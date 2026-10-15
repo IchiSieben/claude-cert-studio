@@ -14,7 +14,7 @@ Esta página no edita el Landing. La sesión del Landing importa los dos bloques
 | `demoUrl` | https://cert.ichisieben.dev | responde 200, sin `noindex`, cero errores de consola (2026-10-15) |
 | Familia | `family: claude-code-ecosystem`, `siblings: [claude-kit, enjambre]`, `academyRoute: certify` | campos verificados en `config.ts` de la rama `ecosistema/2026-10-15` |
 | Habilidades | `javascript`, `html-css`, `playwright`, `hosting-estatico`, `bash`, `git` | los seis slugs existen en `Landing/src/content/skills/` |
-| Portada | `/media/cert-studio/poster.webp` + `preview.mp4` | origen: `docs/media/` del repo público, grabado en la Mac (59,7 fps) desde la URL pública; ver `docs/CAPTURAS.md` |
+| Portada | `/media/cert-studio/poster.webp` + `preview.mp4` | origen: `docs/media/` del repo público, grabado en la Mac (58,9 fps, banco 120/120) desde la URL pública; ver `docs/CAPTURAS.md` |
 | `order` | 15 | 12–14 ya están ocupados (`chasqui`/`enjambre`, `claude-kit`, `signal-agent`) |
 
 Antes de importar: copiar `docs/media/poster.webp` y `docs/media/preview.mp4` a
