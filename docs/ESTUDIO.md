@@ -52,26 +52,27 @@ Redondear cada cuota con `Math.round` y "arreglar" la diferencia en el último d
 
 ---
 
-# Repaso espaciado simple ("due today")
+# Repaso espaciado SM-2 simplificado ("due today")
 
 ## Qué es
 
-Volver a ver una pregunta cuando estás a punto de olvidarla, no cuando te toca por orden. Los sistemas completos (SM-2, FSRS) estiman un intervalo por tarjeta. Aquí se usa la regla más simple que todavía sirve: una pregunta está pendiente si nunca la viste, si la fallaste la última vez o si la acertaste hace más de 3 días.
+Volver a ver una pregunta cuando estás a punto de olvidarla, no cuando te toca por orden. SM-2 (el algoritmo de SuperMemo que popularizó Anki) guarda por tarjeta una facilidad `ef` y un intervalo `iv`: cada acierto alarga el intervalo multiplicándolo por `ef`, y cada fallo lo reinicia y baja `ef`. Aquí va en versión binaria, sin la nota de 0 a 5: acierto o fallo.
 
 ## Por qué importa aquí
 
-Con 218 preguntas no hace falta un planificador sofisticado; hace falta que los fallos vuelvan y que lo aprendido se repase antes de borrarse. `isDue()` en `app/index.html` implementa la regla en una línea, y la pestaña Drill ofrece "Practise due questions" filtrado por los dominios marcados.
+La regla anterior (pendiente si la acertaste hace más de 3 días) trataba igual una pregunta que aciertas siempre y una que fallas una vez de cada dos. Con 240 preguntas eso desperdicia sesiones repasando lo que ya sabes. Ahora, en `app/index.html`, los intervalos tras aciertos seguidos son 1, 3 y luego `round(iv × ef)` días, y un fallo deja la pregunta pendiente al momento con `ef − 0,2` (mínimo 1,3). `schedule()` calcula el siguiente estado e `isDue()` decide.
 
 ## Ejemplo real
 
-Perfil nuevo: las 106 preguntas de CCAR-F están pendientes. Tras practicar 5, el contador baja exactamente en las acertadas: el test `drill 5 questions records 5 answers and lowers the due count` comprueba que `due = total − acertadas`.
+Con `ef` = 2,5, cuatro aciertos seguidos dan intervalos de 1, 3, 8 y 20 días; un fallo después devuelve `iv` = 0 y `ef` = 2,3. El progreso guardado antes del cambio no se pierde ni se reescribe: `srs()` lee un registro viejo como si un acierto llevara la regla de 3 días (`reps` 2, `iv` 3) y empieza con un `ef` más bajo cuantas más veces se falló. El test `SM-2: pre-SM-2 progress migrates without loss…` comprueba las dos cosas.
 
 ## Error típico
 
-Guardar solo "acertada / fallada" sin la fecha. Sin `when` no hay forma de saber que algo acertado hace dos semanas ya necesita repaso. Cada respuesta guarda `seen`, `right`, `wrong`, `last` y `when`.
+Migrar reescribiendo todo el almacenamiento la primera vez que se abre la app: si algo falla a la mitad, el progreso queda corrupto. La migración aquí es perezosa: se interpreta al leer y los campos nuevos solo se escriben con la siguiente respuesta a esa pregunta.
 
 ## Para saber más
 
+- Wozniak, P. (1990), descripción original de SM-2: https://super-memory.com/english/ol/sm2.htm
 - Ebbinghaus y la curva del olvido; Cepeda et al. (2006), *Distributed practice in verbal recall tasks*: https://doi.org/10.1037/0033-2909.132.3.354
 
 ---
@@ -108,7 +109,7 @@ Una página sin servidor ni build (`app/index.html` + tres `.js` de datos) se pu
 
 ## Por qué importa aquí
 
-Los datos van como `.js` y no como `.json` justamente para que `file://` funcione: un `fetch()` de un JSON local lo bloquea el navegador. Así la misma copia corre desde un clon, desde Hostinger y desde la Mac sin cambiar nada. `npm test` cubre 16 casos: simulacros sin repetidos, resultado, modo muestra sin `localStorage`, PDF de la hoja de repaso, 390 px sin scroll horizontal y cero errores de consola.
+Los datos van como `.js` y no como `.json` justamente para que `file://` funcione: un `fetch()` de un JSON local lo bloquea el navegador. Así la misma copia corre desde un clon, desde Hostinger y desde la Mac sin cambiar nada. `npm test` cubre 22 casos: simulacros sin repetidos, resultado, modo muestra sin `localStorage`, PDF de la hoja de repaso, 390 px sin scroll horizontal, migración del repaso espaciado, uso sin conexión, cero desplazamiento de diseño y cero errores de consola.
 
 ## Ejemplo real
 

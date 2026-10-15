@@ -9,6 +9,16 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://cert.ichisieben.dev/">
 <meta name="description" content="Independent study environment for the Claude Certified Developer and Architect (Foundations) exams: blueprint, drill by task statement, timed mock exam, distractor taxonomy and progress.">
+<meta property="og:description" content="Original scenario questions for the CCAR-F and CCDV-F exams, timed mocks drawn by official domain weight, every trap explained. Unofficial study aid.">
+<meta property="og:image" content="https://cert.ichisieben.dev/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Claude Cert Studio start page: the two certifications with their domain weights">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#c9612c">
 <style>
 :root{
   --bg:#f6f4ef; --panel:#ffffff; --ink:#1c1a17; --muted:#6b665d; --line:#e4dfd4;
@@ -96,6 +106,9 @@ summary{cursor:pointer;font-weight:600}
 .task .mono{color:var(--muted)}
 .mini{font-size:12px;color:var(--muted);white-space:nowrap}
 kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;color:var(--muted)}
+/* the page paints before the ~0.5 MB bank arrives: header ships pre-rendered and main reserves the viewport, so nothing shifts when render() runs */
+main{min-height:100vh}
+@media print{main{min-height:0}}
 footer{border-top:1px solid var(--line);color:var(--muted);font-size:12px;padding:16px 0}
 footer p{margin:0 0 6px}
 .grid.two{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
@@ -125,17 +138,17 @@ footer p{margin:0 0 6px}
 <body>
 <header><div class="wrap">
   <div class="brand">Claude Cert Studio<small>independent study environment · not affiliated with Anthropic</small></div>
-  <div class="cert" id="certSwitch"></div>
-  <nav id="nav"></nav>
+  <div class="cert" id="certSwitch"><button class="active" onclick="setCert('CCAR-F')">CCAR-F</button><button class="" onclick="setCert('CCDV-F')">CCDV-F</button></div>
+  <nav id="nav"><button class="active" onclick="go('start')">Start</button><button class="" onclick="go('home')">Overview</button><button class="" onclick="go('blueprint')">Blueprint</button><button class="" onclick="go('concepts')">Concepts</button><button class="" onclick="go('drill')">Drill</button><button class="" onclick="go('mock')">Mock exam</button><button class="" onclick="go('traps')">Traps</button><button class="" onclick="go('progress')">Progress</button></nav>
   <button class="theme" id="themeBtn" title="Toggle theme">◐</button>
 </div></header>
 <div class="wrap" id="sampleBanner" hidden></div>
 <main><div class="wrap" id="view"></div></main>
 <footer><div class="wrap"><p id="disclaimer"><b>Unofficial study aid. Not affiliated with or endorsed by Anthropic. All questions are original; none reproduces a real exam item (the real items are confidential).</b></p><p id="footNote">Blueprints transcribed from the official exam guides v1.0 (July 2026). Progress is stored only in this browser. Keys: <kbd>A</kbd>–<kbd>D</kbd> select · <kbd>Enter</kbd> check / next.</p></div></footer>
 
-<script src="data/blueprints.js"></script>
-<script src="data/questions-ccar-f.js"></script>
-<script src="data/questions-ccdv-f.js"></script>
+<script src="data/blueprints.js?v=63e84a76"></script>
+<script src="data/questions-ccar-f.js?v=e8ae6be3"></script>
+<script src="data/questions-ccdv-f.js?v=2b785ce7"></script>
 <script>
 // ---------- state ----------
 const CERTS = Object.keys(window.BLUEPRINTS);
@@ -171,6 +184,9 @@ function seedSample(){
   store.set('progress', p);
 }
 // UI chrome strings; questions, explanations and the blueprint stay in English (the exam is in English)
+// The Academy's "Certify" route (lessons for every domain and lab). Checked 200 on 2026-10-15; set false to hide.
+const ACADEMY_LINK = true;
+const ACADEMY_URL = { en: 'https://ichisieben.dev/academy/certify/', es: 'https://ichisieben.dev/es/academy/certify/' };
 const T = {
   en: { views:{ start:'Start', home:'Overview', blueprint:'Blueprint', concepts:'Concepts', drill:'Drill', mock:'Mock exam', traps:'Traps', progress:'Progress' },
     sample:'Sample mode · demo progress held in memory; nothing is saved in this browser.', sampleExit:'Study for real',
@@ -178,8 +194,9 @@ const T = {
     startLead:'Practise for the Claude Certified Architect and Developer (Foundations) exams with original scenario questions, a timed mock scored like the real one, and feedback on which kind of trap caught you.',
     items:'items', min:'min', pass:'pass', bank:'original questions', study:'Study', weights:'Where the points are',
     howH:'What the app does, in 90 seconds',
-    how:['<b>Pick a certification</b> — the blueprint shows every domain with its official weight and task statements.','<b>Diagnose</b> — a half-length mock drawn by weight shows your weakest domain.','<b>Drill</b> — by domain or single task statement; every wrong option is tagged with one of ten trap types.','<b>Sit the full mock</b> — timed, scored 100–1000 (pass 720), with a per-domain result and your misses.','<b>Come back</b> — “Due today” resurfaces misses and anything not seen for 3 days. Progress stays in your browser.'],
+    how:['<b>Pick a certification</b> — the blueprint shows every domain with its official weight and task statements.','<b>Diagnose</b> — a half-length mock drawn by weight shows your weakest domain.','<b>Drill</b> — by domain or single task statement; every wrong option is tagged with one of ten trap types.','<b>Sit the full mock</b> — timed, scored 100–1000 (pass 720), with a per-domain result and your misses.','<b>Come back</b> — “Due today” resurfaces misses at once and right answers at growing intervals (1, 3, then about 2.5× longer each time). Progress stays in your browser.'],
     who:'Who can sit the real exams: as of 2026-10-15 the <a href="https://anthropic-partners.skilljar.com/page/faq-certifications" rel="noopener">official FAQ</a> limits them to people at Claude Partner Network organizations, registering with a company email.',
+    academy:'Prefer reading first? The <a href="URL" rel="noopener">Certify route</a> of the Academy walks through the eight domains and seven hands-on labs behind this bank.',
     note:'Blueprints transcribed from the official exam guides v1.0 (July 2026). Progress is stored only in this browser. Keys: <kbd>A</kbd>–<kbd>D</kbd> select · <kbd>Enter</kbd> check / next.' },
   es: { views:{ start:'Inicio', home:'Resumen', blueprint:'Blueprint', concepts:'Conceptos', drill:'Práctica', mock:'Simulacro', traps:'Trampas', progress:'Progreso' },
     sample:'Modo muestra · progreso de demostración en memoria; no se guarda nada en este navegador.', sampleExit:'Estudiar de verdad',
@@ -187,8 +204,9 @@ const T = {
     startLead:'Practica para los exámenes Claude Certified Architect y Developer (Foundations) con preguntas de escenario originales, un simulacro cronometrado con la misma escala que el real y la trampa exacta en la que caíste. Las preguntas están en inglés, como el examen.',
     items:'ítems', min:'min', pass:'aprueba', bank:'preguntas originales', study:'Estudiar', weights:'Dónde están los puntos',
     howH:'Qué hace la app, en 90 segundos',
-    how:['<b>Elige una certificación</b>: el blueprint muestra cada dominio con su peso oficial y sus task statements.','<b>Diagnostica</b>: un simulacro de media longitud, extraído por peso, te dice tu dominio más débil.','<b>Practica</b>: por dominio o por task statement; cada opción incorrecta lleva uno de diez tipos de trampa.','<b>Rinde el simulacro completo</b>: cronometrado, escala 100–1000 (aprueba con 720), con resultado por dominio y tus fallos.','<b>Vuelve</b>: “Due today” te devuelve los fallos y lo que no ves hace 3 días. El progreso queda en tu navegador.'],
+    how:['<b>Elige una certificación</b>: el blueprint muestra cada dominio con su peso oficial y sus task statements.','<b>Diagnostica</b>: un simulacro de media longitud, extraído por peso, te dice tu dominio más débil.','<b>Practica</b>: por dominio o por task statement; cada opción incorrecta lleva uno de diez tipos de trampa.','<b>Rinde el simulacro completo</b>: cronometrado, escala 100–1000 (aprueba con 720), con resultado por dominio y tus fallos.','<b>Vuelve</b>: “Due today” te devuelve los fallos enseguida y los aciertos a intervalos crecientes (1, 3 y luego unas 2,5 veces más cada vez). El progreso queda en tu navegador.'],
     who:'Quién puede rendir los exámenes reales: al 2026-10-15, la <a href="https://anthropic-partners.skilljar.com/page/faq-certifications" rel="noopener">FAQ oficial</a> los limita a personas de organizaciones del Claude Partner Network, con correo corporativo.',
+    academy:'¿Prefieres leer primero? La <a href="URL" rel="noopener">ruta Certifícate</a> de la Academia recorre los ocho dominios y los siete laboratorios detrás de este banco.',
     note:'Blueprints transcritos de las guías oficiales v1.0 (julio 2026). El progreso se guarda solo en este navegador. Teclas: <kbd>A</kbd>–<kbd>D</kbd> elegir · <kbd>Enter</kbd> comprobar / siguiente.' }
 }[LANG];
 // progress shape: { [cert]: { q: { [id]: {seen, right, wrong, last} }, traps: {key:count}, mocks:[{date, score, pct, byDomain, misses}] } }
@@ -209,6 +227,23 @@ function render(){
   document.getElementById('nav').innerHTML = Object.entries(VIEWS).map(([k,v]) => `<button class="${k===S.view?'active':''}" onclick="go('${k}')">${v}</button>`).join('');
   const fn = { start, home, blueprint, concepts, drill, mock, traps, progress }[S.view];
   document.getElementById('view').innerHTML = fn();
+  setMeta();
+}
+// <title> and description follow the certification and the view (the page is indexed; shared links read them)
+const META = {
+  start:  () => ['Claude Cert Studio · CCAR-F and CCDV-F practice', `Practise for the Claude Certified Architect and Developer (Foundations) exams: ${CERTS.map(c => (window.QUESTIONS[c]||[]).length).reduce((a,b)=>a+b,0)} original scenario questions, timed mocks by official weight, every trap explained.`],
+  home:   b => [`${b.code} overview`, `Your readiness for ${b.name}: per-domain mastery against the official weights.`],
+  blueprint: b => [`${b.code} blueprint`, `${b.name}: ${b.domains.length} domains with official weights and every task statement, printable as a cheat sheet.`],
+  concepts: b => [`${b.code} concepts`, `One card per concept tested in ${b.name}, searchable, each linked to its drill.`],
+  drill:  b => [`${b.code} drill`, `Drill ${b.name} by domain or task statement; every wrong option is tagged with the trap it represents.`],
+  mock:   b => [`${b.code} mock exam`, `Timed ${b.items}-item mock for ${b.name}, drawn by official domain weight and scored 100–1000.`],
+  traps:  b => [`${b.code} traps`, `The ten distractor types used in ${b.name} practice questions, and how to eliminate them.`],
+  progress: b => [`${b.code} progress`, `Mock history and per-question progress for ${b.name}, stored only in this browser.`]
+};
+function setMeta(){
+  const [t, d] = (META[S.view] || META.start)(BP());
+  document.title = S.view === 'start' ? t : `${t} — Claude Cert Studio`;
+  const m = document.querySelector('meta[name="description"]'); if(m) m.setAttribute('content', d);
 }
 
 // ---------- helpers ----------
@@ -220,15 +255,36 @@ function domainStats(){
 }
 function record(q, ok, chosen){
   const p = prog(); const c = p[S.cert]; const r = c.q[q.id] || {seen:0,right:0,wrong:0};
+  Object.assign(r, schedule(r, ok));
   r.seen++; ok ? r.right++ : r.wrong++; r.last = ok ? 'right' : 'wrong'; r.when = Date.now(); c.q[q.id] = r;
   if(!ok){ chosen.filter(k => !q.answer.includes(k)).forEach(k => { const t = q.distractors[k]; if(t) c.traps[t] = (c.traps[t]||0)+1; }); }
   saveProg(p);
 }
-// spaced practice: due = never seen, last answer wrong, or right but older than DUE_DAYS
-const DUE_DAYS = 3;
-function isDue(q, p){ const r = (p || prog()[S.cert].q)[q.id]; return !r || r.last!=='right' || !r.when || Date.now()-r.when > DUE_DAYS*864e5; }
+// spaced practice, simplified SM-2 per question: ef = easiness (1.3–2.5), iv = interval in days, reps = right
+// answers in a row. Right: iv goes 1 → 3 → round(iv × ef). Wrong: reps 0, iv 0 (due now), ef − 0.2.
+// Due = never seen, or last answer wrong, or iv days have passed since the last answer.
+// Records written before SM-2 ({seen,right,wrong,last,when} only) are read through srs() without rewriting
+// them: a right answer keeps the old 3-day rule (reps 2, iv 3), a wrong one is due now; ef starts lower the
+// more often the question was missed. The first new answer stores the SM-2 fields.
+const EF0 = 2.5, EF_MIN = 1.3;
+function srs(r){
+  if(r.ef != null) return r;
+  const right = r.last === 'right';
+  return { ...r, ef: Math.max(EF_MIN, EF0 - 0.2*Math.min(r.wrong||0, 6)), reps: right ? 2 : 0, iv: right ? 3 : 0 };
+}
+function schedule(r, ok){
+  const s = srs(r); let { ef, reps, iv } = s;
+  if(ok){ reps++; iv = reps === 1 ? 1 : reps === 2 ? 3 : Math.round(iv * ef); }
+  else { reps = 0; iv = 0; ef = Math.max(EF_MIN, ef - 0.2); }
+  return { ef: Math.round(ef*100)/100, reps, iv };
+}
+function isDue(q, p){ const r = (p || prog()[S.cert].q)[q.id]; if(!r || r.last!=='right' || !r.when) return true; return Date.now()-r.when >= srs(r).iv*864e5; }
 function dueCount(){ const p = prog()[S.cert].q; return QS().filter(q => isDue(q, p)).length; }
 function grade(q, chosen){ const a = q.answer.slice().sort().join(''); const c = chosen.slice().sort().join(''); return a===c; }
+// official doc section behind the keyed answer; `ref` is set only when tools/doc-links.mjs verified it (200 + anchor)
+function docLink(q){ if(!q.ref || !/^https:\/\//.test(q.ref)) return '';
+  const u = new URL(q.ref); const sec = !u.hash ? '' : u.hash === '#page-title' ? ' § intro' : ' § '+decodeURIComponent(u.hash.slice(1)).replace(/-/g,' ');
+  return `<p class="muted docref" style="margin:8px 0 0"><b>Source:</b> <a href="${esc(q.ref)}" target="_blank" rel="noopener">${esc(u.hostname.replace(/^www\./,'') + u.pathname + sec)}</a></p>`; }
 function bar(pct, color){ return `<div class="bar"><i style="width:${Math.max(0,Math.min(100,pct))}%;background:${color||'var(--accent)'}"></i></div>`; }
 
 // ---------- views ----------
@@ -242,7 +298,8 @@ function start(){
   return `<h1>${T.startH}</h1><p class="lead">${T.startLead}</p>
   <div class="grid two">${CERTS.map(card).join('')}</div>
   <h2>${T.howH}</h2><ol class="how">${T.how.map(s => `<li>${s}</li>`).join('')}</ol>
-  <p class="muted" style="font-size:14px">${T.who}</p>`;
+  <p class="muted" style="font-size:14px">${T.who}</p>
+  ${ACADEMY_LINK ? `<p class="muted" style="font-size:14px" id="academyLink">${T.academy.replace('URL', ACADEMY_URL[LANG])}</p>` : ''}`;
 }
 function home(){
   const b = BP(); const st = domainStats(); const c = prog()[S.cert];
@@ -328,7 +385,7 @@ function drill(){
     return `<h1>Drill</h1><p class="lead">Untimed. One question at a time, feedback after each. Choose what to practise.</p>
     <div class="card"><h3>By domain</h3>${b.domains.map(d => `<label class="chk"><input type="checkbox" class="domchk" value="${d.id}" checked> <span class="dot" style="background:${domColor(d.id)}"></span> ${d.id}. ${esc(d.name)} <span class="muted mono">${d.weight}% · ${st[d.id].total} q</span></label>`).join('')}
     <div class="row" style="margin-top:10px"><button class="btn" onclick="startDrill({domains:[...document.querySelectorAll('.domchk:checked')].map(e=>+e.value), unseenFirst:true})">Start (unseen first)</button><button class="btn ghost" onclick="startDrill({domains:[...document.querySelectorAll('.domchk:checked')].map(e=>+e.value)})">Start (random)</button><button class="btn ghost" ${missed?'':'disabled'} onclick="startDrill({domains:[1,2,3,4,5,6,7,8],missedOnly:true})">Retry my ${missed} misses</button></div></div>
-    <div class="card" style="margin-top:14px"><h3>Due today · ${due}</h3><p class="muted">Spaced practice: questions never seen, answered wrong last time, or answered right more than ${DUE_DAYS} days ago — in the domains ticked above.</p><button class="btn" id="dueBtn" ${due?'':'disabled'} onclick="startDrill({domains:[...document.querySelectorAll('.domchk:checked')].map(e=>+e.value), due:true, unseenFirst:true})">Practise due questions</button></div>
+    <div class="card" style="margin-top:14px"><h3>Due today · ${due}</h3><p class="muted">Spaced practice: questions never seen, answered wrong last time, or whose review interval has passed (1, 3, then about 2.5× longer after each right answer, shorter for questions you often miss) — in the domains ticked above.</p><button class="btn" id="dueBtn" ${due?'':'disabled'} onclick="startDrill({domains:[...document.querySelectorAll('.domchk:checked')].map(e=>+e.value), due:true, unseenFirst:true})">Practise due questions</button></div>
     <p class="muted" style="margin-top:14px">To drill a single task statement, use the <a href="#" onclick="go('blueprint');return false">Blueprint</a> tab.</p>`;
   }
   const q = d.pool[d.i]; const dom = BP().domains.find(x=>x.id===q.domain); const task = dom.tasks.find(t=>t.id===q.task);
@@ -347,7 +404,7 @@ function question(q, ctx){
   ${['A','B','C','D'].map(k => { let cls = ctx.chosen.includes(k)?'sel':''; let why='';
     if(ctx.checked){ if(q.answer.includes(k)) cls='correct'; else if(ctx.chosen.includes(k)) cls='wrong'; if(!q.answer.includes(k)) why = `<div class="why"><span class="tag trap">${esc(window.TRAPS[q.distractors[k]]?window.TRAPS[q.distractors[k]].name:q.distractors[k])}</span> ${esc(q.why_wrong[k]||'')}</div>`; }
     return `<button class="opt ${cls}" onclick="pick('${k}')" ${ctx.checked?'disabled':''}><span class="k">${k}</span><span>${esc(q.options[k])}${why}</span></button>`; }).join('')}
-  ${ctx.checked ? `<div class="expl"><h4>${grade(q, ctx.chosen)?'Correct':'Not quite'} · concept: ${esc(q.concept)}</h4><p style="margin:0 0 8px">${esc(q.explanation)}</p><p class="muted" style="margin:0 0 6px"><b>When to use / when not:</b> ${esc(q.learn)}</p><p class="muted" style="margin:0"><b>In your own code:</b> ${esc(q.apply)}</p></div>` : ''}`;
+  ${ctx.checked ? `<div class="expl"><h4>${grade(q, ctx.chosen)?'Correct':'Not quite'} · concept: ${esc(q.concept)}</h4><p style="margin:0 0 8px">${esc(q.explanation)}</p><p class="muted" style="margin:0 0 6px"><b>When to use / when not:</b> ${esc(q.learn)}</p><p class="muted" style="margin:0"><b>In your own code:</b> ${esc(q.apply)}</p>${docLink(q)}</div>` : ''}`;
 }
 function pick(k){
   const ctx = S.drill && S.drill.active ? S.drill : S.mock; if(!ctx || ctx.checked) return;
@@ -462,6 +519,7 @@ document.getElementById('themeBtn').onclick = () => { const cur = document.docum
   const qc = URLP.get('cert'); if(qc && CERTS.includes(qc)) S.cert = qc;
   const qv = URLP.get('view'); if(qv && VIEWS[qv]) S.view = qv;
   render();
+  if('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost') && !SAMPLE) navigator.serviceWorker.register('sw.js').catch(() => {});
 })();
 </script>
 </body>

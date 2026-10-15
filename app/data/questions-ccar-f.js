@@ -1,5 +1,7 @@
 // CCAR-F practice bank — original questions written from the official task statements (exam guide v1.0, July 2026).
 // Reviewed 2026-09-26 against Anthropic docs, the MCP specification and the Anthropic engineering blog; see ../../03-practica/revision-banco-2026-09-26.md.
+// 2026-10-15: refilled to 120 by official domain weight; the new items carry "reviewed": "model" and a
+// "ref" (doc URL + section anchor, checked 200 with the anchor present). Human sample: REVIEW-SAMPLE.md.
 // Schema: see ../README.md. Every wrong option carries a trap key from TRAPS in blueprints.js.
 window.QUESTIONS = window.QUESTIONS || {};
 window.QUESTIONS["CCAR-F"] = [
@@ -32,7 +34,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "stop_reason-driven loop",
   "learn": "Branch on stop_reason whenever you implement an agentic loop: tool_use means execute and continue, end_turn means finish, max_tokens and stop_sequence need their own handling. It is the wrong call only when you are not in a loop at all (single-shot generation). The common mistake is treating the presence or absence of text as the signal of completion.",
-  "apply": "If your loop checks for a keyword such as 'done' or 'finished' in the response text, you are parsing text for control flow; switch to response.stop_reason."
+  "apply": "If your loop checks for a keyword such as 'done' or 'finished' in the response text, you are parsing text for control flow; switch to response.stop_reason.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/handling-stop-reasons#quick-reference"
  },
  {
   "id": "CCARF-1.1-02",
@@ -63,7 +66,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Handling every stop_reason value",
   "learn": "An agentic loop should have an explicit branch for tool_use, end_turn, max_tokens and stop_sequence, plus handling for the other documented values (pause_turn, refusal, model_context_window_exceeded) or a safe non-completion default. This is always the right call in production loops; skipping it is only acceptable in throwaway scripts. The common mistake is an if/else with two branches (tool_use vs 'anything else').",
-  "apply": "If your loop has no code path that mentions max_tokens, truncated responses are being returned as if they were complete."
+  "apply": "If your loop has no code path that mentions max_tokens, truncated responses are being returned as if they were complete.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/handling-stop-reasons#quick-reference"
  },
  {
   "id": "CCARF-1.1-03",
@@ -93,7 +97,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Parallel tool_use handling",
   "learn": "Always process the full list of tool_use blocks and answer each with a tool_result carrying the matching tool_use_id. Disabling parallel calls is only justified when tools genuinely depend on each other. The common mistake is code written for a single tool call that indexes content[0].",
-  "apply": "If your loop reads only the first tool_use block or builds one tool_result per request, it breaks as soon as Claude batches its calls."
+  "apply": "If your loop reads only the first tool_use block or builds one tool_result per request, it breaks as soon as Claude batches its calls.",
+  "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/parallel-tool-use#execution-semantics"
  },
  {
   "id": "CCARF-1.2-01",
@@ -124,7 +129,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Hub-and-spoke coordinator",
   "learn": "Use a coordinator when several specialists must be sequenced, retried or audited; it is the default for multi-agent systems. Direct peer communication is rarely worth it in a foundations-level design. The common mistake is letting subagents call each other, which hides failures from the orchestrator.",
-  "apply": "If a subagent's prompt or code can invoke another subagent, control has leaked out of the coordinator."
+  "apply": "If a subagent's prompt or code can invoke another subagent, control has leaked out of the coordinator.",
+  "ref": "https://www.anthropic.com/engineering/multi-agent-research-system#architecture-overview-for-research"
  },
  {
   "id": "CCARF-1.2-02",
@@ -155,7 +161,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Dynamic subagent selection",
   "learn": "Let the coordinator pick subagents when request shapes vary widely; keep a fixed chain when they do not. Dynamic routing is the wrong call for uniform, high-volume transformations where predictability matters more. The common mistake is bolting special cases onto a fixed chain until it becomes unmaintainable.",
-  "apply": "If your orchestrator is a list of steps executed top to bottom regardless of input, it cannot adapt; the coordinator needs a decision step first."
+  "apply": "If your orchestrator is a list of steps executed top to bottom regardless of input, it cannot adapt; the coordinator needs a decision step first.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents#workflow-orchestrator-workers"
  },
  {
   "id": "CCARF-1.2-03",
@@ -186,7 +193,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Coordinator-owned error handling",
   "learn": "The coordinator should track every dispatched subagent and treat a missing or failed result as a first-class state with retry and escalation. Pushing that responsibility to subagents is wrong because they lack the global view. The common mistake is merging whatever results arrived and calling it done.",
-  "apply": "If your merge step never checks how many results it expected versus received, partial output can be delivered as complete."
+  "apply": "If your merge step never checks how many results it expected versus received, partial output can be delivered as complete.",
+  "ref": "https://code.claude.com/docs/en/sub-agents#api-errors-in-subagents"
  },
  {
   "id": "CCARF-1.3-01",
@@ -217,7 +225,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Task tool enables subagents",
   "learn": "Whenever a design relies on subagents, verify that the Agent tool (formerly Task) is in the parent's tool set. This is the right check for any 'the agent will not delegate' symptom. The common mistake is editing the prompt when the capability is missing from configuration.",
-  "apply": "If your agent's tools list has no Agent (Task) entry and your prompt asks for delegation, the delegation instruction is unreachable."
+  "apply": "If your agent's tools list has no Agent (Task) entry and your prompt asks for delegation, the delegation instruction is unreachable.",
+  "ref": "https://code.claude.com/docs/en/sub-agents#restrict-which-subagents-can-be-spawned"
  },
  {
   "id": "CCARF-1.3-02",
@@ -248,7 +257,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Subagent context isolation",
   "learn": "Treat every subagent prompt as a self-contained brief: goal, constraints, and every fact it needs. This is right whenever the subagent must build on earlier work; it is unnecessary only for genuinely independent tasks. The common mistake is writing the subagent prompt as if it were the next message in the same chat.",
-  "apply": "If a subagent prompt contains words like 'as discussed' or 'what we found' without the actual content, the subagent cannot see it."
+  "apply": "If a subagent prompt contains words like 'as discussed' or 'what we found' without the actual content, the subagent cannot see it.",
+  "ref": "https://code.claude.com/docs/en/agent-sdk/subagents#what-subagents-inherit"
  },
  {
   "id": "CCARF-1.4-01",
@@ -279,7 +289,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Hooks as prerequisite gates",
   "learn": "Use hooks or permission gates whenever skipping a step has financial, security or data consequences; use prompt guidance for preferences and style. A hook is overkill only for cosmetic conventions. The common mistake is treating 'the prompt says so' as enforcement.",
-  "apply": "If a step must never be skipped and you can only point to a sentence in the prompt, you have guidance, not enforcement."
+  "apply": "If a step must never be skipped and you can only point to a sentence in the prompt, you have guidance, not enforcement.",
+  "ref": "https://code.claude.com/docs/en/hooks#how-a-hook-resolves"
  },
  {
   "id": "CCARF-1.4-02",
@@ -402,7 +413,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Fixed pipeline (prompt chaining)",
   "learn": "Choose a fixed chain when the sequence is stable and each step's output can be validated; choose dynamic decomposition when the steps depend on the input. Chains are the wrong call when inputs vary in structure. The common mistake is reaching for an agent because it feels more capable.",
-  "apply": "If you can write the step list on a whiteboard before seeing any input, you have a pipeline, not an agent problem."
+  "apply": "If you can write the step list on a whiteboard before seeing any input, you have a pipeline, not an agent problem.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents#workflow-prompt-chaining"
  },
  {
   "id": "CCARF-1.6-02",
@@ -433,7 +445,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Dynamic adaptive decomposition",
   "learn": "Use runtime planning when inputs are heterogeneous and the set of sub-tasks is not known in advance. It is the wrong call for uniform, high-volume transformations where a chain is cheaper and more predictable. The common mistake is patching a chain with conditionals until it becomes an unreadable pseudo-planner.",
-  "apply": "If you keep adding 'if the request looks like X, also run Y' branches to a pipeline, the workload wants dynamic decomposition."
+  "apply": "If you keep adding 'if the request looks like X, also run Y' branches to a pipeline, the workload wants dynamic decomposition.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents#workflow-orchestrator-workers"
  },
  {
   "id": "CCARF-1.7-01",
@@ -464,7 +477,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Named session resumption",
   "learn": "Resume a named session when a long-running task must continue across invocations. It is the wrong call when each run should be independent (then a fresh session avoids stale context). The common mistake is rebuilding context by hand every run.",
-  "apply": "If your automation script concatenates old transcripts into a new prompt, it is reinventing --resume."
+  "apply": "If your automation script concatenates old transcripts into a new prompt, it is reinventing --resume.",
+  "ref": "https://code.claude.com/docs/en/cli-reference#cli-flags"
  },
  {
   "id": "CCARF-1.7-02",
@@ -495,7 +509,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Session forking",
   "learn": "Fork when you need independent branches from a common starting point; resume when you want to continue one line of work. Forking is the wrong call if the branches must see each other's results. The common mistake is using one session for parallel experiments and getting contaminated results.",
-  "apply": "If two experiments share a session and the second one 'knows' about the first, you needed a fork."
+  "apply": "If two experiments share a session and the second one 'knows' about the first, you needed a fork.",
+  "ref": "https://code.claude.com/docs/en/agent-sdk/sessions#fork-to-explore-alternatives"
  },
  {
   "id": "CCARF-1.6-03",
@@ -526,7 +541,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Fixed pipeline (prompt chaining)",
   "learn": "Use a fixed sequential pipeline when every input requires the same steps in the same order — it is the lowest-latency, lowest-cost, most predictable choice. It is the wrong call when request shapes genuinely vary and a step is sometimes unnecessary or insufficient. The common mistake is adding a dynamic planning layer 'to be more agentic' when the input never actually varies.",
-  "apply": "If your pipeline's steps and order never change across inputs, a coordinator that re-decides the plan each time is adding overhead, not flexibility."
+  "apply": "If your pipeline's steps and order never change across inputs, a coordinator that re-decides the plan each time is adding overhead, not flexibility.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents#summary"
  },
  {
   "id": "CCARF-1.6-04",
@@ -557,7 +573,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Dynamic adaptive decomposition",
   "learn": "Use dynamic decomposition when requests vary enough that some steps are unnecessary or insufficient depending on input; the coordinator decides the plan per request. It is the wrong call for high-volume, uniform inputs where the same steps always apply — there a fixed pipeline is cheaper and more predictable. The common mistake is keeping a fixed pipeline and patching its output afterward instead of deciding up front which steps to run.",
-  "apply": "If your fixed pipeline sometimes produces an empty or nonsensical section, the input shape has outgrown the pipeline; move the step selection into the coordinator."
+  "apply": "If your fixed pipeline sometimes produces an empty or nonsensical section, the input shape has outgrown the pipeline; move the step selection into the coordinator.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents#what-are-agents"
  },
  {
   "id": "CCARF-1.7-04",
@@ -589,6 +606,39 @@ window.QUESTIONS["CCAR-F"] = [
   "concept": "Named session resumption",
   "learn": "Use named session resumption (--resume <name>) when a single line of work must be picked back up exactly as left, especially with several concurrent sessions in play. It is the wrong call when you need to branch into a new, independent path — that is what fork_session is for. The common mistake is trusting 'the last session used' instead of naming the one you mean.",
   "apply": "If you run more than one long-lived Claude Code conversation at a time, give each a name and resume it explicitly instead of hoping the most recent one is the right one."
+ },
+ {
+  "id": "CCARF-1.7-05",
+  "cert": "CCAR-F",
+  "domain": 1,
+  "task": "1.7",
+  "select": 1,
+  "stem": "A team runs a nightly Claude Code agent job inside ephemeral CI containers. At the end of each run the job stores the session ID and passes it to resume on the next night, but every resume fails to find the session even though the ID is correct. The team wants continuity to WORK across ephemeral hosts. What should the architect do?",
+  "options": {
+   "A": "Switch the job to a larger context configuration so the earlier session can be loaded on the new container.",
+   "B": "Keep resuming by ID unchanged: session IDs are resolved on the provider side, so the failure must be a typo.",
+   "C": "Call fork_session on every run so a fresh copy of the previous session is created on the new container.",
+   "D": "Mirror transcripts to shared storage with a session store adapter, or restore the saved session file before resuming."
+  },
+  "answer": [
+   "D"
+  ],
+  "explanation": "Session files are local to the machine that created them, so an ephemeral container that is discarded takes its sessions with it. The documented options are a session store that mirrors transcripts to your own backend, restoring the session file on the new host before calling resume, or not relying on resume at all and carrying the needed results as application state into a fresh session.",
+  "distractors": {
+   "A": "bigger-context",
+   "B": "myth",
+   "C": "wrong-scope"
+  },
+  "why_wrong": {
+   "A": "The window size is irrelevant: the transcript is simply not present on the new host, and a bigger window cannot load a file that does not exist there.",
+   "B": "Myth: sessions are stored as local files, not resolved by the provider, so a correct ID on a different host finds nothing.",
+   "C": "Forking copies an existing session's history, so it also needs the original session file on that machine; it is the right primitive for branching, not for moving a session between hosts."
+  },
+  "concept": "Session resume across hosts",
+  "learn": "Session files live on the machine that created them. To resume elsewhere, persist the transcripts (session store adapter or restoring the file) or skip resume and hand the new session the results it needs. The common mistake is treating a session ID as a portable handle.",
+  "apply": "If your agent runs on CI workers or serverless containers, decide up front where session transcripts are persisted, or pass state explicitly instead of resuming.",
+  "reviewed": "model",
+  "ref": "https://code.claude.com/docs/en/agent-sdk/sessions#resume-across-hosts"
  },
  {
   "id": "CCARF-1.1-04",
@@ -650,7 +700,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Fail-safe on unrecognized stop_reason",
   "learn": "Use an explicit enumeration of stop_reason values with a safe default for anything unrecognized whenever your tool set or the API can grow new stop reasons. It is the wrong call only when the set of possible values is closed and fully tested. The common mistake is assuming 'not tool_use' is a synonym for 'done'.",
-  "apply": "If your loop's default branch silently returns the message for any stop_reason it doesn't explicitly name, add a safe-fail path instead of an implicit success."
+  "apply": "If your loop's default branch silently returns the message for any stop_reason it doesn't explicitly name, add a safe-fail path instead of an implicit success.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/handling-stop-reasons#quick-reference"
  },
  {
   "id": "CCARF-1.2-04",
@@ -681,7 +732,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Dynamic subagent selection",
   "learn": "Have the coordinator choose which subagents to invoke per request when the request mix is varied and specialists are costly to run needlessly. It is the wrong call when every request genuinely needs the full set, in which case a fixed pipeline is simpler. The common mistake is fanning out to every subagent regardless of relevance.",
-  "apply": "If your coordinator invokes the same fixed set of subagents on every request, move the selection decision into the coordinator's own reasoning step."
+  "apply": "If your coordinator invokes the same fixed set of subagents on every request, move the selection decision into the coordinator's own reasoning step.",
+  "ref": "https://www.anthropic.com/engineering/multi-agent-research-system#prompt-engineering-and-evaluations-for-research-agents"
  },
  {
   "id": "CCARF-1.2-05",
@@ -711,7 +763,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Coordinator-owned error handling",
   "learn": "Give the coordinator ownership of logging and next-step decisions for subagent failures whenever a hub-and-spoke topology is in use. It is the wrong call only in a single-agent design with no coordinator to own it. The common mistake is letting each subagent handle and hide its own failures.",
-  "apply": "If a subagent failure disappears without the coordinator logging it or choosing a next step, move that handling into the coordinator."
+  "apply": "If a subagent failure disappears without the coordinator logging it or choosing a next step, move that handling into the coordinator.",
+  "ref": "https://www.anthropic.com/engineering/multi-agent-research-system#production-reliability-and-engineering-challenges"
  },
  {
   "id": "CCARF-1.3-03",
@@ -742,7 +795,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Subagent context isolation",
   "learn": "Paste a prior subagent's complete findings into the next subagent's prompt whenever work must build on that subagent's results. It is the wrong call only when the two subagents are genuinely independent and need no shared history. The common mistake is writing 'see above' into a prompt for a subagent that has no 'above' to see.",
-  "apply": "If a subagent's prompt references earlier findings by pointer instead of by content, replace the pointer with the actual text."
+  "apply": "If a subagent's prompt references earlier findings by pointer instead of by content, replace the pointer with the actual text.",
+  "ref": "https://code.claude.com/docs/en/sub-agents#what-loads-at-startup"
  },
  {
   "id": "CCARF-1.3-04",
@@ -773,7 +827,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Task tool enables subagents",
   "learn": "Confirm the Agent tool (formerly Task) is in a coordinator's tool set whenever it needs to spawn subagents. It is the wrong call to add it when an agent should never delegate at all. The common mistake is diagnosing a missing delegation as a prompting problem instead of a tool-configuration one.",
-  "apply": "If a coordinator never delegates and falls back to inline work, check its tools list for the Agent (Task) tool before touching its prompt."
+  "apply": "If a coordinator never delegates and falls back to inline work, check its tools list for the Agent (Task) tool before touching its prompt.",
+  "ref": "https://code.claude.com/docs/en/sub-agents#restrict-which-subagents-can-be-spawned"
  },
  {
   "id": "CCARF-1.3-05",
@@ -804,7 +859,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Complete prior findings in subagent prompt",
   "learn": "Carry a prior subagent's concrete conclusions into the next subagent's prompt whenever the second step depends on what the first one learned. It is the wrong call only when the two steps are truly unrelated. The common mistake is passing the raw material again instead of the extracted answer.",
-  "apply": "If a subagent is being asked to redo investigative work another subagent already finished, paste that finding into its prompt instead."
+  "apply": "If a subagent is being asked to redo investigative work another subagent already finished, paste that finding into its prompt instead.",
+  "ref": "https://www.anthropic.com/engineering/multi-agent-research-system#prompt-engineering-and-evaluations-for-research-agents"
  },
  {
   "id": "CCARF-1.4-03",
@@ -835,7 +891,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Hooks as prerequisite gates",
   "learn": "Use a PreToolUse hook to gate a tool call whenever a real prerequisite (a passing test, an approval, a completed prior step) must exist before that call is allowed to run. It is the wrong call for steps with no real consequence, where prompt guidance is enough. The common mistake is 'fixing' a bypassed instruction with a stronger version of the same instruction.",
-  "apply": "If a consequential action depends on the model correctly remembering a rule, replace the rule with a hook that checks the actual precondition."
+  "apply": "If a consequential action depends on the model correctly remembering a rule, replace the rule with a hook that checks the actual precondition.",
+  "ref": "https://code.claude.com/docs/en/agent-sdk/hooks#page-title"
  },
  {
   "id": "CCARF-1.4-04",
@@ -927,7 +984,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "PostToolUse normalisation hook",
   "learn": "Use a PostToolUse hook to rewrite heterogeneous tool outputs into one consistent shape whenever multiple sources return the same kind of data differently. It is the wrong call when every source already returns identical shapes. The common mistake is asking the model to normalize formats in its head instead of normalizing the data before it gets there.",
-  "apply": "If your agent's prompt has to explain several possible response shapes for the same kind of tool, move that translation into a PostToolUse hook instead."
+  "apply": "If your agent's prompt has to explain several possible response shapes for the same kind of tool, move that translation into a PostToolUse hook instead.",
+  "ref": "https://code.claude.com/docs/en/agent-sdk/hooks#outputs"
  },
  {
   "id": "CCARF-1.5-04",
@@ -989,7 +1047,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Descriptions drive tool selection",
   "learn": "Write every tool description as if the model has never seen your codebase: what it does, when to use it, when not to, what it takes and what it returns. This is always the first lever for selection problems. The common mistake is one-line descriptions that only restate the function name.",
-  "apply": "If two of your tool descriptions could be swapped without anyone noticing, the model cannot tell them apart either."
+  "apply": "If two of your tool descriptions could be swapped without anyone noticing, the model cannot tell them apart either.",
+  "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools#best-practices-for-tool-definitions"
  },
  {
   "id": "CCARF-2.1-02",
@@ -1020,7 +1079,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Tool descriptions state outputs",
   "learn": "Document inputs and outputs (units, formats, time zones, pagination) in the description itself. This is right for any tool whose return value has semantics that are not obvious. The common mistake is describing only what the tool 'does'.",
-  "apply": "If a developer would need to read your tool's source to know the unit of its return value, the model needs that sentence in the description."
+  "apply": "If a developer would need to read your tool's source to know the unit of its return value, the model needs that sentence in the description.",
+  "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools#best-practices-for-tool-definitions"
  },
  {
   "id": "CCARF-2.1-03",
@@ -1050,7 +1110,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Self-describing tool interfaces",
   "learn": "Tool names and descriptions should stand alone; the model may see them without any other context. This applies to MCP tools and custom tools alike. The common mistake is compensating for weak tool definitions with prompt text elsewhere.",
-  "apply": "If you removed CLAUDE.md and your system prompt, would the tool list still explain itself? If not, the descriptions are carrying too little."
+  "apply": "If you removed CLAUDE.md and your system prompt, would the tool list still explain itself? If not, the descriptions are carrying too little.",
+  "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools#best-practices-for-tool-definitions"
  },
  {
   "id": "CCARF-2.2-01",
@@ -1081,7 +1142,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "MCP isError flag",
   "learn": "Return business and execution failures as tool results with isError true; reserve protocol errors for broken requests. This is always the right call for MCP tools that can fail. The common mistake is encoding errors in prose inside a successful result.",
-  "apply": "If your MCP tool ever returns a success result whose content begins with the word 'Error', it should be setting isError instead."
+  "apply": "If your MCP tool ever returns a success result whose content begins with the word 'Error', it should be setting isError instead.",
+  "ref": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools#error-handling"
  },
  {
   "id": "CCARF-2.2-02",
@@ -1112,7 +1174,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Structured error categories",
   "learn": "Return errors with a machine-readable category and any details needed for recovery (which field failed, retry-after). This is right for any tool consumed by an automated coordinator. The common mistake is a human-readable message only.",
-  "apply": "If your retry logic cannot tell a permission error from a rate limit without reading the message text, add an errorCategory field."
+  "apply": "If your retry logic cannot tell a permission error from a rate limit without reading the message text, add an errorCategory field.",
+  "ref": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools#error-handling"
  },
  {
   "id": "CCARF-2.3-01",
@@ -1143,7 +1206,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Tool set restriction per subagent",
   "learn": "Keep each agent's tool set small and coherent; distribute breadth across subagents. This is the right call whenever selection errors rise with tool count. It is unnecessary for agents with a handful of clearly distinct tools. The common mistake is one mega-agent with every tool attached.",
-  "apply": "If a single agent's tool list needs scrolling to read, split it by domain before touching prompts."
+  "apply": "If a single agent's tool list needs scrolling to read, split it by domain before touching prompts.",
+  "ref": "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents#the-anatomy-of-effective-context"
  },
  {
   "id": "CCARF-2.3-02",
@@ -1173,7 +1237,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "tool_choice modes",
   "learn": "Use tool_choice 'tool' when exactly one tool must run, 'any' when some tool must run, 'auto' when the model may answer directly, and 'none' to disable calls. Forcing guarantees the call, not the shape of its arguments; add strict: true to the tool definition when the input must match the schema exactly. Forcing is also not universally available: manual extended thinking rejects 'any' and 'tool', and some newer models reject them with a request error, in which case the documented route is 'auto' with strict tool use for schema-valid inputs, or structured outputs when the response itself must be fixed JSON. Forcing is wrong when a plain-text answer is a legitimate outcome. The common mistake is relying on auto for steps that require a tool call.",
-  "apply": "If a step's correctness depends on a tool call happening, set tool_choice to 'any' or 'tool' rather than trusting auto."
+  "apply": "If a step's correctness depends on a tool call happening, set tool_choice to 'any' or 'tool' rather than trusting auto.",
+  "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools#forcing-tool-use"
  },
  {
   "id": "CCARF-2.4-01",
@@ -1204,7 +1269,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "MCP scope: project .mcp.json",
   "learn": "Use project scope (.mcp.json) for servers the whole team needs on that repo, user scope for personal tools used across repos, local scope for private experiments. Claude Code asks each user once, in interactive sessions, to approve the project-scoped servers found in a repository's .mcp.json (reset with claude mcp reset-project-choices); that is a security confirmation, not a configuration step. Project scope is wrong for servers that carry personal credentials unless the secret is referenced through environment variable expansion. The common mistake is leaving the default scope and documenting manual steps.",
-  "apply": "If your onboarding doc contains 'run claude mcp add ...', the server should probably be in a committed .mcp.json."
+  "apply": "If your onboarding doc contains 'run claude mcp add ...', the server should probably be in a committed .mcp.json.",
+  "ref": "https://code.claude.com/docs/en/mcp#project-scope"
  },
  {
   "id": "CCARF-2.4-02",
@@ -1235,7 +1301,106 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Env var expansion in .mcp.json",
   "learn": "Commit server definitions, never credentials; use ${VAR} expansion for anything secret or machine-specific. This applies to tokens, hostnames and paths. The common mistake is choosing between 'commit the secret' and 'do not share the config' when expansion gives both.",
-  "apply": "If a committed .mcp.json contains a value you would rotate after a leak, replace it with an environment variable reference."
+  "apply": "If a committed .mcp.json contains a value you would rotate after a leak, replace it with an environment variable reference.",
+  "ref": "https://code.claude.com/docs/en/mcp#unset-variables-without-a-default"
+ },
+ {
+  "id": "CCARF-2.4-05",
+  "cert": "CCAR-F",
+  "domain": 2,
+  "task": "2.4",
+  "select": 1,
+  "stem": "An MCP server registers extra tools at runtime each time a user connects a new data source during an interactive Claude Code session. Claude does not see the new tools until the user restarts the session, and the team wants them to appear AUTOMATICALLY while the session continues. What should the architect do?",
+  "options": {
+   "A": "Document a manual reconnect step that users must run after they connect each new data source in a session.",
+   "B": "Tell Claude in the system prompt that more tools will appear later and that it should try guessed tool names.",
+   "C": "Declare that the tool list can change and send a list-changed notification so the client refetches it.",
+   "D": "Add a hook that rewrites the project .mcp.json file every minute and forces Claude Code to reload its servers."
+  },
+  "answer": [
+   "C"
+  ],
+  "explanation": "MCP servers can change the tools they offer while connected and send a list_changed notification; in an interactive Claude Code session the client then fetches the updated list from that server with no reconnect. The server must declare the listChanged capability for this to be part of the contract. Discovery therefore happens at connection and again on notification, not only at startup.",
+  "distractors": {
+   "A": "violates-constraint",
+   "B": "prompt-not-enforcement",
+   "D": "over-engineering"
+  },
+  "why_wrong": {
+   "A": "It works, but it fails the requirement that the tools appear automatically and relies on every user remembering a manual step.",
+   "B": "Claude cannot call tools that were never listed to it, so a prompt instruction cannot create a capability the client has not discovered.",
+   "D": "Rewriting configuration on a timer is a brittle workaround for a mechanism the protocol already provides with a single notification."
+  },
+  "concept": "list_changed and dynamic tool discovery",
+  "learn": "Clients discover tools when they connect, and a server that declared the listChanged capability can announce changes with a list_changed notification so the client refreshes without reconnecting. This is the right design for servers whose tools depend on runtime state; static tool sets need nothing extra. The common mistake is forcing a restart or a reconnect to pick up new tools.",
+  "apply": "If your MCP server's tool set can change while connected, declare listChanged and emit the notification whenever it does.",
+  "reviewed": "model",
+  "ref": "https://code.claude.com/docs/en/mcp#dynamic-tool-updates"
+ },
+ {
+  "id": "CCARF-2.4-06",
+  "cert": "CCAR-F",
+  "domain": 2,
+  "task": "2.4",
+  "select": 1,
+  "stem": "An MCP server holds read-only database schemas and internal reference pages. Engineers want to name a specific schema or page in their prompt and have its content attached to that request, rather than hoping Claude decides to call a lookup tool. The architect wants the content included when the USER chooses it. What should the architect do?",
+  "options": {
+   "A": "Expose each schema and page as a tool with a rich description and rely on Claude to call it whenever it seems relevant.",
+   "B": "Copy the schemas and pages into the project CLAUDE.md so they are loaded in every single session.",
+   "C": "Add a system prompt rule that Claude must always call the lookup tool before answering any question.",
+   "D": "Expose them as MCP resources so engineers can @-mention them and Claude Code attaches the content."
+  },
+  "answer": [
+   "D"
+  ],
+  "explanation": "Resources are the MCP primitive for data that provides context and are application-driven: the host decides how to include them, and Claude Code lets users reference them with @ mentions that fetch the content and attach it to the prompt. Tools, by contrast, are model-controlled, so the model decides whether and when to call them.",
+  "distractors": {
+   "A": "violates-constraint",
+   "B": "wrong-scope",
+   "C": "prompt-not-enforcement"
+  },
+  "why_wrong": {
+   "A": "Tools are model-controlled, so inclusion depends on Claude's judgment, which breaks the requirement that the user chooses what is attached.",
+   "B": "CLAUDE.md is for durable instructions; pasting schemas there loads them every session, bloats context and lets them go stale instead of fetching the live source on demand.",
+   "C": "A prompt rule is a request, not a guarantee, and it forces a call on every question rather than only when the user picks a resource."
+  },
+  "concept": "MCP resources vs tools",
+  "learn": "Use resources for context the user or application selects (schemas, documents, files) and tools for actions the model decides to take. Claude Code surfaces resources through @ mentions. The common mistake is wrapping static reference data as a tool and hoping the model picks it up.",
+  "apply": "If a tool exists only to return reference content that a person could name, consider exposing that content as a resource instead.",
+  "reviewed": "model",
+  "ref": "https://code.claude.com/docs/en/mcp#use-mcp-resources"
+ },
+ {
+  "id": "CCARF-2.4-07",
+  "cert": "CCAR-F",
+  "domain": 2,
+  "task": "2.4",
+  "select": 2,
+  "stem": "A team connects a dozen MCP servers to Claude Code and finds that tool definitions consume a large share of every session's context. One small server with three tools is needed on nearly every turn. The architect wants to cut context use without hurting that server. Which TWO actions fit? (Select TWO.)",
+  "options": {
+   "A": "Keep tool search enabled so most MCP tool definitions stay deferred and Claude loads them on demand when a task needs them.",
+   "B": "Disable tool search so every definition loads upfront, because deferring definitions always makes tool selection less accurate.",
+   "C": "Remove the large servers from the shared .mcp.json and ask each engineer to add them by hand when needed.",
+   "D": "Configure the small, always-needed server to load its tools into context regardless of deferral."
+  },
+  "answer": [
+   "A",
+   "D"
+  ],
+  "explanation": "With tool search, only tool names and server instructions load at session start and full definitions are discovered on demand, so adding servers has minimal context impact. A server can be exempted with an always-load setting, which the docs advise only for a small number of tools Claude needs on every turn because each upfront tool consumes context.",
+  "distractors": {
+   "B": "myth",
+   "C": "violates-constraint"
+  },
+  "why_wrong": {
+   "B": "Myth: loading every definition upfront is exactly what consumes the context, and the docs describe on-demand discovery as the default way to scale to many servers.",
+   "C": "It would reduce context, but it undoes the shared project configuration and forces every engineer into a manual setup step."
+  },
+  "concept": "MCP tool search and always-load",
+  "learn": "Tool search defers MCP tool definitions so many servers stay cheap, and an always-load setting exempts a small server that is used constantly. Reserve it for few tools, since each one loaded upfront costs context. The common mistake is loading everything upfront or dismantling shared configuration to save tokens.",
+  "apply": "When MCP tool definitions crowd your context, leave deferral on and exempt only the few tools you need every turn.",
+  "reviewed": "model",
+  "ref": "https://code.claude.com/docs/en/mcp#scale-with-mcp-tool-search"
  },
  {
   "id": "CCARF-2.5-01",
@@ -1266,7 +1431,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Grep for content, Glob for paths",
   "learn": "Reach for Grep when you know what text you are looking for, Glob when you know the file name pattern, Read once you know the file. This is right for any exploration task. The common mistake is reading files speculatively.",
-  "apply": "If your agent's transcript shows many Read calls before a single Grep, its exploration strategy is inverted."
+  "apply": "If your agent's transcript shows many Read calls before a single Grep, its exploration strategy is inverted.",
+  "ref": "https://code.claude.com/docs/en/tools-reference#glob-tool-behavior"
  },
  {
   "id": "CCARF-2.5-02",
@@ -1297,7 +1463,74 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Glob for path enumeration",
   "learn": "Use Glob whenever the question is 'which files exist matching this pattern'. It is the wrong tool when you need to know what is inside the files. Results are capped with a truncation flag, so narrow the pattern when the tree is large. On macOS, Linux and WSL, Claude Code leaves Glob and Grep out of the default tool set and searches with find and grep through Bash instead; they come back when named in --tools or --allowedTools or in a subagent's tools list, and the same path-versus-content split applies either way. The common mistake is combining Grep or Read into a manual directory walk.",
-  "apply": "If your skill needs a list of file paths and never their contents, Glob is the whole answer."
+  "apply": "If your skill needs a list of file paths and never their contents, Glob is the whole answer.",
+  "ref": "https://code.claude.com/docs/en/tools-reference#read-tool-behavior"
+ },
+ {
+  "id": "CCARF-2.5-05",
+  "cert": "CCAR-F",
+  "domain": 2,
+  "task": "2.5",
+  "select": 1,
+  "stem": "Claude Code is asked to change a timeout constant in the payments section of a configuration file, but the same line appears in four sections and the edit call fails. The engineer wants ONLY the payments occurrence changed and the rest of the file untouched. What should the architect advise?",
+  "options": {
+   "A": "Retry the edit with a longer match string that includes the section header so it matches exactly one place.",
+   "B": "Replace all occurrences in one edit, then revert the three that should not have changed afterwards by hand.",
+   "C": "Retry with a regular expression in the match string that anchors on the payments section of the file.",
+   "D": "Tell Claude to be careful to pick the right occurrence of the constant on its next attempt at the edit."
+  },
+  "answer": [
+   "A"
+  ],
+  "explanation": "The Edit tool performs exact string replacement and requires the old string to appear exactly once. When it appears more than once, Claude supplies a longer string with enough surrounding context to pin down a single occurrence, or sets replace-all to change every one. Only the first option changes just the intended line.",
+  "distractors": {
+   "B": "violates-constraint",
+   "C": "myth",
+   "D": "vague-guidance"
+  },
+  "why_wrong": {
+   "B": "It would work in the end, but it first rewrites the three lines that must stay untouched and depends on manual reverts, violating the constraint.",
+   "C": "Myth: the Edit tool uses exact string matching, with no regex or fuzzy matching.",
+   "D": "'Be careful' names no mechanism; the match is ambiguous because the string is not unique, and carefulness does not change that."
+  },
+  "concept": "Edit requires a unique match",
+  "learn": "Edit replaces an exact string that must occur once; widen the string with context to disambiguate, or use replace-all when every occurrence should change. Rewriting the whole file is for new files or full rewrites, not partial changes. The common mistake is expecting pattern matching or judgment to resolve an ambiguous match.",
+  "apply": "When a targeted edit fails because the text repeats, include the neighbouring unique lines in the match string.",
+  "reviewed": "model",
+  "ref": "https://code.claude.com/docs/en/tools-reference#edit-tool-behavior"
+ },
+ {
+  "id": "CCARF-2.5-06",
+  "cert": "CCAR-F",
+  "domain": 2,
+  "task": "2.5",
+  "select": 1,
+  "stem": "An engineer asks Claude Code to explain one function inside a very large generated source file, far over the size a single read returns in full. A whole-file read returns only a partial view or an error. The team wants the relevant code in context using the LEAST context. What should the agent do?",
+  "options": {
+   "A": "Keep issuing the same whole-file read, since each attempt automatically returns the next unseen page.",
+   "B": "Print the entire file through a shell command and let the full output enter the conversation.",
+   "C": "Search for the function name to get its line numbers, then read just that range with offset and limit.",
+   "D": "Write a script that splits the file into chunks and read every chunk in order until the function appears."
+  },
+  "answer": [
+   "C"
+  ],
+  "explanation": "A single read returns a limited amount, and a whole file over the hard size limit is refused with an instruction to read a portion with offset and limit, or to search for specific content instead. Locating the function with a content search and then reading just that line range keeps the context small and targeted.",
+  "distractors": {
+   "A": "myth",
+   "B": "violates-constraint",
+   "D": "over-engineering"
+  },
+  "why_wrong": {
+   "A": "Myth: repeating the same call returns the same first page; paging only happens when the agent passes an offset and limit.",
+   "B": "It does get the code, but it pushes the whole oversized file into context, the opposite of the least-context requirement.",
+   "D": "Chunking with a custom script reads far more than needed and adds tooling for something one search plus one ranged read already solves."
+  },
+  "concept": "Targeted reads of large files",
+  "learn": "For files too large to read whole, find the location with a content search and read the range with offset and limit. Reading everything is justified only when the whole file is genuinely needed. The common mistake is dumping or re-reading the full file instead of narrowing first.",
+  "apply": "Before reading a big file, search for the symbol you care about and read only the surrounding lines.",
+  "reviewed": "model",
+  "ref": "https://code.claude.com/docs/en/tools-reference#large-files"
  },
  {
   "id": "CCARF-2.1-05",
@@ -1328,7 +1561,41 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Tool descriptions state outputs",
   "learn": "Use a tool description that names every field the response actually contains whenever another agent or step consumes that output directly. It is the wrong call to over-specify output shape for a tool whose result a human always reviews before use. The common mistake is describing a tool by what it conceptually represents instead of the literal fields it returns.",
-  "apply": "If a downstream step is guessing at fields a tool never returns, rewrite the description to enumerate exactly what comes back."
+  "apply": "If a downstream step is guessing at fields a tool never returns, rewrite the description to enumerate exactly what comes back.",
+  "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools#best-practices-for-tool-definitions"
+ },
+ {
+  "id": "CCARF-2.1-06",
+  "cert": "CCAR-F",
+  "domain": 2,
+  "task": "2.1",
+  "select": 1,
+  "stem": "A scheduling tool takes a nested list of attendee objects, an optional recurrence rule and a format-sensitive datetime string. Its description already explains what it does, when to use it and what every parameter means, yet Claude sometimes omits the recurrence rule when a request implies one and occasionally sends dates in the wrong format. The team wants the MOST direct fix that keeps the schema as it is. What should the architect do?",
+  "options": {
+   "A": "Add a few schema-valid input examples to the tool definition showing nesting, the optional rule and the date format.",
+   "B": "Lower the temperature of the requests so Claude formats the arguments more consistently across calls.",
+   "C": "Put the formatting rules into a user-level memory file so every session reads them before calling the tool.",
+   "D": "Remove the optional parameters from the schema so there is no field left for Claude to omit in a call."
+  },
+  "answer": [
+   "A"
+  ],
+  "explanation": "Clear descriptions come first, but for tools with nested objects, optional parameters or format-sensitive inputs the platform docs recommend adding schema-validated input examples. They show concrete patterns of well-formed calls, including when to include optional fields, at the cost of a small number of extra prompt tokens.",
+  "distractors": {
+   "B": "parameter-patch",
+   "C": "wrong-scope",
+   "D": "violates-constraint"
+  },
+  "why_wrong": {
+   "B": "Sampling settings do not teach Claude what a correct call looks like; this is a parameter patch on an interface problem.",
+   "C": "A memory file configures Claude Code sessions, not an API tool definition; the guidance would never reach the tool-use prompt the API builds.",
+   "D": "Removing the recurrence field would work, but the tool could then no longer create recurring events, which breaks the requirement to keep the schema."
+  },
+  "concept": "Input examples for complex tools",
+  "learn": "After descriptions, use input examples for tools with nested objects, optional parameters or strict formats; each example must validate against the input schema. They are unnecessary for simple flat tools. The common mistake is reaching for sampling parameters when the model has never seen a correct call.",
+  "apply": "If a tool with nested or format-sensitive inputs is called wrongly despite a good description, add two or three valid examples to its definition.",
+  "reviewed": "model",
+  "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools#providing-tool-use-examples"
  },
  {
   "id": "CCARF-2.2-03",
@@ -1358,7 +1625,41 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Structured error categories",
   "learn": "Use isError plus a categorized errorCategory field whenever a tool can fail for reasons that call for different responses. It is the wrong call to build this out for a tool that only ever fails one way, where a plain error message is enough. The common mistake is returning a normal-looking result with the failure hidden in prose, leaving the caller to guess whether anything went wrong.",
-  "apply": "If your MCP tool always returns isError: false and buries failures in the text field, add isError: true plus a structured errorCategory so the caller can act on it."
+  "apply": "If your MCP tool always returns isError: false and buries failures in the text field, add isError: true plus a structured errorCategory so the caller can act on it.",
+  "ref": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools#error-handling"
+ },
+ {
+  "id": "CCARF-2.2-06",
+  "cert": "CCAR-F",
+  "domain": 2,
+  "task": "2.2",
+  "select": 1,
+  "stem": "An MCP booking tool rejects a past departure date and returns a result flagged as an error whose only text is 'E-4021'. Claude retries the identical call several times and then gives up. The architect wants Claude to SELF-CORRECT after such rejections. What should the architect change?",
+  "options": {
+   "A": "Cap the agent at one retry per tool so the loop ends sooner whenever a call to the booking tool fails.",
+   "B": "Keep the execution-error result but make its text say what was wrong and how to fix it, such as the date rule.",
+   "C": "Report the rejection as a protocol-level JSON-RPC error so the client application can handle it centrally.",
+   "D": "Add the full table of E-codes to the system prompt of every agent that might ever call the booking tool."
+  },
+  "answer": [
+   "B"
+  ],
+  "explanation": "The MCP specification says tool execution errors carry actionable feedback that language models can use to self-correct and retry with adjusted parameters, and that input validation problems such as a date in the wrong format belong in that category. An opaque code gives the model nothing to adjust, whereas a message naming the problem and the fix does.",
+  "distractors": {
+   "A": "parameter-patch",
+   "C": "myth",
+   "D": "wrong-scope"
+  },
+  "why_wrong": {
+   "A": "Limiting retries hides the symptom of repeated identical calls without giving Claude any information to change the call.",
+   "C": "Myth: protocol errors are meant for problems models are less likely to fix (unknown tool, malformed request) and are less likely to lead to recovery; validation failures belong in the tool result.",
+   "D": "Distributing a code table to every agent puts the knowledge in the wrong place and has to be kept in sync, when the server can state the fix in its own response."
+  },
+  "concept": "Actionable tool execution errors",
+  "learn": "Return validation and business failures as tool results flagged as errors, with text that names the problem and the correction. Reserve protocol errors for broken requests. The common mistake is returning opaque codes or stack traces that a model cannot act on.",
+  "apply": "Read your tool's error strings as if you were the model: if you could not tell what to change, rewrite them to say what was wrong and what a valid call looks like.",
+  "reviewed": "model",
+  "ref": "https://modelcontextprotocol.io/specification/latest/server/tools#error-handling"
  },
  {
   "id": "CCARF-2.3-03",
@@ -1420,7 +1721,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "tool_choice modes",
   "learn": "Configure tool_choice per step: 'tool' to force a specific call, 'auto' to let Claude decide whether a tool is needed, 'any' to force some tool call, 'none' to forbid tool use. Pair a forced call with strict: true when schema validity matters. Forcing is not universally available: manual extended thinking rejects 'any' and 'tool', and some newer models reject them with a request error; there the documented route is 'auto' with strict tool use, or structured outputs when the response itself must be fixed JSON. It is the wrong call to use the same tool_choice value across steps with different needs. The common mistake is relying on prompt wording to enforce a behaviour that tool_choice already guarantees at the API level.",
-  "apply": "If a pipeline step must always return schema-compliant tool output, set tool_choice to name that tool directly instead of asking nicely in the prompt."
+  "apply": "If a pipeline step must always return schema-compliant tool output, set tool_choice to name that tool directly instead of asking nicely in the prompt.",
+  "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/strict-tool-use#why-strict-tool-use-matters-for-agents"
  },
  {
   "id": "CCARF-3.1-01",
@@ -1451,7 +1753,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "CLAUDE.md hierarchy levels",
   "learn": "Put personal preferences at user level, team conventions at project level, and subsystem specifics at directory level. Mixing levels is the wrong call every time, because it either leaks or hides instructions. The common mistake is editing the nearest CLAUDE.md regardless of who it affects.",
-  "apply": "Before adding a line to a CLAUDE.md, ask who else will read it; if the answer is 'nobody should', it belongs in ~/.claude/CLAUDE.md."
+  "apply": "Before adding a line to a CLAUDE.md, ask who else will read it; if the answer is 'nobody should', it belongs in ~/.claude/CLAUDE.md.",
+  "ref": "https://code.claude.com/docs/en/memory#choose-where-to-put-claude-md-files"
  },
  {
   "id": "CCARF-3.1-02",
@@ -1482,7 +1785,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "@import for modular CLAUDE.md",
   "learn": "Use @import to compose CLAUDE.md from shared standards files and keep each file focused. This is right whenever the same guidance is needed in several places. The common mistake is copy-pasting standards into every repo.",
-  "apply": "If the same paragraph appears in more than one CLAUDE.md in your organisation, move it to a file and @import it."
+  "apply": "If the same paragraph appears in more than one CLAUDE.md in your organisation, move it to a file and @import it.",
+  "ref": "https://code.claude.com/docs/en/memory#import-additional-files"
  },
  {
   "id": "CCARF-3.2-01",
@@ -1513,7 +1817,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Project vs user command scope",
   "learn": "Use .claude/commands (or, preferably for new work, .claude/skills/<name>/SKILL.md) for team workflows that belong to the repo, and ~/.claude/commands or ~/.claude/skills for personal shortcuts. The project scope is the wrong choice for commands that reference personal paths or credentials. The common mistake is authoring team commands in the personal directory because it was convenient.",
-  "apply": "If a teammate asks 'how do I get your slash command?', it should have been in .claude/commands."
+  "apply": "If a teammate asks 'how do I get your slash command?', it should have been in .claude/commands.",
+  "ref": "https://code.claude.com/docs/en/skills#page-title"
  },
  {
   "id": "CCARF-3.2-02",
@@ -1544,7 +1849,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Skill context forking",
   "learn": "Fork a skill's context when it reads a lot of material and the main session only needs its conclusion. Keep it inline when the intermediate steps must be visible to the user. The common mistake is running heavy skills inline and blaming the model for drift.",
-  "apply": "If a skill's tool calls fill the transcript and the user only needs its final answer, set context: fork."
+  "apply": "If a skill's tool calls fill the transcript and the user only needs its final answer, set context: fork.",
+  "ref": "https://code.claude.com/docs/en/skills#run-skills-in-a-subagent"
  },
  {
   "id": "CCARF-3.3-01",
@@ -1575,7 +1881,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": ".claude/rules with paths globs",
   "learn": "Use .claude/rules/*.md with paths frontmatter for conventions that apply to a subset of the tree; keep truly global guidance in CLAUDE.md. Rules are the wrong tool for conventions that apply everywhere. The common mistake is writing 'if editing X' conditionals in the global file.",
-  "apply": "If a CLAUDE.md paragraph starts with 'when working on <directory>', it should be a rule file with a paths glob."
+  "apply": "If a CLAUDE.md paragraph starts with 'when working on <directory>', it should be a rule file with a paths glob.",
+  "ref": "https://code.claude.com/docs/en/memory#path-specific-rules"
  },
  {
   "id": "CCARF-3.3-02",
@@ -1606,7 +1913,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Diagnosing rule path globs",
   "learn": "When a rule applies inconsistently, inspect the paths frontmatter first: check recursion (**), extensions and directory spelling. This is the right first step for any 'rule ignored' symptom. The common mistake is rewriting the rule body when the glob is at fault.",
-  "apply": "If your rule works in one directory and not its children, your glob is missing the ** segment."
+  "apply": "If your rule works in one directory and not its children, your glob is missing the ** segment.",
+  "ref": "https://code.claude.com/docs/en/memory#path-specific-rules"
  },
  {
   "id": "CCARF-3.4-01",
@@ -1637,7 +1945,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Plan mode for architectural changes",
   "learn": "Use plan mode when a change is large, cross-cutting or architecturally risky; use direct execution for small, well-scoped edits. Plan mode is the wrong call for trivial fixes where it only adds ceremony. The common mistake is choosing the mode by habit rather than by the blast radius of the change.",
-  "apply": "If you cannot describe the change in one sentence with a known file list, start in plan mode."
+  "apply": "If you cannot describe the change in one sentence with a known file list, start in plan mode.",
+  "ref": "https://code.claude.com/docs/en/permission-modes#analyze-before-you-edit-with-plan-mode"
  },
  {
   "id": "CCARF-3.4-02",
@@ -1668,7 +1977,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Direct execution for well-scoped edits",
   "learn": "Reserve plan mode for changes where the approach itself needs review; let small, clearly scoped edits execute directly. A blanket rule in either direction is wrong. The common mistake is equating more process with more safety.",
-  "apply": "If your team policy contains the word 'always' about plan mode, add a scope criterion (files touched, interfaces changed) instead."
+  "apply": "If your team policy contains the word 'always' about plan mode, add a scope criterion (files touched, interfaces changed) instead.",
+  "ref": "https://code.claude.com/docs/en/best-practices#explore-first-then-plan-then-code"
  },
  {
   "id": "CCARF-3.5-01",
@@ -1699,7 +2009,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Examples over prose for transformations",
   "learn": "When you can show the desired output, show it: 2-3 input/output pairs beat rule lists for format and mapping tasks. Prose is still better for open-ended reasoning where there is no single correct shape. The common mistake is growing the rule list one exception at a time.",
-  "apply": "If your prompt for a transformation contains more 'unless' clauses than examples, replace the clauses with examples."
+  "apply": "If your prompt for a transformation contains more 'unless' clauses than examples, replace the clauses with examples.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#use-examples-effectively"
  },
  {
   "id": "CCARF-3.5-02",
@@ -1730,7 +2041,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Few, targeted examples",
   "learn": "Choose 2-4 examples that cover the format plus the hardest ambiguous cases, and stop. This holds for commands, skills and API prompts alike. The common mistake is treating examples as training data rather than as a specification.",
-  "apply": "If you cannot say what each example teaches that the others do not, delete it."
+  "apply": "If you cannot say what each example teaches that the others do not, delete it.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#use-examples-effectively"
  },
  {
   "id": "CCARF-3.6-01",
@@ -1761,7 +2073,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "claude -p with JSON output",
   "learn": "Use claude -p for any scripted invocation and --output-format json when a program will consume the result. Interactive mode is for humans. The common mistake is scraping stdout from an interactive run.",
-  "apply": "If your CI YAML calls claude without -p, or greps its output, switch to -p with --output-format json."
+  "apply": "If your CI YAML calls claude without -p, or greps its output, switch to -p with --output-format json.",
+  "ref": "https://code.claude.com/docs/en/best-practices#run-non-interactive-mode"
  },
  {
   "id": "CCARF-3.6-02",
@@ -1790,7 +2103,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "--json-schema in pipelines",
   "learn": "Combine --json-schema, exit-code checks and consumer-side validation for any headless step whose output feeds another job. Free-form output is fine only when a human is the consumer. The common mistake is relying on the prompt to keep field names stable.",
-  "apply": "If a downstream job would crash on a renamed key, the producing step needs --json-schema and the consumer needs validation."
+  "apply": "If a downstream job would crash on a renamed key, the producing step needs --json-schema and the consumer needs validation.",
+  "ref": "https://code.claude.com/docs/en/headless#basic-usage"
  },
  {
   "id": "CCARF-3.1-03",
@@ -1821,7 +2135,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "CLAUDE.md hierarchy levels",
   "learn": "Use CLAUDE.local.md or the user-level ~/.claude/CLAUDE.md when a change should persist for one person without affecting the shared project file. It is the wrong call when the whole team should see the same convention, which belongs in the project's ./CLAUDE.md instead. The common mistake is putting a personal preference into the shared file, or assuming chat instructions survive into a new session.",
-  "apply": "If a personal preference lives in the project's versioned CLAUDE.md, everyone on the team inherits it; move it to CLAUDE.local.md or the user-level file instead."
+  "apply": "If a personal preference lives in the project's versioned CLAUDE.md, everyone on the team inherits it; move it to CLAUDE.local.md or the user-level file instead.",
+  "ref": "https://code.claude.com/docs/en/memory#choose-where-to-put-claude-md-files"
  },
  {
   "id": "CCARF-3.1-04",
@@ -1852,7 +2167,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Diagnosing CLAUDE.md subdirectory scope",
   "learn": "Use a subdirectory CLAUDE.md for conventions that only one part of the tree needs; it loads when Claude reads files there and is concatenated with, not layered over, the root file. It is the wrong diagnosis to reach for context size or model parameters when a memory file silently fails to load. The common mistake is assuming any Markdown file in the folder counts, or expecting a nested file to override the root file instead of removing the conflict.",
-  "apply": "If a subdirectory's rules never seem to apply, run /context and confirm a file literally named CLAUDE.md sits at the top of that directory before touching anything else."
+  "apply": "If a subdirectory's rules never seem to apply, run /context and confirm a file literally named CLAUDE.md sits at the top of that directory before touching anything else.",
+  "ref": "https://code.claude.com/docs/en/memory#claude-isn’t-following-my-claude-md"
  },
  {
   "id": "CCARF-3.2-03",
@@ -1883,7 +2199,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Skill context forking",
   "learn": "Use context: fork when a skill's own reading and reasoning would flood the main conversation and only the final result matters there. It is the wrong call for a skill whose intermediate steps the user actually wants to see. The common mistake is trying to control context bleed with a bigger window or a polite instruction instead of the frontmatter setting built for it.",
-  "apply": "If a skill routinely pastes large intermediate content into the main thread, add context: fork instead of asking it to be more concise."
+  "apply": "If a skill routinely pastes large intermediate content into the main thread, add context: fork instead of asking it to be more concise.",
+  "ref": "https://code.claude.com/docs/en/skills#run-skills-in-a-subagent"
  },
  {
   "id": "CCARF-3.2-04",
@@ -1913,7 +2230,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Project vs user command scope",
   "learn": "Use a project-scoped command or skill (.claude/commands/ or .claude/skills/) when the whole team should share and review it in version control; use a user-scoped one (~/.claude/commands/ or ~/.claude/skills/) for a personal habit that should follow one person everywhere. Both forms are invoked with /name, and disable-model-invocation: true keeps a skill manual-only. It is the wrong call to put a personal command in the shared folder, or to turn an on-demand workflow into always-loaded CLAUDE.md text. The common mistake is confusing 'versioned' with 'shared with the team' when it's really about which folder the file sits in.",
-  "apply": "If a command should only ever run for one person across many repos, move it to ~/.claude/commands/ instead of the project's .claude/commands/."
+  "apply": "If a command should only ever run for one person across many repos, move it to ~/.claude/commands/ instead of the project's .claude/commands/.",
+  "ref": "https://code.claude.com/docs/en/skills#page-title"
  },
  {
   "id": "CCARF-3.3-03",
@@ -1975,7 +2293,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Diagnosing rule frontmatter",
   "learn": "When a rule that should be conditional loads everywhere, inspect its frontmatter before its body: the key must be paths, the YAML must parse, and the globs must be right (** for any depth). It is the wrong fix to move the content into CLAUDE.md or to borrow skill fields. The common mistake is assuming a typo in the frontmatter produces an error; Claude Code silently treats the rule as unconditional.",
-  "apply": "If /context shows a supposedly path-scoped rule loaded at launch, check that its frontmatter key is literally paths and that the YAML parses (claude --debug shows parse errors)."
+  "apply": "If /context shows a supposedly path-scoped rule loaded at launch, check that its frontmatter key is literally paths and that the YAML parses (claude --debug shows parse errors).",
+  "ref": "https://code.claude.com/docs/en/memory#rules-frontmatter-reference"
  },
  {
   "id": "CCARF-3.4-03",
@@ -2006,7 +2325,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Direct execution for well-scoped edits",
   "learn": "Use direct execution when a change is small, well-understood, and touches a known, short list of files with no architectural ripple effects. It is the wrong call for changes with broad blast radius or irreversible consequences, where plan mode earns its overhead. The common mistake is defaulting to heavy process for every change regardless of its actual size.",
-  "apply": "If a change is a handful of matching lines with no other callers, ask Claude to make it directly instead of routing it through plan mode."
+  "apply": "If a change is a handful of matching lines with no other callers, ask Claude to make it directly instead of routing it through plan mode.",
+  "ref": "https://code.claude.com/docs/en/best-practices#explore-first-then-plan-then-code"
  },
  {
   "id": "CCARF-3.4-04",
@@ -2037,7 +2357,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Plan mode for architectural changes",
   "learn": "Use plan mode when a change is large in scope, touches code owned by multiple teams, or is hard or impossible to reverse once merged. It is the wrong call for small, contained edits where the overhead outweighs the risk. The common mistake is trusting after-the-fact review to substitute for reviewing the approach itself before any code is written.",
-  "apply": "If a change is irreversible or spans several teams' code, start in plan mode instead of letting Claude execute and reviewing only the resulting diff."
+  "apply": "If a change is irreversible or spans several teams' code, start in plan mode instead of letting Claude execute and reviewing only the resulting diff.",
+  "ref": "https://code.claude.com/docs/en/best-practices#explore-first-then-plan-then-code"
  },
  {
   "id": "CCARF-3.5-03",
@@ -2068,7 +2389,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Examples over prose for transformations",
   "learn": "Use a few concrete input/output examples when a transformation's boundaries are ambiguous in prose. It is the wrong call for transformations that are already unambiguous, where examples add nothing. The common mistake is trying to fix ambiguity by adding more or stronger wording instead of a worked example.",
-  "apply": "If a classification task keeps landing inconsistently on the same boundary, add 2-3 examples for that boundary instead of rewriting the category description again."
+  "apply": "If a classification task keeps landing inconsistently on the same boundary, add 2-3 examples for that boundary instead of rewriting the category description again.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#use-examples-effectively"
  },
  {
   "id": "CCARF-3.5-04",
@@ -2098,7 +2420,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Few, targeted examples",
   "learn": "Use one or two targeted examples per failing edge case when a transformation mostly works but breaks on specific patterns. It is the wrong call to dump every historical example in hopes of covering everything, which dilutes the signal. The common mistake is assuming more examples are always better, or that Claude retains anything between sessions without an explicit file.",
-  "apply": "If two specific edge cases are failing, add one example per edge case instead of pasting the entire historical dataset into the prompt."
+  "apply": "If two specific edge cases are failing, add one example per edge case instead of pasting the entire historical dataset into the prompt.",
+  "ref": "https://code.claude.com/docs/en/memory#auto-memory"
  },
  {
   "id": "CCARF-3.6-03",
@@ -2160,7 +2483,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Scoped tool permissions in headless CI",
   "learn": "Use --allowedTools scoped to the task's actual needs when a headless job should be unable to touch anything outside its job. It is the wrong call when the job legitimately needs broad access, such as a general-purpose refactor task. The common mistake is trusting a written instruction or a later self-check instead of denying the capability outright.",
-  "apply": "If a CI job has full default permissions, replace the blanket access with --allowedTools scoped to exactly what that job needs."
+  "apply": "If a CI job has full default permissions, replace the blanket access with --allowedTools scoped to exactly what that job needs.",
+  "ref": "https://code.claude.com/docs/en/headless#turn-off-permission-prompts-in-unattended-runs"
  },
  {
   "id": "CCARF-4.1-01",
@@ -2191,7 +2515,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Explicit criteria over vague instructions",
   "learn": "Specify the conditions that trigger an action and the conditions that exclude it, in measurable terms. This is right for any classification with consequences. The common mistake is describing an attitude ('be careful') instead of a rule.",
-  "apply": "If your system prompt uses adjectives like 'suspicious', 'relevant' or 'important' without defining them, expect false positives."
+  "apply": "If your system prompt uses adjectives like 'suspicious', 'relevant' or 'important' without defining them, expect false positives.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#be-clear-and-direct"
  },
  {
   "id": "CCARF-4.1-02",
@@ -2253,7 +2578,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Targeted few-shot for ambiguous cases",
   "learn": "Aim examples at the boundary where the instructions run out; 2-4 usually suffice. Examples are wasted on cases the model already handles. The common mistake is choosing typical examples instead of hard ones.",
-  "apply": "If your examples all show easy cases, replace them with the cases your error log says are being confused."
+  "apply": "If your examples all show easy cases, replace them with the cases your error log says are being confused.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#use-examples-effectively"
  },
  {
   "id": "CCARF-4.2-02",
@@ -2284,7 +2610,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Examples for format consistency",
   "learn": "Use examples whenever a specific output layout matters; include an edge case such as an empty section. Where the structure is strict enough to be a schema, use tool-based structured output instead. The common mistake is describing the layout in words.",
-  "apply": "If you find yourself writing 'the output should look like...' in prose, paste an actual example instead."
+  "apply": "If you find yourself writing 'the output should look like...' in prose, paste an actual example instead.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#use-examples-effectively"
  },
  {
   "id": "CCARF-4.3-01",
@@ -2315,7 +2642,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Structured output via tool_use",
   "learn": "When downstream code needs a schema-compliant object, use structured outputs: a strict tool that you force with tool_choice, or JSON outputs with a schema. Plain-text JSON is acceptable only for human-read output or exploratory scripts. The common mistake is hardening the parser instead of the contract.",
-  "apply": "If your code contains json.loads on response text and a try/except around it, switch to a strict tool or JSON outputs so the shape is enforced by the API."
+  "apply": "If your code contains json.loads on response text and a try/except around it, switch to a strict tool or JSON outputs so the shape is enforced by the API.",
+  "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools#forcing-tool-use"
  },
  {
   "id": "CCARF-4.3-02",
@@ -2377,7 +2705,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Retry with validation errors appended",
   "learn": "Every retry should carry the validator's findings and the original input. Blind retries are acceptable only for transient transport errors. The common mistake is a retry loop that resubmits an identical request.",
-  "apply": "If your retry function takes no argument describing the failure, it cannot help the model fix anything."
+  "apply": "If your retry function takes no argument describing the failure, it cannot help the model fix anything.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents#workflow-evaluator-optimizer"
  },
  {
   "id": "CCARF-4.4-02",
@@ -2407,7 +2736,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Bounded feedback loops",
   "learn": "Validate externally, feed errors back, cap attempts, escalate the remainder. This is right for any output with business consequences. The common mistake is an infinite loop or a loop that trusts the model's self-assessment.",
-  "apply": "If your retry loop has no maximum and no 'what happens after' branch, it is not bounded."
+  "apply": "If your retry loop has no maximum and no 'what happens after' branch, it is not bounded.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents#agents"
  },
  {
   "id": "CCARF-4.5-01",
@@ -2438,7 +2768,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Message Batches for latency-tolerant work",
   "learn": "Use the Batches API when results can wait and volume is high; use real-time for anything a user or an agent loop is waiting on. Batches are the wrong call for interactive or dependent multi-step calls. The common mistake is optimising real-time throughput for a job that is not real-time.",
-  "apply": "If nobody is waiting for an individual result and you have thousands of them, the workload belongs in a batch."
+  "apply": "If nobody is waiting for an individual result and you have thousands of them, the workload belongs in a batch.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/batch-processing#batch-limitations"
  },
  {
   "id": "CCARF-4.5-02",
@@ -2468,7 +2799,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Matching API mode to latency needs",
   "learn": "Classify each workload by who waits and whether requests depend on each other; batch the independent, latency-tolerant ones. Real-time remains right for everything else. The common mistake is moving an agent loop to batches because it is expensive.",
-  "apply": "If a request can only be constructed after another request's response, it cannot be in the same batch."
+  "apply": "If a request can only be constructed after another request's response, it cannot be in the same batch.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/batch-processing#retrieving-batch-results"
  },
  {
   "id": "CCARF-4.6-01",
@@ -2499,7 +2831,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Independent second-instance review",
   "learn": "Use a separate instance for review whenever the cost of an undetected error is high. Self-review is acceptable for low-stakes polish. The common mistake is appending 'check your work' and believing it is a review step.",
-  "apply": "If your review prompt is in the same request as the generation, it is self-review, not review."
+  "apply": "If your review prompt is in the same request as the generation, it is self-review, not review.",
+  "ref": "https://code.claude.com/docs/en/best-practices#run-multiple-claude-sessions"
  },
  {
   "id": "CCARF-4.6-02",
@@ -2530,7 +2863,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Reviewer input isolation",
   "learn": "Give a reviewing instance the output, the source and the criteria, and nothing that reveals how the output was produced. This matters for every multi-pass review. The common mistake is sharing the generator's transcript to be helpful.",
-  "apply": "If your reviewer prompt includes the phrase 'the previous model reasoned that', you have leaked generation context into the review."
+  "apply": "If your reviewer prompt includes the phrase 'the previous model reasoned that', you have leaked generation context into the review.",
+  "ref": "https://code.claude.com/docs/en/best-practices#add-an-adversarial-review-step"
  },
  {
   "id": "CCARF-4.1-03",
@@ -2592,7 +2926,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Defining the decision criterion",
   "learn": "Define the decision criterion explicitly whenever a classification depends on a boundary, such as urgent versus routine or high versus low priority. It is the wrong call only when the categories truly are subjective and meant to reflect individual reviewer judgment. The common mistake is trusting words like 'important' or 'urgent' to carry a fixed meaning on their own.",
-  "apply": "If two reviewers reading the same ticket log would disagree on priority, write down the rule that decides it and put that rule in the prompt."
+  "apply": "If two reviewers reading the same ticket log would disagree on priority, write down the rule that decides it and put that rule in the prompt.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#be-clear-and-direct"
  },
  {
   "id": "CCARF-4.2-03",
@@ -2623,7 +2958,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Targeted few-shot for ambiguous cases",
   "learn": "Use a few targeted few-shot examples when a model is inconsistent on a specific, identifiable pattern such as adjacent-field resumes or borderline categories. It is the wrong call when the model is already consistent, or when the ambiguity is so broad that no small example set could cover it. The common mistake is adding general context or vague advice instead of showing the exact boundary case resolved.",
-  "apply": "If you can point to the specific pattern that gets classified inconsistently, add two to four examples of exactly that pattern labeled correctly."
+  "apply": "If you can point to the specific pattern that gets classified inconsistently, add two to four examples of exactly that pattern labeled correctly.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#use-examples-effectively"
  },
  {
   "id": "CCARF-4.2-04",
@@ -2653,7 +2989,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Examples for format consistency",
   "learn": "Combine a small set of formatted examples with an explicit statement of the allowed structure whenever an output layout must be fixed. It is the wrong call when the format is meant to vary per case. The common mistake is describing the desired format only in prose and hoping the model infers the exact headings and order.",
-  "apply": "If your generated reports drift in section names or order, add worked examples in the exact target format plus an explicit list of the only allowed headings."
+  "apply": "If your generated reports drift in section names or order, add worked examples in the exact target format plus an explicit list of the only allowed headings.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#be-clear-and-direct"
  },
  {
   "id": "CCARF-4.3-03",
@@ -2777,7 +3114,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Bounded feedback loops",
   "learn": "Bound a validation-and-retry loop with a fixed retry cap and a failure path whenever the input might be unfixable. It is the wrong call only for one-shot pipelines with no retry logic at all. The common mistake is building error-guided retries without ever limiting how many times they can run.",
-  "apply": "If your retry loop has no maximum attempt count, add one and send anything that still fails at the cap to a human queue instead of looping forever."
+  "apply": "If your retry loop has no maximum attempt count, add one and send anything that still fails at the cap to a human queue instead of looping forever.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents#agents"
  },
  {
   "id": "CCARF-4.5-03",
@@ -2808,7 +3146,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Message Batches for latency-tolerant work",
   "learn": "Use the Message Batches API for large, latency-tolerant workloads where no one is waiting on an individual response, since it costs substantially less in exchange for turnaround measured in hours. It is the wrong call whenever a user or downstream system needs a same-second answer. The common mistake is building custom batching infrastructure or splitting the work across agents instead of using the API's own batch mode.",
-  "apply": "If a workload is a one-time or periodic bulk job with no one waiting on individual results, route it through the Message Batches API instead of synchronous calls."
+  "apply": "If a workload is a one-time or periodic bulk job with no one waiting on individual results, route it through the Message Batches API instead of synchronous calls.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/batch-processing#how-the-message-batches-api-works"
  },
  {
   "id": "CCARF-4.5-04",
@@ -2838,7 +3177,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Matching API mode to latency needs",
   "learn": "Match API mode to how long the caller can wait: synchronous requests for interactive, second-scale needs, Message Batches for large, latency-tolerant jobs at lower cost. It is the wrong call to pick a mode by workload size alone without asking who is waiting. The common mistake is believing batches return quickly enough for interactive use, or trying to serve both needs with one oversized request.",
-  "apply": "If a workload has no one waiting on an individual result, route it to the Message Batches API; if a user is waiting, keep it synchronous."
+  "apply": "If a workload has no one waiting on an individual result, route it to the Message Batches API; if a user is waiting, keep it synchronous.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/batch-processing#message-batches-api"
  },
  {
   "id": "CCARF-4.6-03",
@@ -2869,7 +3209,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Independent second-instance review",
   "learn": "Use an independent second instance with no memory of the generation step when a review needs to catch mistakes the first pass is blind to. It is the wrong call for quick, low-stakes output where a same-instance check is cheap and good enough. The common mistake is asking the generating instance to review its own work more emphatically instead of starting a fresh one.",
-  "apply": "If a self-check almost never changes the output, replace it with a review by a separate instance that never saw the generation."
+  "apply": "If a self-check almost never changes the output, replace it with a review by a separate instance that never saw the generation.",
+  "ref": "https://code.claude.com/docs/en/best-practices#run-multiple-claude-sessions"
  },
  {
   "id": "CCARF-4.6-04",
@@ -2900,7 +3241,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Reviewer input isolation",
   "learn": "Isolate a reviewer's input to the requirements and the artifact being reviewed, keeping the generator's own reasoning and false starts out of its prompt. It is the wrong call when the reviewer genuinely needs the generation history, such as auditing a decision trail. The common mistake is treating a second instance as independent by default even after pasting the first instance's reasoning into its prompt.",
-  "apply": "If your 'independent' reviewer's prompt includes the drafting instance's own reasoning or drafts, strip that out and give it only the requirements and the final output."
+  "apply": "If your 'independent' reviewer's prompt includes the drafting instance's own reasoning or drafts, strip that out and give it only the requirements and the final output.",
+  "ref": "https://code.claude.com/docs/en/best-practices#add-an-adversarial-review-step"
  },
  {
   "id": "CCARF-5.1-01",
@@ -2931,7 +3273,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Persistent case-facts block",
   "learn": "Keep a verbatim facts block for anything with an exact value and summarise only the story around it. This is right for any long-running task with identifiers or figures. The common mistake is summarising the whole transcript uniformly.",
-  "apply": "If your summariser is the only place a policy number or a date lives, it will eventually be wrong; pin those values in a block that never gets summarised."
+  "apply": "If your summariser is the only place a policy number or a date lives, it will eventually be wrong; pin those values in a block that never gets summarised.",
+  "ref": "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents#context-engineering-for-long-horizon-tasks"
  },
  {
   "id": "CCARF-5.1-02",
@@ -2965,6 +3308,39 @@ window.QUESTIONS["CCAR-F"] = [
   "apply": "If a user could sue over a value in your transcript, that value must not pass through a summariser."
  },
  {
+  "id": "CCARF-5.1-04",
+  "cert": "CCAR-F",
+  "domain": 5,
+  "task": "5.1",
+  "select": 1,
+  "stem": "A contract-analysis agent concatenates fifteen long documents, roughly a hundred thousand tokens, and places its instructions and question first, followed by the documents. Answers regularly miss details that sit in documents in the middle of the input. The team wants the MOST effective prompt-structure change without changing the model or the window size. What should the architect do?",
+  "options": {
+   "A": "Add a system prompt sentence telling Claude to pay equal attention to every document found in the input.",
+   "B": "Put the documents first in tagged blocks, the question after them, and ask Claude to quote passages first.",
+   "C": "Move to a configuration with a larger context window so the documents sit further from the window limit.",
+   "D": "Set the temperature to zero so that the model weighs every part of the input uniformly when it answers."
+  },
+  "answer": [
+   "B"
+  ],
+  "explanation": "The prompting guide advises placing long documents near the top of the prompt, above the query, instructions and examples, and reports that putting the query at the end can improve quality, especially with multi-document inputs. Structuring the documents in tagged blocks and asking Claude to quote relevant passages first helps it focus on the relevant content and ignore the rest.",
+  "distractors": {
+   "A": "vague-guidance",
+   "C": "bigger-context",
+   "D": "parameter-patch"
+  },
+  "why_wrong": {
+   "A": "'Pay equal attention' is advice without a mechanism; it does not change where the content sits or how it is structured.",
+   "C": "A larger window holds more text but does nothing for how well details in the middle of it are used.",
+   "D": "Sampling temperature controls randomness of output tokens, not how the model attends to different positions in the input."
+  },
+  "concept": "Position-aware long-context structure",
+  "learn": "With long inputs, put the documents first in tagged blocks, the query last, and have Claude quote relevant passages before answering. Details buried in the middle of a long input are the ones most likely to be missed. The common mistake is enlarging the window instead of restructuring the input.",
+  "apply": "If a long aggregated prompt starts with instructions and ends with documents, reorder it so the documents come first and the question comes last.",
+  "reviewed": "model",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#long-context-prompting"
+ },
+ {
   "id": "CCARF-5.2-01",
   "cert": "CCAR-F",
   "domain": 5,
@@ -2993,7 +3369,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Explicit escalation triggers",
   "learn": "List the conditions that require escalation, with examples of near-misses on both sides. This is right wherever an agent can take a consequential action. The common mistake is delegating the threshold to the model's judgment.",
-  "apply": "If your escalation rule uses 'appropriate', 'necessary' or 'significant' without numbers or named conditions, it is not a rule."
+  "apply": "If your escalation rule uses 'appropriate', 'necessary' or 'significant' without numbers or named conditions, it is not a rule.",
+  "ref": "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents#the-anatomy-of-effective-context"
  },
  {
   "id": "CCARF-5.2-02",
@@ -3027,6 +3404,39 @@ window.QUESTIONS["CCAR-F"] = [
   "apply": "If your agent can execute an action on an under-specified request without a documented 'ask first' condition, it will guess."
  },
  {
+  "id": "CCARF-5.2-04",
+  "cert": "CCAR-F",
+  "domain": 5,
+  "task": "5.2",
+  "select": 1,
+  "stem": "A support agent already has explicit escalation triggers. The team's dashboard shows only the share of conversations resolved without a human, which has been rising, and leadership asks whether the triggers are actually CALIBRATED. Which measurement should the architect add?",
+  "options": {
+   "A": "Escalation accuracy both ways: warranted escalations and missed ones, found by human review of a sample.",
+   "B": "The raw escalation rate, with a target of driving that rate as low as possible over the coming quarter.",
+   "C": "A customer sentiment score used on its own, since negative sentiment reliably shows who needs a human.",
+   "D": "A confidence rating the agent gives about each of its own escalation decisions, trusted when it is high."
+  },
+  "answer": [
+   "A"
+  ],
+  "explanation": "The customer-support guide treats escalation as a success criterion measured as the percentage of correctly escalated conversations versus those that should have been escalated but were not. A falling escalation rate alone cannot distinguish better resolution from missed escalations, so calibration needs both error directions checked against human judgment.",
+  "distractors": {
+   "B": "violates-constraint",
+   "C": "myth",
+   "D": "self-review"
+  },
+  "why_wrong": {
+   "B": "A low rate is easy to reach by under-escalating, which is the failure the team must detect, so it works as a number but violates the calibration requirement.",
+   "C": "Myth: sentiment does not reliably indicate whether a case needs a human; a calm customer can need a policy exception and an angry one can have a routine request.",
+   "D": "The agent grading its own decision keeps the same reasoning that made the decision and gives no independent check of the triggers."
+  },
+  "concept": "Escalation accuracy in both directions",
+  "learn": "Measure escalation as accuracy, counting both unwarranted escalations and missed ones, using human review of a sample. A lower escalation rate on its own is not evidence of better calibration. The common mistake is optimising a single number that rewards under-escalating.",
+  "apply": "Have reviewers sample conversations the agent did not escalate and count how many should have been.",
+  "reviewed": "model",
+  "ref": "https://platform.claude.com/docs/en/about-claude/use-case-guides/customer-support-chat#establish-success-criteria"
+ },
+ {
   "id": "CCARF-5.3-01",
   "cert": "CCAR-F",
   "domain": 5,
@@ -3054,7 +3464,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Structured error context between agents",
   "learn": "Errors that cross an agent boundary should be structured: type, attempted action, partial results. This is right in every multi-agent system. The common mistake is letting subagents return natural-language failure messages.",
-  "apply": "If your coordinator cannot tell from a subagent's response which query failed, the error contract is missing."
+  "apply": "If your coordinator cannot tell from a subagent's response which query failed, the error contract is missing.",
+  "ref": "https://www.anthropic.com/engineering/multi-agent-research-system#production-reliability-and-engineering-challenges"
  },
  {
   "id": "CCARF-5.4-01",
@@ -3084,7 +3495,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Subagents per question and scratchpad files",
   "learn": "For codebase exploration, treat each question as its own task and keep durable findings in files. A single long session is fine for a focused, related sequence of steps. The common mistake is expecting one session to stay sharp across dozens of unrelated topics.",
-  "apply": "If answers start referencing files from an unrelated earlier question, the session has degraded; delegate and write findings to a file."
+  "apply": "If answers start referencing files from an unrelated earlier question, the session has degraded; delegate and write findings to a file.",
+  "ref": "https://code.claude.com/docs/en/best-practices#course-correct-early-and-often"
  },
  {
   "id": "CCARF-5.5-01",
@@ -3148,6 +3560,38 @@ window.QUESTIONS["CCAR-F"] = [
   "apply": "If you have never seen a high-confidence output reviewed by a human, you do not know your calibration."
  },
  {
+  "id": "CCARF-5.5-04",
+  "cert": "CCAR-F",
+  "domain": 5,
+  "task": "5.5",
+  "select": 2,
+  "stem": "A team grades its agent's outputs with an LLM judge and ships changes when the judge's pass rate is high. Reviewers rarely read the grades or the transcripts. Later, users report failures that the judge had approved. Which TWO practices should the architect add to find out whether the judge can be trusted? (Select TWO.)",
+  "options": {
+   "A": "Ask the judge to rate its own confidence and skip human checks whenever that confidence is high.",
+   "B": "Compare the judge's grades with expert human grades on a sample and refine the rubric until they agree.",
+   "C": "Read transcripts and grades from many trials to confirm that the graders score what was intended.",
+   "D": "Swap in a larger model as the judge and treat its higher pass rate as proof of better calibration."
+  },
+  "answer": [
+   "B",
+   "C"
+  ],
+  "explanation": "Anthropic's guidance on agent evaluations says LLM-as-judge graders should be calibrated closely against human experts, and that you will not know whether graders work well unless you read the transcripts and grades from many trials. Both practices expose divergence between the judge and the intended standard.",
+  "distractors": {
+   "A": "self-review",
+   "D": "parameter-patch"
+  },
+  "why_wrong": {
+   "A": "The judge reporting confidence in its own grade keeps the same reasoning that may be wrong and gives no independent measure of agreement with humans.",
+   "D": "Swapping the model is a parameter patch: a different pass rate says nothing about whether grades match human judgment until they are compared."
+  },
+  "concept": "Calibrating an LLM judge against humans",
+  "learn": "Treat a model grader as an instrument to be validated: compare it with expert human grading on a sample and read transcripts regularly. Once it is robust, human review can be occasional. The common mistake is trusting a high automated pass rate without ever checking the grader.",
+  "apply": "Schedule a recurring sample where a human grades the same outputs as the judge and review where they disagree.",
+  "reviewed": "model",
+  "ref": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents#going-from-zero-to-one-a-roadmap-to-great-evals-for-agents"
+ },
+ {
   "id": "CCARF-5.6-01",
   "cert": "CCAR-F",
   "domain": 5,
@@ -3176,7 +3620,8 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Claim-to-source mappings",
   "learn": "Define provenance as part of the subagent output schema and preserve it through every synthesis step. This is right for any multi-source research or reporting agent. Adding citations afterwards works only when the source documents are still available to the step doing it; the common mistake is asking for citations at the final step from a context that has already compressed the sources away.",
-  "apply": "If a subagent's output schema has no field for the source of each claim, provenance is already gone before synthesis begins."
+  "apply": "If a subagent's output schema has no field for the source of each claim, provenance is already gone before synthesis begins.",
+  "ref": "https://www.anthropic.com/engineering/multi-agent-research-system#architecture-overview-for-research"
  },
  {
   "id": "CCARF-5.3-03",
@@ -3207,7 +3652,41 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Partial results preserved on subagent failure",
   "learn": "Preserve and return partial results alongside a structured error whenever a subagent processes a batch and can fail partway through. It is the wrong call when a task is atomic and a partial result would be meaningless on its own. The common mistake is treating any mid-batch failure as an all-or-nothing outcome and discarding completed work.",
-  "apply": "If a failing subagent's response discards everything it already produced, the coordinator will redo completed work; switch to returning the partial results plus a structured error for the part that failed."
+  "apply": "If a failing subagent's response discards everything it already produced, the coordinator will redo completed work; switch to returning the partial results plus a structured error for the part that failed.",
+  "ref": "https://www.anthropic.com/engineering/multi-agent-research-system#production-reliability-and-engineering-challenges"
+ },
+ {
+  "id": "CCARF-5.3-04",
+  "cert": "CCAR-F",
+  "domain": 5,
+  "task": "5.3",
+  "select": 1,
+  "stem": "A research agent run takes about an hour. When a tool error occurs near the end, the whole pipeline restarts from the beginning, which wastes completed work and frustrates users. The team wants recovery that avoids repeating finished work and still handles failures PREDICTABLY. What should the architect do?",
+  "options": {
+   "A": "Raise every tool timeout so that errors become less frequent during the hour the run takes to complete.",
+   "B": "Instruct the agent in its system prompt to avoid causing errors and to be careful with every tool call.",
+   "C": "Retry the entire run up to three times with backoff whenever any error appears at any point in the run.",
+   "D": "Tell the agent when a tool fails, and add retry logic and checkpoints so the run resumes where it broke."
+  },
+  "answer": [
+   "D"
+  ],
+  "explanation": "Anthropic's engineering write-up on its multi-agent research system describes letting the agent know when a tool is failing so it can adapt, combined with deterministic safeguards such as retry logic and regular checkpoints, and building systems that resume from where the agent was when the error occurred rather than restarting. That keeps completed work and makes failure handling predictable.",
+  "distractors": {
+   "A": "parameter-patch",
+   "B": "prompt-not-enforcement",
+   "C": "violates-constraint"
+  },
+  "why_wrong": {
+   "A": "Longer timeouts reduce how often some errors fire but give no recovery path for the ones that still occur.",
+   "B": "Errors from tools and networks are not controlled by the agent's care, and a prompt cannot provide checkpoints.",
+   "C": "Retrying the entire run repeats the hour of finished work, which is exactly the cost the team wants to avoid."
+  },
+  "concept": "Resume from checkpoint on failure",
+  "learn": "Combine an agent that is told about tool failures with deterministic retry logic and checkpoints, so a long run resumes at the point of failure. Restarting from scratch is acceptable only for short runs. The common mistake is treating errors as something to prompt away or to cure by rerunning everything.",
+  "apply": "For any long-running agent, persist progress at regular checkpoints so a failure resumes the run instead of restarting it.",
+  "reviewed": "model",
+  "ref": "https://www.anthropic.com/engineering/multi-agent-research-system#production-reliability-and-engineering-challenges"
  },
  {
   "id": "CCARF-5.4-03",
@@ -3238,7 +3717,41 @@ window.QUESTIONS["CCAR-F"] = [
   },
   "concept": "Subagents per question and scratchpad files",
   "learn": "Use per-question subagents with scratchpad files when a long exploration session covers many independent questions over an unfamiliar codebase. It is the wrong call when the questions genuinely build on each other and need the full shared context. The common mistake is assuming the model quietly isolates unrelated questions on its own within one session.",
-  "apply": "If you are relying on one long session to stay sharp across dozens of unrelated questions, expect drift; switch to a subagent per question with scratchpad files for confirmed findings."
+  "apply": "If you are relying on one long session to stay sharp across dozens of unrelated questions, expect drift; switch to a subagent per question with scratchpad files for confirmed findings.",
+  "ref": "https://code.claude.com/docs/en/sub-agents#what-loads-at-startup"
+ },
+ {
+  "id": "CCARF-5.4-04",
+  "cert": "CCAR-F",
+  "domain": 5,
+  "task": "5.4",
+  "select": 1,
+  "stem": "After several hours investigating a payments module, an architect wants to start a long refactoring task in the SAME Claude Code session. Three design decisions and a list of constraints must carry over, while raw file contents can go. The architect wants the summary to keep what MATTERS rather than what an automatic pass guesses is important. What should the architect do?",
+  "options": {
+   "A": "Run /clear and re-explain the decisions and constraints from memory at the start of the refactor.",
+   "B": "Do nothing, since the automatic summary always preserves decisions and constraints.",
+   "C": "Run /compact with instructions naming the decisions and constraints to keep, then start.",
+   "D": "Move to a configuration with a larger context window so that no summary is ever needed."
+  },
+  "answer": [
+   "C"
+  ],
+  "explanation": "Claude Code lets you act before the automatic pass: running /compact with focus instructions, for example naming the thing to preserve, makes the summary keep what you choose instead of what the automatic pass guesses is important. That fits a milestone between two tasks that must share some knowledge.",
+  "distractors": {
+   "A": "violates-constraint",
+   "B": "myth",
+   "D": "bigger-context"
+  },
+  "why_wrong": {
+   "A": "Clearing works, but it discards the carried-over knowledge and relies on the architect re-creating it from memory, which breaks the requirement.",
+   "B": "Myth: the automatic pass decides for itself what seems important, and conversation-only details can be lost, which is why the docs offer a focused compact.",
+   "D": "A larger window postpones compaction but does not carry the right items forward, and old conversation still crowds out what the new task needs."
+  },
+  "concept": "Focused /compact at a milestone",
+  "learn": "Before a long new task in the same session, run /compact with focus instructions naming what to keep; use /clear only when the work is unrelated. For anything that must always survive, put it in the project-root CLAUDE.md or a file on disk. The common mistake is trusting the automatic summary or enlarging the window.",
+  "apply": "At a task boundary that must keep specific decisions, run /compact with a one-line focus naming them instead of waiting for automatic compaction.",
+  "reviewed": "model",
+  "ref": "https://code.claude.com/docs/en/context-window#when-your-context-fills-up"
  },
  {
   "id": "CCARF-5.6-03",
@@ -3270,5 +3783,38 @@ window.QUESTIONS["CCAR-F"] = [
   "concept": "Claim-to-source mappings",
   "learn": "Use explicit claim-to-source tagging, carried through every merge step, whenever a synthesis needs to remain traceable back to its sources. It is the wrong call for a purely internal draft where no one will ever need to verify a specific claim. The common mistake is fixing attribution after the fact instead of preserving the tags that already existed before the merge.",
   "apply": "If your merge step combines already-tagged claims into an untagged list, fix the merge to carry the tags through rather than trying to reconstruct them afterward."
+ },
+ {
+  "id": "CCARF-5.6-04",
+  "cert": "CCAR-F",
+  "domain": 5,
+  "task": "5.6",
+  "select": 1,
+  "stem": "Two research subagents return different market-size figures for the same segment, each citing a different report with its own publication date. The synthesis step currently keeps whichever figure arrived first. Stakeholders need a synthesis that is ACCURATE and auditable. What should the architect change?",
+  "options": {
+   "A": "Average the two figures so that the final report shows a single number for the segment's market size.",
+   "B": "Keep both figures with source and publication date, and flag the discrepancy instead of choosing silently.",
+   "C": "Always keep the figure from the most recent report and discard the other, since newer data is always right.",
+   "D": "Ask the synthesis step to use its judgment about which source seems more credible and report only that one."
+  },
+  "answer": [
+   "B"
+  ],
+  "explanation": "Findings should carry structured source attribution, including dates, through synthesis, and the prompting guide advises verifying information across multiple sources and tracking competing hypotheses. When sources disagree the reader needs both values, who said them and when, because the gap may come from different dates or methods rather than an error.",
+  "distractors": {
+   "A": "violates-constraint",
+   "C": "myth",
+   "D": "vague-guidance"
+  },
+  "why_wrong": {
+   "A": "An average is a number no source reported, so it cannot be traced to evidence, which breaks the auditability requirement.",
+   "C": "Myth: a newer publication is not automatically more accurate, since reports can differ in scope or method and not only in date.",
+   "D": "Judging 'credibility' without criteria hides the conflict from the reader and gives the synthesis no measurable rule."
+  },
+  "concept": "Conflicting sources with dates",
+  "learn": "When subagents report conflicting figures, preserve every value with its source and publication date and surface the conflict instead of resolving it silently. Choosing one is acceptable only when you have an explicit, stated rule. The common mistake is merging conflicting numbers into one value and losing the evidence.",
+  "apply": "Require each subagent finding to include source and date fields, and make the synthesis step list conflicting values side by side.",
+  "reviewed": "model",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#research-and-information-gathering"
  }
 ];

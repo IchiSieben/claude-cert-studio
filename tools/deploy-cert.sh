@@ -4,9 +4,11 @@
 # keys from the Hostinger API `hosting_files_generate-upload-url`) and are never printed.
 #   HSTG_UP_URL=... HSTG_AUTH=... HSTG_REST=... bash tools/deploy-cert.sh
 set -euo pipefail
+node "$(dirname "$0")/stamp-sw.mjs" --check   # never ship a stale service-worker cache name
 : "${HSTG_UP_URL:?}" "${HSTG_AUTH:?}" "${HSTG_REST:?}"
 cd "$(dirname "$0")/../app"
-FILES=(index.html .htaccess README.md data/blueprints.js data/questions-ccar-f.js data/questions-ccdv-f.js)
+FILES=(index.html .htaccess README.md data/blueprints.js data/questions-ccar-f.js data/questions-ccdv-f.js
+       sw.js manifest.webmanifest robots.txt sitemap.xml og.png icon.svg icon-192.png icon-512.png)
 fail=0
 for f in "${FILES[@]}"; do
   size=$(wc -c < "$f" | tr -d ' ')

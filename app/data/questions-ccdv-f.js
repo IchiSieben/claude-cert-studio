@@ -1,5 +1,7 @@
 // CCDV-F practice bank — original questions written from the official task statements (exam guide v1.0, July 2026).
 // Reviewed 2026-09-26 against Anthropic docs, the MCP specification and the Anthropic engineering blog; see ../../03-practica/revision-banco-2026-09-26.md.
+// 2026-10-15: refilled to 120 by official domain weight; the new items carry "reviewed": "model" and a
+// "ref" (doc URL + section anchor, checked 200 with the anchor present). Human sample: REVIEW-SAMPLE.md.
 // Schema: see ../README.md. Every wrong option carries a trap key from TRAPS in blueprints.js.
 window.QUESTIONS = window.QUESTIONS || {};
 window.QUESTIONS["CCDV-F"] = [
@@ -32,7 +34,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "workflow vs agent decision",
   "learn": "Use a workflow when the sequence of steps is fixed and known; use an agent when the path must be discovered at run time. The common mistake is reaching for an agent because it sounds more capable, then losing predictability and paying for planning tokens on every run.",
-  "apply": "If you can draw the control flow as a fixed diagram before the model runs, it belongs in code as a workflow, not in the model's judgment."
+  "apply": "If you can draw the control flow as a fixed diagram before the model runs, it belongs in code as a workflow, not in the model's judgment.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents#workflow-prompt-chaining"
  },
  {
   "id": "CCDVF-1.1-02",
@@ -63,7 +66,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "routing workflow",
   "learn": "Routing is the right call when inputs fall into distinct categories that need separate handling and separation improves each path. It is the wrong call when the categories overlap heavily or the classifier is unreliable. The common mistake is cramming every case into one prompt and tuning the model instead of the structure.",
-  "apply": "If your system prompt has sections that begin 'If the request is about X…', that is a router waiting to be split out."
+  "apply": "If your system prompt has sections that begin 'If the request is about X…', that is a router waiting to be split out.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents#workflow-routing"
  },
  {
   "id": "CCDVF-1.1-03",
@@ -94,7 +98,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "supervisor / subagent context isolation",
   "learn": "Subagents exist to isolate context: brief in, summary out. This is the wrong call when the task is a single short step that needs the full conversation anyway. The common mistake is treating a subagent like a function that must see everything the caller sees.",
-  "apply": "Check what you pass to a subagent: if it is the whole messages array rather than a task description, you are leaking context in both directions."
+  "apply": "Check what you pass to a subagent: if it is the whole messages array rather than a task description, you are leaking context in both directions.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents#workflow-orchestrator-workers"
  },
  {
   "id": "CCDVF-1.2-01",
@@ -125,7 +130,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "Agent SDK vs custom harness",
   "learn": "Reach for the Agent SDK when you want Claude Code's capabilities inside your own product or pipeline. Build a custom loop when you need full control over every turn or a minimal footprint with one or two tools. The common mistake is rebuilding tools, permissions and compaction by hand.",
-  "apply": "If your backlog contains 'implement file read tool' and 'implement bash tool', compare it against what query() already gives you."
+  "apply": "If your backlog contains 'implement file read tool' and 'implement bash tool', compare it against what query() already gives you.",
+  "ref": "https://code.claude.com/docs/en/agent-sdk/agent-loop#automatic-compaction"
  },
  {
   "id": "CCDVF-1.2-02",
@@ -156,7 +162,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "hooks for deterministic actions",
   "learn": "Use hooks (PreToolUse, PostToolUse and friends) whenever an action must happen every time or must never happen. Use prompt instructions for preferences where occasional deviation is acceptable. The common mistake is expecting instruction-following to reach 100 percent.",
-  "apply": "Any sentence in your prompt containing 'always' or 'never' about a tool call is a candidate for a hook."
+  "apply": "Any sentence in your prompt containing 'always' or 'never' about a tool call is a candidate for a hook.",
+  "ref": "https://code.claude.com/docs/en/hooks-guide#page-title"
  },
  {
   "id": "CCDVF-1.2-03",
@@ -187,7 +194,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "client-side vs server-side tool execution",
   "learn": "Client-side tools are the right call when execution must happen in your environment, with your credentials and network access. Server-side tools are the right call for capabilities Anthropic hosts, such as web search. The common mistake is assuming the model itself reaches out to systems.",
-  "apply": "Ask 'whose process runs this code?' for each tool; if the answer is 'mine', it is a client-side tool and the model only proposes the call."
+  "apply": "Ask 'whose process runs this code?' for each tool; if the answer is 'mine', it is a client-side tool and the model only proposes the call.",
+  "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview#how-tool-use-works"
  },
  {
   "id": "CCDVF-1.3-01",
@@ -218,7 +226,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "stop_reason-driven agent loop",
   "learn": "Always read stop_reason to decide the next step of an agent loop; also handle max_tokens (truncated), pause_turn (server tool still working) and refusal. Text markers are the wrong call because they are optional to the model. The common mistake is treating the text content as the protocol.",
-  "apply": "Grep your loop for string matching on response text; each hit should probably be a check on stop_reason or on content block types."
+  "apply": "Grep your loop for string matching on response text; each hit should probably be a check on stop_reason or on content block types.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/handling-stop-reasons#pause-turn"
  },
  {
   "id": "CCDVF-1.3-02",
@@ -249,7 +258,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "external memory for agents",
   "learn": "Externalise memory when information must survive across sessions or when history grows without bound. Keep it in context when the task is a single short session. The common mistake is believing the model retains anything you did not send in the current request.",
-  "apply": "If your request builder concatenates all past sessions, replace that with a retrieval step over a memory store."
+  "apply": "If your request builder concatenates all past sessions, replace that with a retrieval step over a memory store.",
+  "ref": "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents#context-engineering-for-long-horizon-tasks"
  },
  {
   "id": "CCDVF-1.1-04",
@@ -311,7 +321,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "workflow vs agent decision",
   "learn": "Use an agent when the sequence of steps cannot be fixed in advance and must be discovered from intermediate results. Use a workflow when the steps are known and repeatable. The common mistake is trying to hand-code every possible branch instead of accepting that the task needs dynamic control.",
-  "apply": "If your flowchart needs a new branch every time you see a new case, replace the flowchart with an agent."
+  "apply": "If your flowchart needs a new branch every time you see a new case, replace the flowchart with an agent.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents#agents"
  },
  {
   "id": "CCDVF-1.2-05",
@@ -342,7 +353,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "self-hosted vs Anthropic-hosted agent deployment",
   "learn": "Self-host the Agent SDK inside your own infrastructure when data or execution must never touch a third party's runtime. Use a hosted or managed platform when that constraint doesn't apply and speed of setup matters more. The common mistake is assuming any use of a third-party product breaks the boundary, even when only the model API itself is called directly.",
-  "apply": "If a compliance requirement names 'no third-party runtime', check whether the agent framework runs as your own process calling the API, not a vendor's hosted service."
+  "apply": "If a compliance requirement names 'no third-party runtime', check whether the agent framework runs as your own process calling the API, not a vendor's hosted service.",
+  "ref": "https://code.claude.com/docs/en/agent-sdk/hosting#page-title"
  },
  {
   "id": "CCDVF-1.2-06",
@@ -373,7 +385,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "hooks for deterministic actions",
   "learn": "Use hooks (PreToolUse, PostToolUse and similar) whenever an action must always happen or must never happen. Use prompt instructions for preferences where occasional deviation is tolerable. The common mistake is expecting a strongly worded prompt to reach the reliability that only code enforcement provides.",
-  "apply": "Any policy phrased as 'without exceptions' or 'never' about a tool call belongs in a hook, not in the system prompt."
+  "apply": "Any policy phrased as 'without exceptions' or 'never' about a tool call belongs in a hook, not in the system prompt.",
+  "ref": "https://code.claude.com/docs/en/memory#claude-md-vs-auto-memory"
  },
  {
   "id": "CCDVF-1.2-07",
@@ -404,7 +417,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "Agent SDK vs custom harness",
   "learn": "Build a custom loop over the Messages API when you need only a couple of well-defined tools and no filesystem, permission or hook machinery. Reach for the Agent SDK when you want Claude Code's full harness inside your product. The common mistake is assuming tool use itself requires the SDK.",
-  "apply": "If your tool set is short and fixed, compare the size of a hand-written loop against the SDK's dependency weight before choosing."
+  "apply": "If your tool set is short and fixed, compare the size of a hand-written loop against the SDK's dependency weight before choosing.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents#when-and-how-to-use-frameworks"
  },
  {
   "id": "CCDVF-1.2-08",
@@ -434,7 +448,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "agent loop production readiness",
   "learn": "Use a code-enforced turn limit and structured is_error tool results whenever a loop must run unattended. It is the wrong call to rely on prompt wording for either, since neither is guaranteed. The common mistake is treating stop_reason == tool_use as the only branch that matters and letting every failure crash the process.",
-  "apply": "If your loop has no turn ceiling and no is_error handling, both are missing before the loop is safe to run unattended."
+  "apply": "If your loop has no turn ceiling and no is_error handling, both are missing before the loop is safe to run unattended.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents#agents"
  },
  {
   "id": "CCDVF-1.3-03",
@@ -465,7 +480,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "agent framework selection for typed validation",
   "learn": "Choose PydanticAI when typed, validated inputs and outputs plus typed dependency injection are the centre of the design and the team already works in that ecosystem. It is the wrong call when the real need is branching, cycles or checkpointed state, which graph frameworks handle better. The common mistake is picking a framework by popularity rather than by which primitive it is built around.",
-  "apply": "If your backlog item is 'validate every tool's input and output against a schema', check whether a typed-validation framework already does that before writing custom checks."
+  "apply": "If your backlog item is 'validate every tool's input and output against a schema', check whether a typed-validation framework already does that before writing custom checks.",
+  "ref": "https://strandsagents.com/docs/user-guide/sdk/agents/structured-output/#how-it-works"
  },
  {
   "id": "CCDVF-1.3-04",
@@ -496,7 +512,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "context compaction for long-running agents",
   "learn": "Use compaction when a single long-running session's history grows past what is still relevant, summarising older turns while keeping recent, actionable details. It is the wrong call when the task is genuinely independent subtasks, which fit subagents better. The common mistake is reaching for a bigger window instead of reducing what is actually in it.",
-  "apply": "If a long session is filling its window with tool output you no longer need verbatim, compact it instead of upgrading the model."
+  "apply": "If a long session is filling its window with tool output you no longer need verbatim, compact it instead of upgrading the model.",
+  "ref": "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents#context-engineering-for-long-horizon-tasks"
  },
  {
   "id": "CCDVF-1.3-05",
@@ -527,7 +544,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "framework choice for stateful branching workflows",
   "learn": "Use LangGraph when a process needs branches, cycles, checkpoints and human-in-the-loop pauses modelled explicitly as state. It is the wrong call for a simple, linear sequence of steps, where a plain chain is lighter. The common mistake is assuming a framework name implies a capability it doesn't provide out of the box.",
-  "apply": "If your process needs to pause, resume from a checkpoint, or loop back, model it as a graph rather than a linear chain."
+  "apply": "If your process needs to pause, resume from a checkpoint, or loop back, model it as a graph rather than a linear chain.",
+  "ref": "https://docs.langchain.com/oss/python/langgraph/overview#page-title"
  },
  {
   "id": "CCDVF-2.1-01",
@@ -713,7 +731,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "prompt cache prefix order",
   "learn": "Put static content first (tools, then system, then stable message history) and dynamic content last, and keep the cached prefix byte-identical across requests. Caching is the wrong lever when nothing is repeated between calls. The common mistake is varying something that sits before the breakpoint.",
-  "apply": "Diff two consecutive requests from tools downward; the first differing byte is where your cache hits stop."
+  "apply": "Diff two consecutive requests from tools downward; the first differing byte is where your cache hits stop.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-caching#what-invalidates-the-cache"
  },
  {
   "id": "CCDVF-2.3-03",
@@ -775,7 +794,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "extended thinking budget vs max_tokens",
   "learn": "Set max_tokens high enough to cover the reasoning plus the answer whenever thinking is enabled, and expect thinking to arrive as its own content block before the text. Extended thinking is the wrong call for simple, latency-sensitive tasks where the extra tokens buy nothing. The common mistake is forgetting that thinking is output; a second one is combining thinking with non-default sampling parameters, which the API rejects.",
-  "apply": "Whenever you enable or deepen thinking (adaptive effort, or a legacy token budget), check that max_tokens rose with it."
+  "apply": "Whenever you enable or deepen thinking (adaptive effort, or a legacy token budget), check that max_tokens rose with it.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking"
  },
  {
   "id": "CCDVF-2.4-01",
@@ -805,7 +825,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "async concurrency and SDK retries",
   "learn": "Use bounded async concurrency when you have many independent realtime calls; use the Batch API only when completion within a day is acceptable. Unbounded concurrency is the wrong call because it trips rate limits. The common mistake is re-implementing retry logic the client already provides.",
-  "apply": "If you see a for-loop awaiting one request at a time, replace it with gather over a semaphore-guarded coroutine."
+  "apply": "If you see a for-loop awaiting one request at a time, replace it with gather over a semaphore-guarded coroutine.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/batch-processing#batch-limitations"
  },
  {
   "id": "CCDVF-2.4-02",
@@ -959,7 +980,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "instruction/data boundary",
   "learn": "Put your instructions in system, and untrusted content (uploads, tool output, fetched pages) in the conversation as document or tool_result blocks, JSON-encoded or clearly delimited when it must be text, with an explicit policy that such content is data. This is insufficient on its own for consequential tool actions, which also need enforcement (least privilege, confirmation steps, screening of tool output). The common mistake is building the system prompt from user-controlled text.",
-  "apply": "Search for string concatenation that feeds user or file content into the system parameter and move it to a delimited user block."
+  "apply": "Search for string concatenation that feeds user or file content into the system parameter and move it to a delimited user block.",
+  "ref": "https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks#indirect-prompt-injection"
  },
  {
   "id": "CCDVF-2.5-03",
@@ -1051,7 +1073,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "model pinning and promotion evals",
   "learn": "Pin production to an explicit model ID in versioned config and treat a model upgrade like a dependency upgrade: test against your eval set, then promote through a reviewed change. Floating pointers (a shared template, a 'newest model' lookup, or an older-generation convenience alias that resolves to the latest snapshot) are only acceptable for experimentation where drift is tolerable. The common mistake is assuming a newer model is a drop-in improvement for every task.",
-  "apply": "Check where each production service gets its model ID; if it is not an explicit ID in that service's own versioned config, an unplanned model change is waiting to happen."
+  "apply": "Check where each production service gets its model ID; if it is not an explicit ID in that service's own versioned config, an unplanned model change is waiting to happen.",
+  "ref": "https://platform.claude.com/docs/en/about-claude/models/model-ids-and-versions#before-the-4-6-generation"
  },
  {
   "id": "CCDVF-2.6-02",
@@ -1082,7 +1105,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "settings.json scopes",
   "learn": "Use project settings for what the team shares, local settings for personal uncommitted overrides, user settings for cross-project personal defaults, and managed settings for organisation policy. Putting team config at user level is the wrong call because it drifts. The common mistake is documenting permissions in CLAUDE.md instead of configuring them.",
-  "apply": "Check that settings.local.json is in .gitignore and that the allowlist your teammates need lives in the committed settings.json."
+  "apply": "Check that settings.local.json is in .gitignore and that the allowlist your teammates need lives in the committed settings.json.",
+  "ref": "https://code.claude.com/docs/en/settings#settings-files-and-who-they-affect"
  },
  {
   "id": "CCDVF-2.3-05",
@@ -1113,7 +1137,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "prompt cache TTL semantics",
   "learn": "Know the cache lifetime: entries expire after five minutes by default and are refreshed on every hit, and a one-hour TTL can be requested on the breakpoint for workloads whose requests are spaced further apart (writes cost more, reads cost the same). The one-hour TTL is the wrong call for chatty traffic that already hits the cache every few seconds. The common mistake is diagnosing a prefix mismatch when the entry simply expired between requests.",
-  "apply": "If consecutive requests are identical but spaced more than a few minutes apart and cache_creation_input_tokens keeps appearing, check the cadence against the TTL before touching the prompt."
+  "apply": "If consecutive requests are identical but spaced more than a few minutes apart and cache_creation_input_tokens keeps appearing, check the cadence against the TTL before touching the prompt.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-caching#how-prompt-caching-works"
  },
  {
   "id": "CCDVF-2.3-06",
@@ -1144,7 +1169,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "tool_result pairing",
   "learn": "Execute and return every tool_use block from a single assistant turn together, in one following message, whenever the model can request more than one tool at once. It is unnecessary only when the workflow guarantees a single tool call per turn. The common mistake is writing a loop that assumes exactly one tool_use per turn and silently drops any additional ones.",
-  "apply": "If your agent loop errors with a missing tool_result after a multi-tool turn, change it to collect and answer every tool_use block from that turn before sending the next request."
+  "apply": "If your agent loop errors with a missing tool_result after a multi-tool turn, change it to collect and answer every tool_use block from that turn before sending the next request.",
+  "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/handle-tool-calls#handling-results-from-client-tools"
  },
  {
   "id": "CCDVF-2.3-07",
@@ -1175,7 +1201,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "Files API reuse of documents",
   "learn": "Use the Files API when the same file (PDF, image, text) is reused across many requests: upload once, reference by file_id, and add cache_control to the block when the surrounding prefix is stable. Inline base64 is fine for one-off requests. The common mistake is treating the API as if it remembered a document between calls, or re-encoding a large file on every request.",
-  "apply": "If the same large file is base64-encoded into every request, upload it once with the Files API and pass its file_id instead."
+  "apply": "If the same large file is base64-encoded into every request, upload it once with the Files API and pass its file_id instead.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/pdf-support#option-3-files-api"
  },
  {
   "id": "CCDVF-2.3-08",
@@ -1205,7 +1232,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "realtime vs batch cost tradeoff",
   "learn": "Combine the Message Batches API with prompt caching whenever a large volume of requests can tolerate a delay and shares a stable prefix; inside a batch, cache hits are best-effort, so use identical cache_control blocks in every request and the one-hour TTL. It is the wrong call when a human is waiting on an individual answer, where realtime with streaming fits instead. The common mistake is tuning an unrelated parameter while ignoring the batch and caching primitives that actually address cost.",
-  "apply": "If a nightly job calls messages.create in a loop with an unchanged system prompt, switch it to the Batches API and add cache_control to that prompt."
+  "apply": "If a nightly job calls messages.create in a loop with an unchanged system prompt, switch it to the Batches API and add cache_control to that prompt.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/batch-processing#pricing"
  },
  {
   "id": "CCDVF-2.5-05",
@@ -1236,7 +1264,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "choosing the right Claude interface",
   "learn": "Use the Claude API/SDK whenever a workflow must be driven by your own systems, produce structured output for code to validate, or write into another system with your own error handling. It is the wrong call when a person is actively driving the conversation and wants a chat experience, where claude.ai or Claude Code fits better. The common mistake is trying to automate a chat interface, by browser automation or by stretching an end-user scheduling feature, instead of switching to the interface built for integration.",
-  "apply": "If a task currently done in claude.ai must run from your own scheduler and feed another system, move it to the API/SDK instead of automating the app."
+  "apply": "If a task currently done in claude.ai must run from your own scheduler and feed another system, move it to the API/SDK instead of automating the app.",
+  "ref": "https://support.claude.com/en/articles/13854387-schedule-recurring-tasks-in-claude-cowork#h_2d97bb4e5d"
  },
  {
   "id": "CCDVF-2.5-06",
@@ -1267,7 +1296,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "instruction/data boundary",
   "learn": "Wrap untrusted content (tool output, diffs, uploaded files) in explicit tags and tell the model in its instructions that tagged content is data. It is unnecessary only when every piece of content in the context is fully trusted and author-controlled. The common mistake is relying on a polite request instead of a structural separation.",
-  "apply": "If tool results or fetched text are concatenated straight into the prompt with no tags or framing, add both the tags and the instruction that names them as data."
+  "apply": "If tool results or fetched text are concatenated straight into the prompt with no tags or framing, add both the tags and the instruction that names them as data.",
+  "ref": "https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks#indirect-prompt-injection"
  },
  {
   "id": "CCDVF-2.5-07",
@@ -1298,7 +1328,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "structured output via JSON schema",
   "learn": "Use structured outputs (a JSON schema on the request) or strict tool use whenever another system must consume Claude's output programmatically; forcing a tool through tool_choice was the older way to get JSON and is rejected on the newest models. It is unnecessary when the output is only read by a human, where prose is fine. The common mistake is trying to regex or re-summarize structure out of prose instead of requesting it against a schema.",
-  "apply": "If a downstream service parses Claude's free-text output with regex or string matching, replace that output with a schema-constrained structured output."
+  "apply": "If a downstream service parses Claude's free-text output with regex or string matching, replace that output with a schema-constrained structured output.",
+  "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools#forcing-tool-use"
  },
  {
   "id": "CCDVF-2.5-08",
@@ -1329,7 +1360,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "session hygiene and state isolation",
   "learn": "Prune or summarize tool and file content once it has served its purpose, keeping history lean across a long session. It is unnecessary in short, single-purpose sessions where nothing accumulates. The common mistake is assuming a larger context window solves a growth problem instead of just postponing it.",
-  "apply": "If a long-running session keeps appending full file or tool contents to history indefinitely, add a step that prunes or summarizes them after use."
+  "apply": "If a long-running session keeps appending full file or tool contents to history indefinitely, add a step that prunes or summarizes them after use.",
+  "ref": "https://code.claude.com/docs/en/context-window#what-the-timeline-shows"
  },
  {
   "id": "CCDVF-2.5-09",
@@ -1360,7 +1392,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "plugins for team distribution",
   "learn": "Package a plugin when several Claude Code components (skills, commands, hooks, MCP servers) need to reach every teammate identically and automatically. It is unnecessary for a single small convention that fits comfortably in CLAUDE.md or settings.json. The common mistake is trying to force one config file or one person's local setup to carry components it was never built to distribute.",
-  "apply": "If a team keeps re-explaining the same multi-part Claude Code setup to each new teammate, package it as a plugin instead."
+  "apply": "If a team keeps re-explaining the same multi-part Claude Code setup to each new teammate, package it as a plugin instead.",
+  "ref": "https://code.claude.com/docs/en/plugins#page-title"
  },
  {
   "id": "CCDVF-2.5-11",
@@ -1422,7 +1455,41 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "operate and maintain: model deprecation migration",
   "learn": "Treat a deprecation notice as a scheduled dependency upgrade: evaluate the recommended replacement against your eval set before the retirement date, then update the pinned ID through review. Pinning protects against unplanned change, not against retirement. The common mistake is assuming a pinned model ID is permanent.",
-  "apply": "When a deprecation notice arrives for a model your service pins, put the replacement through your eval set now and schedule the reviewed config change before the retirement date."
+  "apply": "When a deprecation notice arrives for a model your service pins, put the replacement through your eval set now and schedule the reviewed config change before the retirement date.",
+  "ref": "https://platform.claude.com/docs/en/about-claude/model-deprecations#overview"
+ },
+ {
+  "id": "CCDVF-2.2-04",
+  "cert": "CCDV-F",
+  "domain": 2,
+  "task": "2.2",
+  "select": 1,
+  "stem": "A support chat feature streams Claude's answer to users. The backend treats the HTTP 200 returned when the stream opens as proof the request succeeded and forwards tokens until the connection closes. During busy periods some users see answers cut off mid-sentence with no error shown, and the logs record only successful requests. The team must OPERATE the feature so these failures are detected. What should the developer implement?",
+  "options": {
+   "A": "Increase the client read timeout, since a 200 status means the answer will eventually complete if the client waits long enough.",
+   "B": "Handle error events inside the stream, mark the response failed, log it, and retry or tell the user.",
+   "C": "Scan the final text for an unfinished sentence and treat that as the only signal that the request failed.",
+   "D": "Disable streaming for every user permanently and return only complete responses after a long wait."
+  },
+  "answer": [
+   "B"
+  ],
+  "explanation": "With server-sent events the status code is sent before generation finishes, so the API can still report a failure afterwards as an error event in the stream, for example an overloaded error that would be a 529 on a non-streaming call. A production consumer must handle those events explicitly, record them and retry or surface the failure. Relying on the HTTP status alone makes these failures invisible to both users and logs.",
+  "distractors": {
+   "A": "parameter-patch",
+   "C": "text-parsing",
+   "D": "violates-constraint"
+  },
+  "why_wrong": {
+   "A": "A longer timeout changes nothing: the stream has already ended with an error event, and the 200 status was never a promise of a complete answer.",
+   "C": "Guessing from prose is unreliable (a complete answer can end oddly, a failed one can end cleanly) when the stream carries a structured error event.",
+   "D": "Giving up streaming throws away the responsiveness the feature was built for, when handling the error event fixes the actual gap."
+  },
+  "concept": "mid-stream error events after a 200",
+  "learn": "On a streamed response the HTTP status is committed before the answer is finished, so errors can still arrive later as error events in the stream. Handle them in the stream consumer and log them as failures. The common mistake is to treat a 200 as end-to-end success.",
+  "apply": "Add an explicit branch for error events to every streaming consumer and count them in your error metrics.",
+  "reviewed": "model",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/streaming#error-events"
  },
  {
   "id": "CCDVF-2.1-03",
@@ -1453,7 +1520,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "third-party vendor clients (Bedrock/Vertex)",
   "learn": "Use a cloud provider client (Bedrock, Vertex, Foundry) when a compliance, residency or billing relationship already exists with that provider. It is the wrong call when no such relationship exists and the direct API already meets the requirement. The common mistake is trying to satisfy an infrastructure requirement with a prompt instruction instead of an architecture change.",
-  "apply": "If your compliance requirement is being addressed by a system-prompt clause instead of a routing change, switch to calling Claude through the provider your organization already has under contract."
+  "apply": "If your compliance requirement is being addressed by a system-prompt clause instead of a routing change, switch to calling Claude through the provider your organization already has under contract.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/claude-on-vertex-ai#making-requests"
  },
  {
   "id": "CCDVF-2.1-04",
@@ -1669,7 +1737,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "settings.json scopes",
   "learn": "Use managed/enterprise settings whenever a rule must apply to every engineer with no override anywhere in the hierarchy. Project or user settings are the right call when some flexibility per repository or per person is acceptable. The common mistake is putting an org-wide, non-negotiable rule into project settings, which only reach repositories that carry the file and can be edited by anyone with a checkout.",
-  "apply": "If a 'mandatory for everyone' rule currently lives in a project's settings.json, move it to managed settings so it cannot be overridden."
+  "apply": "If a 'mandatory for everyone' rule currently lives in a project's settings.json, move it to managed settings so it cannot be overridden.",
+  "ref": "https://code.claude.com/docs/en/permissions#settings-precedence"
  },
  {
   "id": "CCDVF-2.6-04",
@@ -1700,7 +1769,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "CLAUDE.md hierarchy",
   "learn": "Use the global, user-level CLAUDE.md for a preference that is personal and must follow one person across projects without being shared. Use the project-level file when the instruction should apply to every contributor on that repository. The common mistake is putting a personal preference into a file that gets committed and pushed to teammates.",
-  "apply": "If a personal formatting preference currently lives in a project's checked-in CLAUDE.md, move it to the user's global `~/.claude/CLAUDE.md` instead."
+  "apply": "If a personal formatting preference currently lives in a project's checked-in CLAUDE.md, move it to the user's global `~/.claude/CLAUDE.md` instead.",
+  "ref": "https://code.claude.com/docs/en/memory#choose-where-to-put-claude-md-files"
  },
  {
   "id": "CCDVF-2.6-05",
@@ -1762,7 +1832,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "CLAUDE.md hierarchy",
   "learn": "Use the user-level CLAUDE.md for personal preferences, the project root for shared repository rules and directory-level CLAUDE.md files (or .claude/rules/ files with a paths frontmatter) for area-specific conventions that load only when Claude works in those paths. A single flat file is the wrong call in a multi-package repository. The common mistake is treating CLAUDE.md as one monolith.",
-  "apply": "If a section of your root CLAUDE.md starts with 'when working in directory X', move that section into X/CLAUDE.md."
+  "apply": "If a section of your root CLAUDE.md starts with 'when working in directory X', move that section into X/CLAUDE.md.",
+  "ref": "https://code.claude.com/docs/en/memory#choose-where-to-put-claude-md-files"
  },
  {
   "id": "CCDVF-3.1-02",
@@ -1793,7 +1864,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "headless Claude Code in CI",
   "learn": "Use claude -p with a structured output format for automation, and interactive sessions for exploratory development. Interactive mode is the wrong call anywhere no human is present. The common mistake is parsing the human-readable output instead of asking for JSON.",
-  "apply": "If a script invokes Claude Code, it should pass -p and a machine-readable output format; anything else is a human workflow in disguise."
+  "apply": "If a script invokes Claude Code, it should pass -p and a machine-readable output format; anything else is a human workflow in disguise.",
+  "ref": "https://code.claude.com/docs/en/headless#examples"
  },
  {
   "id": "CCDVF-3.1-03",
@@ -1824,7 +1896,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "settings.json scopes",
   "learn": "Use project-level `.claude/settings.json` when a setting must apply to everyone who works in that repository, since it is versioned and shared by cloning. Use user-level settings for personal defaults that should follow you across repositories, and local settings for a personal override in one repo. The common mistake is reaching for a personal or machine-level file to enforce something that needs to travel with the repository itself.",
-  "apply": "If a setting must hold for every engineer who clones a repo without a manual step, it belongs in that repo's committed `.claude/settings.json`, not in a personal or local file."
+  "apply": "If a setting must hold for every engineer who clones a repo without a manual step, it belongs in that repo's committed `.claude/settings.json`, not in a personal or local file.",
+  "ref": "https://code.claude.com/docs/en/settings#share-settings-with-your-team"
  },
  {
   "id": "CCDVF-3.1-04",
@@ -1855,7 +1928,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "progressive disclosure for Skills",
   "learn": "Use a Skill when knowledge is long, procedural and only occasionally relevant, so its name and description stay cheap in every session while the full body loads only on a matching task. It is the wrong call for short instructions that should always apply, which belong in CLAUDE.md instead. The common mistake is assuming file placement alone, rather than the Skill mechanism itself, is what produces on-demand loading.",
-  "apply": "If a procedure is long and rarely needed, package it as a Skill so only its description costs tokens by default; do not fold it into CLAUDE.md just to make it discoverable."
+  "apply": "If a procedure is long and rarely needed, package it as a Skill so only its description costs tokens by default; do not fold it into CLAUDE.md just to make it discoverable.",
+  "ref": "https://code.claude.com/docs/en/skills#control-who-invokes-a-skill"
  },
  {
   "id": "CCDVF-4.1-01",
@@ -1886,7 +1960,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "integration-layer vs model-output errors",
   "learn": "Classify each failure first: HTTP and SDK errors belong to the integration layer, wrong or malformed content belongs to prompt and model behaviour. Blaming the prompt is the wrong call when the request never reached generation. The common mistake is editing prompts in response to transport errors.",
-  "apply": "Read the trace before touching the prompt: if there is a status code, the fix is in your client code."
+  "apply": "Read the trace before touching the prompt: if there is a status code, the fix is in your client code.",
+  "ref": "https://platform.claude.com/docs/en/api/errors#http-errors"
  },
  {
   "id": "CCDVF-4.1-02",
@@ -1917,7 +1992,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "root-cause isolation via exact-request replay",
   "learn": "Reproduce a failure with the exact logged request, then vary one thing at a time in the Console playground or a scripted harness, when a bug's layer (prompt, tool description, input, or integration) is not yet known. It is the wrong call once the cause is already confirmed, where the next step is simply fixing it. The common mistake is changing something plausible first and watching the failure rate, instead of isolating the cause with a controlled replay. Once the cause is known, strict tool use is the enforcement mechanism for schema-valid arguments.",
-  "apply": "If you cannot yet say which layer is failing, log and replay the exact request before touching descriptions, parameters or code."
+  "apply": "If you cannot yet say which layer is failing, log and replay the exact request before touching descriptions, parameters or code.",
+  "ref": "https://platform.claude.com/docs/en/release-notes/overview#august-18-2026"
  },
  {
   "id": "CCDVF-4.1-03",
@@ -1948,7 +2024,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "idempotent side effects under retries",
   "learn": "Combine exponential backoff with jitter and an idempotency key on the side-effecting call whenever retries could repeat something with real consequences, such as a charge. It is the wrong call for read-only, side-effect-free requests, where a simple retry is enough. The common mistake is retrying a financial or state-changing tool call exactly as sent, with nothing to stop it from executing twice.",
-  "apply": "If a retried request can re-trigger a non-idempotent action, add an idempotency key before you add backoff, not instead of it."
+  "apply": "If a retried request can re-trigger a non-idempotent action, add an idempotency key before you add backoff, not instead of it.",
+  "ref": "https://platform.claude.com/docs/en/api/errors#http-errors"
  },
  {
   "id": "CCDVF-5.1-01",
@@ -2010,7 +2087,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "few-shot prompting for ambiguous cases",
   "learn": "Zero-shot works for obvious tasks; add a small number of targeted examples when the format or the edge cases are what fail. Many examples are the wrong call because they bloat the prompt and can overfit. The common mistake is adding more definitions instead of demonstrations.",
-  "apply": "Collect the tickets your classifier gets wrong; the recurring patterns are the examples to add."
+  "apply": "Collect the tickets your classifier gets wrong; the recurring patterns are the examples to add.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#use-examples-effectively"
  },
  {
   "id": "CCDVF-5.1-03",
@@ -2041,7 +2119,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "token accounting with thinking",
   "learn": "Cost is input tokens plus all output tokens, and thinking tokens are output; on models that keep prior-turn thinking blocks they are billed again as input on later turns. A large thinking budget or high effort is the wrong call for simple high-volume requests where the reasoning is wasted. The common mistake is configuring thinking for hard tasks and leaving it on for easy ones.",
-  "apply": "Inspect the usage object on a thinking-enabled request and compare output_tokens_details.thinking_tokens with the visible answer length."
+  "apply": "Inspect the usage object on a thinking-enabled request and compare output_tokens_details.thinking_tokens with the visible answer length.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/thinking#thinking-and-the-context-window"
  },
  {
   "id": "CCDVF-5.2-01",
@@ -2072,7 +2151,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "SDKs wrap REST",
   "learn": "Prefer the official SDK unless a platform constraint prevents it; drop to raw HTTP only when you need something the SDK cannot express. The common mistake is under-estimating how much the SDK does: headers, retries, timeouts, typing and streaming parsing.",
-  "apply": "If your code sets the API version header by hand, you are probably reimplementing the SDK."
+  "apply": "If your code sets the API version header by hand, you are probably reimplementing the SDK.",
+  "ref": "https://platform.claude.com/docs/en/cli-sdks-libraries/sdks/python#retries"
  },
  {
   "id": "CCDVF-5.2-02",
@@ -2134,7 +2214,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "SSE streaming and backend relay",
   "learn": "Streaming is SSE; browsers should receive tokens from your backend, never call the API with your key. A direct browser call is the wrong call in every production setting. The common mistake is confusing 'realtime' with 'websocket'.",
-  "apply": "If any client-side bundle contains an Anthropic API key, redesign it as a server relay immediately."
+  "apply": "If any client-side bundle contains an Anthropic API key, redesign it as a server relay immediately.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/batch-processing#what-can-be-batched"
  },
  {
   "id": "CCDVF-5.3-01",
@@ -2165,7 +2246,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "model tiering per task",
   "learn": "Match each step to the cheapest model that passes its evaluation; use the top tier only where reasoning depth is needed. Uniform model choice is the wrong call in a multi-step pipeline. The common mistake is picking one model for the hardest step and applying it everywhere.",
-  "apply": "List each LLM call in your pipeline with its difficulty and volume; the high-volume, low-difficulty ones are your cost lever."
+  "apply": "List each LLM call in your pipeline with its difficulty and volume; the high-volume, low-difficulty ones are your cost lever.",
+  "ref": "https://platform.claude.com/docs/en/about-claude/models/choosing-a-model#combine-models"
  },
  {
   "id": "CCDVF-5.4-01",
@@ -2195,7 +2277,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "prompt caching for repeated prefixes",
   "learn": "Cache when a large prefix repeats across many calls within the cache lifetime; do not bother when prompts are short or unique. Cached reads cost far less than writes, so hit rate is what matters. The common mistake is placing volatile content before the breakpoint.",
-  "apply": "Sort your prompt so everything static comes first, put cache_control at the end of it, and check cache_read_input_tokens in the usage object."
+  "apply": "Sort your prompt so everything static comes first, put cache_control at the end of it, and check cache_read_input_tokens in the usage object.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-caching#structuring-your-prompt"
  },
  {
   "id": "CCDVF-5.4-02",
@@ -2257,7 +2340,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "token accounting with thinking",
   "learn": "Use the token-counting endpoint plus max_tokens whenever you need to know, before sending, whether a specific request fits inside the context window; the endpoint counts input only and reports a close estimate rather than the billed figure. It is the wrong tool when you only need a rough order-of-magnitude for logging. The common mistake is estimating from visible prompt text alone and forgetting that thinking and output tokens share the same window.",
-  "apply": "If your code approximates tokens by dividing characters by a constant and ignores the thinking budget, switch to counting the exact request with the token-counting endpoint."
+  "apply": "If your code approximates tokens by dividing characters by a constant and ignores the thinking budget, switch to counting the exact request with the token-counting endpoint.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/context-windows#context-window-overflow-behavior"
  },
  {
   "id": "CCDVF-5.1-06",
@@ -2287,7 +2371,41 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "latency requirements: perceived vs total",
   "learn": "Use a smaller, faster model with thinking off (or, on models where thinking cannot be disabled, at low effort) and streaming enabled when a task is simple and users are watching in real time. It is the wrong call for long, multi-step reasoning where accuracy matters more than a few seconds of delay. The common mistake is keeping a large thinking budget or high effort on every request 'just in case' instead of matching the mode to the task.",
-  "apply": "If a low-latency, simple task still runs with a full thinking budget on the largest model, switch it to a smaller model with thinking off and streaming on."
+  "apply": "If a low-latency, simple task still runs with a full thinking budget on the largest model, switch it to a smaller model with thinking off and streaming on.",
+  "ref": "https://platform.claude.com/docs/en/about-claude/models/choosing-a-model#option-1-start-efficiency-first"
+ },
+ {
+  "id": "CCDVF-5.1-07",
+  "cert": "CCDV-F",
+  "domain": 5,
+  "task": "5.1",
+  "select": 1,
+  "stem": "To keep monthly spend predictable, a team sets the effort parameter of its summarisation endpoint to the lowest level. They state in the design document that this guarantees every answer stays under 300 output tokens. In production some answers are noticeably longer. The team asks for an ACCURATE explanation of what effort does and how to enforce the limit. Which response is correct?",
+  "options": {
+   "A": "Effort at the lowest level is a hard cap on output tokens, so any longer answer indicates an API fault that should be reported to support.",
+   "B": "Also set the sampling temperature to zero as well, because temperature bounds how many tokens the model generates per answer.",
+   "C": "Add a line to the system prompt saying answers must never exceed 300 tokens, and treat that line as the guarantee.",
+   "D": "Effort is a behavioural signal, not a budget; enforce the cap with max_tokens and handle the max_tokens stop reason."
+  },
+  "answer": [
+   "D"
+  ],
+  "explanation": "Effort shifts how much work the model puts into a response, including text, tool calls and thinking, but it is a behavioural signal rather than a strict token budget. The hard limit on total output is max_tokens, which covers thinking plus visible text, so a guaranteed cap needs max_tokens plus code that handles stop_reason max_tokens when an answer is truncated.",
+  "distractors": {
+   "A": "myth",
+   "B": "parameter-patch",
+   "C": "prompt-not-enforcement"
+  },
+  "why_wrong": {
+   "A": "Effort never promised a hard token cap, so longer answers are expected behaviour and not an API fault.",
+   "B": "Sampling settings change which tokens are picked, not how long the output may be, so temperature cannot bound length.",
+   "C": "A requested length in the prompt is only guidance the model may miss; a cost limit needs the enforced max_tokens parameter."
+  },
+  "concept": "effort is a signal, max_tokens is the cap",
+  "learn": "Effort trades thoroughness against token use, but only max_tokens enforces a ceiling on output. Use effort to tune typical behaviour and max_tokens (with stop-reason handling) for guarantees. The common mistake is treating a soft control as a hard limit.",
+  "apply": "When a requirement says 'never more than N tokens', set max_tokens and test the truncated path, not just the effort level.",
+  "reviewed": "model",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/effort#effort-levels"
  },
  {
   "id": "CCDVF-5.2-07",
@@ -2318,7 +2436,41 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "Agent SDK vs custom harness",
   "learn": "Use the Agent SDK when you need an agent loop with sessions, hooks, permissions and tool orchestration built in. It is the wrong call when all you need is typed, reliable access to the Messages API for single calls or a simple tool loop, which the client SDK (and its beta tool runner) covers. The common mistake is assuming the client SDK already includes agent-level features because it is made by the same vendor.",
-  "apply": "If your project needs hooks or cross-session memory and is only using the base SDK, switch to the Agent SDK for that layer."
+  "apply": "If your project needs hooks or cross-session memory and is only using the base SDK, switch to the Agent SDK for that layer.",
+  "ref": "https://code.claude.com/docs/en/agent-sdk/overview#compare-the-agent-sdk-to-other-claude-tools"
+ },
+ {
+  "id": "CCDVF-5.2-08",
+  "cert": "CCDV-F",
+  "domain": 5,
+  "task": "5.2",
+  "select": 1,
+  "stem": "An internal analytics portal shows model-generated commentary token by token. Users submit a question through an ordinary form POST to the team's backend, and only the generated text flows back to the browser: the browser sends nothing while the answer streams. A teammate proposes a WebSocket connection to the browser because 'real-time text needs a bidirectional socket'. Which assessment is MOST accurate and SIMPLEST?",
+  "options": {
+   "A": "Claude streams one-way server-sent events over HTTP, so the backend can relay them as an SSE response; a WebSocket adds nothing here.",
+   "B": "A WebSocket is required for this portal, because an ordinary HTTP response cannot be delivered to the browser in incremental pieces.",
+   "C": "Poll a status endpoint every few seconds and append new text, since server-sent events do not work behind standard HTTP gateways.",
+   "D": "Run a WebSocket gateway cluster with a message broker so that every token fans out to all subscribed browsers."
+  },
+  "answer": [
+   "A"
+  ],
+  "explanation": "Messages API streaming is delivered as server-sent events: a one-way stream of server-to-client events carried in an ordinary HTTP response. When data only flows server to browser, the backend can relay those events as its own SSE response; a WebSocket's two-way channel is only worth its extra moving parts when the client must send data over the same connection.",
+  "distractors": {
+   "B": "myth",
+   "C": "violates-constraint",
+   "D": "over-engineering"
+  },
+  "why_wrong": {
+   "B": "HTTP responses can be streamed incrementally; that is exactly how server-sent events work.",
+   "C": "Polling adds delay and extra requests, which defeats token-by-token display, and SSE works over plain HTTP.",
+   "D": "A broker and gateway cluster is a heavy answer for a one-way flow that a single streamed response already handles."
+  },
+  "concept": "SSE vs WebSocket for one-way token flow",
+  "learn": "Use SSE for server-to-client streams and reserve WebSockets for traffic that truly needs two-way messaging on one connection. Claude's own stream is SSE, so a relay can stay in SSE end to end. The common mistake is equating 'real-time' with 'WebSocket'.",
+  "apply": "Before adding a WebSocket layer, ask which side sends data during the stream; if only the server does, relay SSE.",
+  "reviewed": "model",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/streaming#event-types"
  },
  {
   "id": "CCDVF-5.3-02",
@@ -2349,7 +2501,74 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "model pinning and promotion evals",
   "learn": "Pin a model version and gate any upgrade behind a regression eval set and staged rollout whenever downstream systems depend on a stable output format. It is the wrong process for a low-stakes prototype with no consumers to break. The common mistake is treating 'always use the newest model' as a safe default rather than a change that needs its own testing.",
-  "apply": "If your production endpoint auto-follows the newest model release with no eval gate, switch to a pinned version with a promotion process."
+  "apply": "If your production endpoint auto-follows the newest model release with no eval gate, switch to a pinned version with a promotion process.",
+  "ref": "https://platform.claude.com/docs/en/about-claude/models/model-ids-and-versions#dateless-ids-are-pinned-snapshots"
+ },
+ {
+  "id": "CCDVF-5.3-04",
+  "cert": "CCDV-F",
+  "domain": 5,
+  "task": "5.3",
+  "select": 1,
+  "stem": "A team built a coding assistant in which a frontier-class orchestrator hands pieces of one large refactor to cheaper worker models. Each step depends on the previous step's result and the whole task fits comfortably in a single context window. After the change the cost per task went up and quality did not improve. The team wants to REDUCE cost without losing quality. What does the evidence-based guidance support?",
+  "options": {
+   "A": "Add many more workers to the pipeline so that the extra parallelism eventually pays for the orchestration overhead.",
+   "B": "Keep the architecture but replace the orchestrator with the smallest available model to cut the largest line item.",
+   "C": "Drop the delegation for this workload and run one strong model alone at a lower effort level, keeping workers for independent fan-out work.",
+   "D": "Raise max_tokens on every worker model so that each of them can finish its piece of the refactor in fewer turns."
+  },
+  "answer": [
+   "C"
+  ],
+  "explanation": "Delegating bulk work to cheaper workers saved money in measured cases only for routine work with a long cost tail or work larger than one context window. For a single dependent chain that fits in one context, the orchestrator's model alone at lower effort did better in every case measured, so the fix is to drop the delegation, tune effort and verify on your own evals.",
+  "distractors": {
+   "A": "myth",
+   "B": "violates-constraint",
+   "D": "parameter-patch"
+  },
+  "why_wrong": {
+   "A": "Parallelism needs independent pieces; a dependent chain cannot fan out, so extra workers add cost without speed.",
+   "B": "Swapping the planner for the smallest model risks the quality the team must keep, and it leaves the wasteful handoffs in place.",
+   "D": "A larger output cap does not remove coordination cost between dependent steps; it only allows longer, costlier outputs."
+  },
+  "concept": "orchestrator-worker delegation only pays off with fan-out",
+  "learn": "Multi-model delegation helps with independent, parallel, long-tail work or work bigger than one context window. For one dependent chain, a single model at a tuned effort is usually cheaper and as good. The common mistake is assuming more agents always means lower cost.",
+  "apply": "Before adding workers, check whether the work splits into independent pieces; if not, tune effort on one model and measure on your evals.",
+  "reviewed": "model",
+  "ref": "https://platform.claude.com/docs/en/about-claude/models/optimizing-for-cost-and-intelligence#orchestrator-strategy-delegate-bulk-work"
+ },
+ {
+  "id": "CCDVF-5.3-05",
+  "cert": "CCDV-F",
+  "domain": 5,
+  "task": "5.3",
+  "select": 1,
+  "stem": "A document-extraction service forces JSON output by ending every request with a pre-filled assistant message that starts with an opening brace. The team switches the service to a newer model generation and every request now fails with an HTTP 400 invalid_request_error saying the conversation must end with a user message. The old model is being retired, so the service must run on the new one. What is the CORRECT fix?",
+  "options": {
+   "A": "Retry each failed request with exponential backoff, because a 400 on a new model is a transient overload.",
+   "B": "Remove the prefilled assistant turn and get the JSON shape from structured outputs or system-prompt instructions.",
+   "C": "Raise max_tokens so the pre-filled opening brace has more room to continue into a complete JSON document.",
+   "D": "Pin the old model indefinitely so that the prefill keeps working and no migration of the service is needed."
+  },
+  "answer": [
+   "B"
+  ],
+  "explanation": "Newer model generations do not support prefilling the assistant turn and reject such requests with a 400. This is a breaking change between releases, not a transient fault. The documented replacements are structured outputs (or output_config.format) and system-prompt instructions, which give the JSON shape without a prefilled turn.",
+  "distractors": {
+   "A": "myth",
+   "C": "parameter-patch",
+   "D": "violates-constraint"
+  },
+  "why_wrong": {
+   "A": "A 400 invalid_request_error is a deterministic rejection of the request; retrying the same payload fails every time.",
+   "C": "The failure is the request format, not output length, so a larger max_tokens changes nothing.",
+   "D": "The old model is being retired, so pinning it only postpones the failure and breaks the stated requirement."
+  },
+  "concept": "breaking change: no assistant prefill on newer models",
+  "learn": "Model upgrades can remove request features, and a 400 from a new model usually means the payload must change. Read the migration notes and replace the removed feature, here prefill with structured outputs. The common mistake is retrying or tuning parameters instead of fixing the request.",
+  "apply": "Before switching model IDs, scan the migration notes for features your requests rely on and run them against the new model in staging.",
+  "reviewed": "model",
+  "ref": "https://platform.claude.com/docs/en/api/errors#prefill-not-supported"
  },
  {
   "id": "CCDVF-5.4-03",
@@ -2380,7 +2599,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "prompt cache prefix order",
   "learn": "Place a cache_control breakpoint at the end of each stable section, in tools, system, messages order, whenever you want that section reused across turns; in a growing conversation the last breakpoint moves forward and the lookback finds the previous write, and a top-level cache_control (automatic caching) does that moving for you. It is the wrong fix when the content genuinely changes every call, since there is no stable prefix to cache. The common mistake is assuming a single breakpoint or a longer TTL is enough without a breakpoint after every stable section.",
-  "apply": "If only your tools block ever shows a cache hit, add breakpoints after the system prompt and at the end of the stable part of the history as well."
+  "apply": "If only your tools block ever shows a cache hit, add breakpoints after the system prompt and at the end of the stable part of the history as well.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-caching#how-automatic-prefix-checking-works"
  },
  {
   "id": "CCDVF-5.4-04",
@@ -2411,7 +2631,41 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "batch and caching cost stacking",
   "learn": "Check whether a smaller model passes your eval and whether the workload is non-interactive before spending more; those two levers, model size and batch processing, usually save the most. It is the wrong first move for latency-sensitive, interactive requests where batch processing is not an option. The common mistake is optimizing smaller knobs like temperature or max_tokens before checking whether the model tier itself is oversized for the task.",
-  "apply": "If a large, non-interactive job runs on the most capable model with synchronous calls, switch to evaluating a smaller model and routing the job through the batch endpoint."
+  "apply": "If a large, non-interactive job runs on the most capable model with synchronous calls, switch to evaluating a smaller model and routing the job through the batch endpoint.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/batch-processing#using-prompt-caching-with-message-batches"
+ },
+ {
+  "id": "CCDVF-5.4-05",
+  "cert": "CCDV-F",
+  "domain": 5,
+  "task": "5.4",
+  "select": 1,
+  "stem": "Finance wants a projection of monthly input-token volume for a candidate newer model, based on a fixed set of 5,000 representative production prompts. The team must not run billable generation or touch production traffic. They propose reusing the token counts already measured on the current model. Which approach gives the ACCURATE projection?",
+  "options": {
+   "A": "Reuse the existing counts for the projection, because every Claude model tokenises the same text in an identical way.",
+   "B": "Send each sample as a real Messages request with a tiny max_tokens value and read the usage object of every response.",
+   "C": "Apply a flat percentage uplift to the current counts as a rule of thumb, since newer models usually need somewhat more tokens.",
+   "D": "Call the token-counting endpoint on the samples with the candidate model's ID, because counts follow the model passed in."
+  },
+  "answer": [
+   "D"
+  ],
+  "explanation": "The token-counting endpoint returns the input token count for a request without generating a response, and it counts with the tokenizer of the model you pass. Tokenizers can change between model generations, so the same text may produce different counts. Counting the same samples under the candidate model gives a measured projection for cost and context-fit planning.",
+  "distractors": {
+   "A": "myth",
+   "B": "violates-constraint",
+   "C": "vague-guidance"
+  },
+  "why_wrong": {
+   "A": "Tokenizers differ across model generations, so identical text can yield different counts and reused numbers can be off.",
+   "B": "Real requests are billable generation and consume rate limits, which the team ruled out; the counting endpoint exists for this purpose.",
+   "C": "A guessed uplift has no measured basis for this corpus, and the real difference depends on the content."
+  },
+  "concept": "cost modelling with per-model token counts",
+  "learn": "Model your costs from counts measured on the model you will actually call, using the counting endpoint before launch. Counts are an estimate that is close for the model passed. The common mistake is carrying counts or ratios over from a different model generation.",
+  "apply": "When evaluating a model switch, count your sample prompts with the candidate model ID and compare against the current counts.",
+  "reviewed": "model",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/token-counting#supported-models"
  },
  {
   "id": "CCDVF-6.1-01",
@@ -2441,7 +2695,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "tool output pruning and compaction",
   "learn": "Design tools to return compact, relevant results, and compact the conversation as it grows. Raw dumps are acceptable only when the model truly needs every line. The common mistake is treating context as free storage.",
-  "apply": "Measure the size of your largest tool result; if it dwarfs the user's question, the tool needs filtering or summarisation."
+  "apply": "Measure the size of your largest tool result; if it dwarfs the user's question, the tool needs filtering or summarisation.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/context-windows#how-the-context-window-works"
  },
  {
   "id": "CCDVF-6.1-02",
@@ -2472,7 +2727,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "context isolation via subagents",
   "learn": "Use subagents when tasks are independent and exploration is heavy; use one session when later steps genuinely depend on earlier findings. The common mistake is running everything in one ever-growing session because it feels simpler.",
-  "apply": "If a session's history contains work for tasks that are already finished, those tasks should have been subagents."
+  "apply": "If a session's history contains work for tasks that are already finished, those tasks should have been subagents.",
+  "ref": "https://code.claude.com/docs/en/sub-agents#what-loads-at-startup"
  },
  {
   "id": "CCDVF-6.2-01",
@@ -2503,7 +2759,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "system vs user placement",
   "learn": "Put durable instructions in system, and per-request data and task in user. Rebuilding stable rules inside every user message is the wrong call when several call sites assemble the message or when it contains user-controlled text. The common mistake is treating the user message as the only place to talk to the model.",
-  "apply": "Read your user message template; anything that does not change per request belongs in system."
+  "apply": "Read your user message template; anything that does not change per request belongs in system.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#long-context-prompting"
  },
  {
   "id": "CCDVF-6.2-02",
@@ -2533,7 +2790,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "instruction clarity and output constraints",
   "learn": "Be explicit about sections, length, format and grounding; add a small example when format matters. Long lists of adjectives are the wrong call because they are not measurable. The common mistake is describing quality instead of specifying output.",
-  "apply": "If your prompt could be handed to a new hire and they would still ask 'how long, what format?', the model is asking the same thing."
+  "apply": "If your prompt could be handed to a new hire and they would still ask 'how long, what format?', the model is asking the same thing.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#be-clear-and-direct"
  },
  {
   "id": "CCDVF-6.3-01",
@@ -2564,7 +2822,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "structured outputs for machine-parsed replies",
   "learn": "Use structured outputs (a JSON-schema response format, or strict tool use) whenever your code will parse the output, and still validate the values. Forcing a tool call through tool_choice is the older route and is not supported on every model or together with manual extended thinking. Free-text JSON is acceptable only for throwaway experiments. The common mistake is treating the model's text as a parser-safe stream.",
-  "apply": "Search your code for JSON.parse or json.loads on model text; each occurrence is a candidate for a schema-driven structured output plus a validation step."
+  "apply": "Search your code for JSON.parse or json.loads on model text; each occurrence is a candidate for a schema-driven structured output plus a validation step.",
+  "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview#when-claude-uses-tools"
  },
  {
   "id": "CCDVF-6.3-02",
@@ -2595,7 +2854,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "scepticism toward confident output",
   "learn": "Verify model claims against ground truth whenever they will be acted on, especially identifiers, APIs and numbers. Skipping verification is only acceptable for low-stakes drafts. The common mistake is equating fluency with correctness.",
-  "apply": "Wire compile, lint and test steps into the loop so every generated change is checked by something that is not the model."
+  "apply": "Wire compile, lint and test steps into the loop so every generated change is checked by something that is not the model.",
+  "ref": "https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/reduce-hallucinations#advanced-techniques"
  },
  {
   "id": "CCDVF-6.1-03",
@@ -2626,7 +2886,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "just-in-time context loading",
   "learn": "Use just-in-time loading (a tool that fetches a document, table or manual by identifier) whenever most of a knowledge base is irrelevant to any single request. It is the wrong call when the agent genuinely needs to reason across most of the material at once. The common mistake is treating the context window as the place to store a whole library instead of an index into it.",
-  "apply": "If your system prompt front-loads content most requests never use, replace the front-load with a lookup tool the agent calls only when needed."
+  "apply": "If your system prompt front-loads content most requests never use, replace the front-load with a lookup tool the agent calls only when needed.",
+  "ref": "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents#context-retrieval-and-agentic-search"
  },
  {
   "id": "CCDVF-6.1-04",
@@ -2657,7 +2918,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "external memory for agents",
   "learn": "Use a persistent notes file or memory store when work spans sessions and only a small set of facts needs to survive. It is the wrong call for a single short task where nothing needs to outlive the session. The common mistake is assuming session continuity is automatic rather than something the agent must write down itself.",
-  "apply": "If resuming a task means re-reading the whole prior transcript, switch to a notes file that captures only the decisions and open items."
+  "apply": "If resuming a task means re-reading the whole prior transcript, switch to a notes file that captures only the decisions and open items.",
+  "ref": "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents#context-engineering-for-long-horizon-tasks"
  },
  {
   "id": "CCDVF-6.2-03",
@@ -2688,7 +2950,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "input sanitisation",
   "learn": "Escape or JSON-encode sequences that could forge your own delimiters whenever untrusted text is inserted into a structured prompt, and prefer delivering third-party content as tool results, which the model is trained to treat with skepticism; a stated untrusted-content policy in the system prompt is a complementary layer, not the boundary. Escaping is unnecessary only when the inserted text is fully controlled by your own system. The common mistake is trusting a closing tag to stay a closing tag no matter what a user pastes.",
-  "apply": "If user-submitted text is concatenated straight into a tagged prompt template, add escaping for that template's own tags before insertion."
+  "apply": "If user-submitted text is concatenated straight into a tagged prompt template, add escaping for that template's own tags before insertion.",
+  "ref": "https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks#indirect-prompt-injection"
  },
  {
   "id": "CCDVF-6.2-04",
@@ -2718,7 +2981,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "system vs user placement",
   "learn": "Put a closed set of allowed outputs and stable rules in system, and keep user to the item being processed, whenever labels or formats must stay fixed. It is the wrong call when the category set genuinely changes per request and must travel with the data. The common mistake is describing categories in prose instead of enumerating them.",
-  "apply": "If your classifier prompt describes categories in a sentence rather than a list, replace the sentence with an explicit enumeration."
+  "apply": "If your classifier prompt describes categories in a sentence rather than a list, replace the sentence with an explicit enumeration.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#be-clear-and-direct"
  },
  {
   "id": "CCDVF-6.2-05",
@@ -2749,7 +3013,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "few-shot prompting for ambiguous cases",
   "learn": "Add a small number of diverse, correctly labelled examples when written rules alone leave a model inconsistent on judgment-call cases. It is the wrong call for cases the model already handles correctly, where examples add bulk for no gain. The common mistake is responding to inconsistency by writing more rules instead of showing examples.",
-  "apply": "If disagreement clusters on a specific kind of ambiguous input, add worked examples of that kind rather than lengthening the rules."
+  "apply": "If disagreement clusters on a specific kind of ambiguous input, add worked examples of that kind rather than lengthening the rules.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#use-examples-effectively"
  },
  {
   "id": "CCDVF-6.2-06",
@@ -2780,7 +3045,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "SDLC for prompts: evaluation before release",
   "learn": "Score every prompt change against a fixed evaluation set with written criteria before adopting it. It is unnecessary only for a true one-off, throwaway prompt with no future iterations. The common mistake is judging a prompt change by eyeballing the same few familiar examples.",
-  "apply": "If 'better' is decided by eyeballing the last change on the same handful of examples, build an evaluation set with criteria instead."
+  "apply": "If 'better' is decided by eyeballing the last change on the same handful of examples, build an evaluation set with criteria instead.",
+  "ref": "https://platform.claude.com/docs/en/test-and-evaluate/develop-tests#eval-design-principles"
  },
  {
   "id": "CCDVF-6.3-03",
@@ -2811,7 +3077,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "defensive parsing beyond schema enforcement",
   "learn": "Validate structured output against field types and business rules in code even when a schema is enforced, and retry with the specific error when validation fails. It is unnecessary only when the values carry no downstream cost if wrong. The common mistake is treating schema enforcement as proof the values inside are correct.",
-  "apply": "If your pipeline writes a schema-validated record straight to storage with no code-level check on its values, add that validation before the write."
+  "apply": "If your pipeline writes a schema-validated record straight to storage with no code-level check on its values, add that validation before the write.",
+  "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview#when-claude-uses-tools"
  },
  {
   "id": "CCDVF-7.1-01",
@@ -2841,7 +3108,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "prompt injection mitigation",
   "learn": "Treat all external content as untrusted, minimise tool privileges, and require enforced approval for actions with real-world consequences. Prompt instructions are a supplementary layer, never the primary one. The common mistake is believing a warning in the system prompt is sufficient.",
-  "apply": "For each tool your agent has, ask what an attacker could do with it through the content the agent reads; every dangerous answer needs a gate."
+  "apply": "For each tool your agent has, ask what an attacker could do with it through the content the agent reads; every dangerous answer needs a gate.",
+  "ref": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools#user-interaction-model"
  },
  {
   "id": "CCDVF-7.2-01",
@@ -2872,7 +3140,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "guardrail layering",
   "learn": "Stack independent controls: input filtering, policy in the prompt, output validation and monitoring. A single prompt-level rule is acceptable only for low-risk preferences. The common mistake is assuming a strongly worded instruction is a control.",
-  "apply": "Draw the path from user input to displayed output; if the only place a policy is checked is the prompt, add a check outside the model."
+  "apply": "Draw the path from user input to displayed output; if the only place a policy is checked is the prompt, add a check outside the model.",
+  "ref": "https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks#continuous-monitoring"
  },
  {
   "id": "CCDVF-7.3-01",
@@ -2903,7 +3172,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "hooks as destructive-action guardrails",
   "learn": "Use PreToolUse hooks to block or require approval for dangerous tool calls, and PostToolUse hooks for follow-up actions. Hooks are unnecessary for low-consequence style preferences. The common mistake is writing the rule in CLAUDE.md and calling it enforced.",
-  "apply": "Enumerate the commands that would ruin your day and encode each as a hook pattern, not a sentence."
+  "apply": "Enumerate the commands that would ruin your day and encode each as a hook pattern, not a sentence.",
+  "ref": "https://code.claude.com/docs/en/memory#claude-md-vs-auto-memory"
  },
  {
   "id": "CCDVF-7.4-01",
@@ -2933,7 +3203,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "secrets management across environments",
   "learn": "Never commit secrets; inject them per environment from a secret store, rotate them, and watch their usage. Sharing one key across environments is the wrong call because a staging leak becomes a production breach. The common mistake is treating a private repository as a safe place for credentials.",
-  "apply": "Run a secret scanner on your history today; any hit means revoke first, then fix the loading mechanism."
+  "apply": "Run a secret scanner on your history today; any hit means revoke first, then fix the loading mechanism.",
+  "ref": "https://support.claude.com/en/articles/9767949-api-key-best-practices-keeping-your-keys-safe-and-secure#h_84bf246403"
  },
  {
   "id": "CCDVF-7.1-02",
@@ -2995,7 +3266,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "input pre-screening against jailbreaks",
   "learn": "Pre-screen user input with a lightweight model before it reaches the main conversation, constraining its answer to a simple classification, and combine that screen with the system-prompt policy and output validation, because any one layer can be talked around. It is unnecessary for genuinely low-stakes preferences where a bypass costs nothing. The common mistake is treating a strongly worded system-prompt rule as sufficient on its own.",
-  "apply": "If jailbreak attempts are reaching your main model, put a cheap classification call in front of it and reject flagged requests before they enter the conversation."
+  "apply": "If jailbreak attempts are reaching your main model, put a cheap classification call in front of it and reject flagged requests before they enter the conversation.",
+  "ref": "https://code.claude.com/docs/en/security#additional-safeguards"
  },
  {
   "id": "CCDVF-7.1-04",
@@ -3026,7 +3298,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "PII minimization",
   "learn": "Minimize what you send to the model to exactly what the task requires, and pseudonymize or drop identifiers the task does not need. It is the wrong call only when the task itself genuinely requires the identifying fields, such as looking up one customer's own record for them. The common mistake is sending full source records for convenience and trying to compensate with a prompt instruction.",
-  "apply": "Before wiring a prompt to a data source, list the fields the task actually consumes; anything else does not get sent."
+  "apply": "Before wiring a prompt to a data source, list the fields the task actually consumes; anything else does not get sent.",
+  "ref": "https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks#indirect-prompt-injection"
  },
  {
   "id": "CCDVF-7.2-02",
@@ -3056,7 +3329,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "secure-by-design least privilege",
   "learn": "Enforce least privilege at the credential and database level, a scoped, read-only role separate from human accounts, rather than only describing the restriction in the prompt. It is the wrong call only when the tool's task genuinely requires write access, in which case that access should still be scoped as narrowly as possible. The common mistake is trusting a prompt rule to do a permission system's job.",
-  "apply": "For every tool credential, check what it can do at the database or API level, not just what the prompt tells the agent to do with it."
+  "apply": "For every tool credential, check what it can do at the database or API level, not just what the prompt tells the agent to do with it.",
+  "ref": "https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks#indirect-prompt-injection"
  },
  {
   "id": "CCDVF-7.2-03",
@@ -3087,7 +3361,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "spend limits and kill switch",
   "learn": "Configure hard usage and spend limits with a kill switch at the account or workspace level so a bug or an attack has a bounded cost regardless of what the agent does. It is the wrong call only for a fully offline, cost-free prototype. The common mistake is asking the model to self-limit instead of capping it structurally.",
-  "apply": "Before a paid tool goes live, set a spend limit that halts calls automatically; if none exists, the current limit is however much money a bug can spend before someone notices."
+  "apply": "Before a paid tool goes live, set a spend limit that halts calls automatically; if none exists, the current limit is however much money a bug can spend before someone notices.",
+  "ref": "https://platform.claude.com/docs/en/api/rate-limits#setting-lower-limits-for-workspaces"
  },
  {
   "id": "CCDVF-7.4-02",
@@ -3118,7 +3393,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "client-side key exposure",
   "learn": "Call the Claude API from a backend that holds the key server-side, and have the client authenticate to your backend instead. It is the wrong call only if there genuinely is no backend and the deployment target is a fully trusted, non-distributed environment. The common mistake is treating obfuscation or rotation as a substitute for keeping the key off the client entirely.",
-  "apply": "If your API key ships inside anything a user's device downloads, a mobile app, a browser bundle, it is already exposed; add a backend before the next release."
+  "apply": "If your API key ships inside anything a user's device downloads, a mobile app, a browser bundle, it is already exposed; add a backend before the next release.",
+  "ref": "https://platform.claude.com/docs/en/cli-sdks-libraries/sdks/typescript#requirements"
  },
  {
   "id": "CCDVF-8.1-01",
@@ -3149,7 +3425,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "tool description quality",
   "learn": "Write tool descriptions like documentation for a new colleague: purpose, when not to use it, parameter semantics and examples. Extra routing machinery is the wrong call before descriptions are fixed. The common mistake is naming the function and calling it done.",
-  "apply": "Read each tool description without the code; if you could not choose between your tools from the text alone, neither can the model."
+  "apply": "Read each tool description without the code; if you could not choose between your tools from the text alone, neither can the model.",
+  "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools#best-practices-for-tool-definitions"
  },
  {
   "id": "CCDVF-8.2-01",
@@ -3180,7 +3457,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "stdio vs Streamable HTTP transport",
   "learn": "Use stdio for local single-client servers and Streamable HTTP for shared or remote deployments, with authentication in front. The common mistake is assuming the transport choice changes the server's tool logic.",
-  "apply": "If more than one machine needs your MCP server, it is an HTTP deployment question, not a code rewrite."
+  "apply": "If more than one machine needs your MCP server, it is an HTTP deployment question, not a code rewrite.",
+  "ref": "https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/streamable-http#page-title"
  },
  {
   "id": "CCDVF-8.3-01",
@@ -3211,7 +3489,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "Skills vs MCP vs custom tools",
   "learn": "Choose Skills for know-how, templates and workflows; MCP for connecting to external systems and sharing integrations; custom tools for capabilities inside your own API application; built-ins for what Claude Code already does. The common mistake is building a server to deliver what is really documentation.",
-  "apply": "Ask whether the thing you need is knowledge or a connection; knowledge is a Skill, a connection is a tool or MCP server."
+  "apply": "Ask whether the thing you need is knowledge or a connection; knowledge is a Skill, a connection is a tool or MCP server.",
+  "ref": "https://code.claude.com/docs/en/skills#page-title"
  },
  {
   "id": "CCDVF-8.3-02",
@@ -3242,7 +3521,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "built-in tools vs MCP integrations",
   "learn": "Reach for an MCP server when Claude Code must talk to an external system that needs managed credentials or must be shared across a team; built-in tools cover the local environment and one-off commands. It is the wrong call for a single local script where Bash alone is enough. The common mistake is pasting a live token into CLAUDE.md or a prompt so that a built-in tool can reach a SaaS API.",
-  "apply": "If your instruction names an external service that needs a credential, register an MCP server for it with the token in an environment variable or OAuth, never in the prompt or CLAUDE.md."
+  "apply": "If your instruction names an external service that needs a credential, register an MCP server for it with the token in an environment variable or OAuth, never in the prompt or CLAUDE.md.",
+  "ref": "https://code.claude.com/docs/en/security#core-protections"
  },
  {
   "id": "CCDVF-8.1-03",
@@ -3273,7 +3553,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "code-enforced tool approval",
   "learn": "Use a code-level permission gate, such as a can_use_tool callback or an explicit approval step, whenever a tool call has irreversible, financial, or data-destroying consequences. It is unnecessary for low-risk, reversible reads where a mistaken call costs nothing. The common mistake is treating a stronger or repeated prompt instruction as if it were an enforcement mechanism.",
-  "apply": "If an irreversible tool's only safeguard is a system-prompt instruction asking the model to confirm first, switch to a code-level approval gate that runs independently of the model's output."
+  "apply": "If an irreversible tool's only safeguard is a system-prompt instruction asking the model to confirm first, switch to a code-level approval gate that runs independently of the model's output.",
+  "ref": "https://code.claude.com/docs/en/agent-sdk/user-input#page-title"
  },
  {
   "id": "CCDVF-8.1-04",
@@ -3304,7 +3585,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "actionable is_error messages",
   "learn": "Use a specific is_error message naming the exact problem and the expected format whenever a validation failure is something the model could plausibly correct on retry. It is unnecessary detail for failures the model cannot act on, such as an outage in your own infrastructure. The common mistake is forwarding a fabricated success or a vague status instead of an actionable error.",
-  "apply": "If a failed tool call currently returns a silent substitution or a one-word status, switch it to an is_error result that states the specific problem and the expected input."
+  "apply": "If a failed tool call currently returns a silent substitution or a one-word status, switch it to an is_error result that states the specific problem and the expected input.",
+  "ref": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools#error-handling"
  },
  {
   "id": "CCDVF-8.1-05",
@@ -3335,7 +3617,40 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "client-side vs server-side tool execution",
   "learn": "Use an Anthropic-hosted server-side tool when the capability it offers, such as a live web lookup, already covers the need and you want to avoid owning that infrastructure. It is the wrong call when the integration is internal or proprietary and no server-side tool can reach it, which is when a custom client-side tool is justified. The common mistake is assuming a model's training knowledge substitutes for a live lookup.",
-  "apply": "If your team is about to build and host a lookup integration that a server-side tool already covers, switch to the hosted tool instead."
+  "apply": "If your team is about to build and host a lookup integration that a server-side tool already covers, switch to the hosted tool instead.",
+  "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool#how-web-search-works"
+ },
+ {
+  "id": "CCDVF-8.1-06",
+  "cert": "CCDV-F",
+  "domain": 8,
+  "task": "8.1",
+  "select": 2,
+  "stem": "An agent harness lists 'Bash' in allowedTools and implements a canUseTool callback that rejects any shell command touching a production path. In testing, commands touching production paths still run and the callback is never invoked for them. Which TWO changes make the production-path check actually apply? (Select TWO.)",
+  "options": {
+   "A": "Move the production-path check into a PreToolUse hook, which runs before every other permission step.",
+   "B": "Add a sentence to the system prompt telling Claude never to run shell commands against production paths.",
+   "C": "Replace the bare Bash entry with scoped allow rules for known-safe commands, so other shell calls fall through to the callback.",
+   "D": "Set the permission mode to bypassPermissions so that every tool call is routed to the callback."
+  },
+  "answer": [
+   "A",
+   "C"
+  ],
+  "explanation": "A bare tool name in allowedTools approves every call to that tool before canUseTool is consulted, so the callback never sees those calls. A PreToolUse hook runs first on every call and its deny applies in every mode. Narrowing the allow rule to scoped patterns also works, because unmatched shell calls then fall through to the callback for a decision.",
+  "distractors": {
+   "B": "prompt-not-enforcement",
+   "D": "myth"
+  },
+  "why_wrong": {
+   "B": "A prompt sentence is advisory; a production guard needs enforcement in code that does not depend on the model's compliance.",
+   "D": "bypassPermissions approves calls without prompting, so it does not route them to the callback and makes the gap larger."
+  },
+  "concept": "auto-approval bypasses canUseTool; hooks run first",
+  "learn": "Approval checks in canUseTool only see calls that no earlier step resolved: bare allow entries and permissive modes skip it. Put checks that must run on every call in a PreToolUse hook, or keep allow rules narrow. The common mistake is assuming the callback is a universal gate.",
+  "apply": "Audit your allowedTools list: any bare tool name is a bypass for the callback, so cover critical checks with a hook.",
+  "reviewed": "model",
+  "ref": "https://code.claude.com/docs/en/agent-sdk/permissions#allow-and-deny-rules"
  },
  {
   "id": "CCDVF-8.2-02",
@@ -3366,7 +3681,41 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "MCP resources vs tools vs prompts",
   "learn": "Expose static, read-only reference material as an MCP resource (application-controlled, URI-addressed) and reserve tools for actions the model decides to take; prompts are user-invoked templates. It is the wrong call when the content depends on model-chosen arguments or has side effects, which is tool territory. The common mistake is making the model actively call for content the application could attach directly.",
-  "apply": "If an MCP tool exists only to hand back fixed reference content, convert it to a resource and let the host attach it."
+  "apply": "If an MCP tool exists only to hand back fixed reference content, convert it to a resource and let the host attach it.",
+  "ref": "https://modelcontextprotocol.io/specification/2026-07-28/server/resources#page-title"
+ },
+ {
+  "id": "CCDVF-8.2-03",
+  "cert": "CCDV-F",
+  "domain": 8,
+  "task": "8.2",
+  "select": 1,
+  "stem": "A developer's MCP server runs over the stdio transport, spawned as a subprocess by the host. It connects and lists its tools, but as soon as a tool runs the host reports malformed protocol messages and drops the connection. The tool code contains several print() calls added for debugging. What is the MOST likely cause and fix?",
+  "options": {
+   "A": "The tool runs too slowly, so the developer should raise the host request timeout for every tool call.",
+   "B": "print() writes to stdout, which carries the protocol messages in stdio mode; log to stderr or a file instead.",
+   "C": "Move the server to the HTTP transport and deploy it as a network service, which avoids the problem.",
+   "D": "Prefix each debug line with a comment marker so the host skips those lines as non-protocol output."
+  },
+  "answer": [
+   "B"
+  ],
+  "explanation": "In a stdio server the process's standard output is the channel for JSON-RPC messages. Any stray write to it, such as print() or console.log, corrupts the stream and breaks the connection. The fix is to send logs to stderr, using a logging library that writes there, or to a file.",
+  "distractors": {
+   "A": "parameter-patch",
+   "C": "over-engineering",
+   "D": "myth"
+  },
+  "why_wrong": {
+   "A": "The errors are malformed messages, not timeouts, so a longer timeout does not touch the cause.",
+   "C": "HTTP servers can log to stdout safely, but redeploying as a network service is a large change for what is a one-line logging fix.",
+   "D": "The host does not skip lines by prefix; it parses the stream as protocol messages and any extra text corrupts it."
+  },
+  "concept": "stdio servers must not write to stdout",
+  "learn": "With the stdio transport, stdout belongs to the protocol, so log to stderr or a file. HTTP servers do not have this restriction. The common mistake is leaving debug prints in a server that works fine when run by hand.",
+  "apply": "Configure your stdio MCP server's logger to write to stderr and grep the codebase for print or console.log calls.",
+  "reviewed": "model",
+  "ref": "https://modelcontextprotocol.io/docs/develop/build-server#logging-in-mcp-servers"
  },
  {
   "id": "CCDVF-8.3-03",
@@ -3397,7 +3746,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "Skills vs MCP vs custom tools",
   "learn": "Use a Skill when a procedure, template or helper script only applies sometimes and should not cost context otherwise; CLAUDE.md and unfiltered rules load at launch every session, and path-scoped rules fit only content tied to specific files. It is the wrong mechanism when the task needs live access to an external system, which calls for a tool or MCP server. The common mistake is putting a sometimes-relevant procedure into an always-loaded file.",
-  "apply": "If a team keeps a written procedure and helper scripts that only apply to one recurring situation, package it as a Skill instead of a permanently loaded file or a hosted server."
+  "apply": "If a team keeps a written procedure and helper scripts that only apply to one recurring situation, package it as a Skill instead of a permanently loaded file or a hosted server.",
+  "ref": "https://code.claude.com/docs/en/memory#organize-rules-with-claude/rules/"
  },
  {
   "id": "CCDVF-8.3-04",
@@ -3428,7 +3778,8 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "built-in tools vs MCP integrations",
   "learn": "Use the built-in tools, such as Bash, Grep, and Glob, whenever the task is running commands or navigating files that Claude Code can already reach locally. It is the wrong call when the task needs an external system or data source the built-ins cannot reach, which is when a custom tool or MCP server is justified. The common mistake is assuming a task requires new infrastructure before checking what already ships.",
-  "apply": "If a plan proposes a new server or script to wrap a local shell command, switch to the built-in Bash tool first."
+  "apply": "If a plan proposes a new server or script to wrap a local shell command, switch to the built-in Bash tool first.",
+  "ref": "https://code.claude.com/docs/en/tools-reference#page-title"
  },
  {
   "id": "CCDVF-8.3-05",
@@ -3459,6 +3810,7 @@ window.QUESTIONS["CCDV-F"] = [
   },
   "concept": "Skills vs MCP vs custom tools",
   "learn": "Use an MCP server when the same capability, especially access to a live external system, must be reused and kept consistent across multiple applications or teams. It is the wrong call when only one application ever needs the capability, where a custom tool inside that app's own loop is simpler. The common mistake is duplicating an integration per application, or reaching for a mechanism, like a Skill or a bespoke messaging system, that was not built for shared live access.",
-  "apply": "If the same external lookup is being reimplemented separately inside several applications, switch to one MCP server that all of them consume as clients."
+  "apply": "If the same external lookup is being reimplemented separately inside several applications, switch to one MCP server that all of them consume as clients.",
+  "ref": "https://modelcontextprotocol.io/docs/2026-07-28/getting-started/intro#page-title"
  }
 ];

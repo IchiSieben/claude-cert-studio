@@ -8,13 +8,13 @@ Esta página no edita el Landing. La sesión del Landing importa los dos bloques
 |---|---|---|
 | Archivos destino | `Landing/src/content/projects/es/cert-studio.md` y `Landing/src/content/projects/en/cert-studio.md` | exacto; el slug coincide con `routes/certify.json` (`project: cert-studio`) y con `docs/arquitectura.json` |
 | Segmento | `agentes-ia` | el mismo que `claude-kit` y `enjambre` |
-| Estado | `live` + `statusNote: "Open source · 218 original questions"` | el prompt decía 240; el banco real tiene 106 + 112 = 218 (contado por `tools/validate-bank.mjs` el 2026-10-15) |
+| Estado | `live` + `statusNote: "Open source · 240 original questions"` | 120 + 120, repartidas por peso oficial (validador del banco, 2026-10-15; rellenado tras la revisión del 26-sep) |
 | Madurez | `usable` | verificado en el esquema (`config.ts`) |
 | `repoUrl` | https://github.com/IchiSieben/claude-cert-studio | público desde el 2026-10-15 |
 | `demoUrl` | https://cert.ichisieben.dev | responde 200, sin `noindex`, cero errores de consola (2026-10-15) |
 | Familia | `family: claude-code-ecosystem`, `siblings: [claude-kit, enjambre]`, `academyRoute: certify` | campos verificados en `config.ts` de la rama `ecosistema/2026-10-15` |
 | Habilidades | `javascript`, `html-css`, `playwright`, `hosting-estatico`, `bash`, `git` | los seis slugs existen en `Landing/src/content/skills/` |
-| Portada | `/media/cert-studio/poster.webp` + `preview.mp4` | origen: `docs/media/` del repo público; ver `docs/CAPTURAS.md` |
+| Portada | `/media/cert-studio/poster.webp` + `preview.mp4` | origen: `docs/media/` del repo público, grabado en la Mac (59,7 fps) desde la URL pública; ver `docs/CAPTURAS.md` |
 | `order` | 15 | 12–14 ya están ocupados (`chasqui`/`enjambre`, `claude-kit`, `signal-agent`) |
 
 Antes de importar: copiar `docs/media/poster.webp` y `docs/media/preview.mp4` a
@@ -29,7 +29,7 @@ Lecciones de la ruta "Certifícate": los 8 documentos de `01-dominios/` y los 7 
 frontmatter (órdenes 1–15; nivel 2 los dominios, 3 los laboratorios). `tools/import-academia.py`
 los lee con `lesson_meta` sin cambios.
 
-Cifras de `results`: 218 preguntas originales (validador del banco, 2026-10-15); 16 pruebas de
+Cifras de `results`: 240 preguntas originales (validador del banco, 2026-10-15); 22 pruebas de
 punta a punta en verde (Playwright, Windows, 2026-10-15).
 
 ## `Landing/src/content/projects/es/cert-studio.md`
@@ -44,15 +44,15 @@ order: 15
 featured: false
 status: "live"
 maturity: "usable"
-statusNote: "Open source · 218 original questions"
+statusNote: "Open source · 240 original questions"
 published: true
 since: 2026
 date: "2026-10-15"
 family: "claude-code-ecosystem"
 siblings: ["claude-kit", "enjambre"]
 academyRoute: "certify"
-summary: "Un simulador estático para preparar las certificaciones CCAR-F y CCDV-F: simulacros que reparten las preguntas según el peso oficial de cada dominio, cronómetro, puntaje escalado de 100 a 1000 y cada opción incorrecta etiquetada con el tipo de trampa que representa. El progreso vive solo en el navegador. Ayuda de estudio no oficial: las 218 preguntas son originales y ninguna reproduce un ítem real del examen."
-oneLine: "Me preparo para las certificaciones de Claude Code con un simulador propio: 218 preguntas originales, simulacros por peso de dominio y cada trampa explicada."
+summary: "Un simulador estático para preparar las certificaciones CCAR-F y CCDV-F: simulacros que reparten las preguntas según el peso oficial de cada dominio, cronómetro, puntaje escalado de 100 a 1000 y cada opción incorrecta etiquetada con el tipo de trampa que representa. El progreso vive solo en el navegador. Ayuda de estudio no oficial: las 240 preguntas son originales y ninguna reproduce un ítem real del examen."
+oneLine: "Me preparo para las certificaciones de Claude Code con un simulador propio: 240 preguntas originales, simulacros por peso de dominio y cada trampa explicada."
 techLine: "HTML · JavaScript sin dependencias · Playwright · hosting estático"
 repoUrl: "https://github.com/IchiSieben/claude-cert-studio"
 demoUrl: "https://cert.ichisieben.dev"
@@ -64,18 +64,18 @@ skills:
   - "bash"
   - "git"
 applied:
-  javascript: "Toda la app en un archivo sin framework ni build: reparto por resto mayor, puntaje ponderado, repaso espaciado y un modo muestra con semilla fija."
+  javascript: "Toda la app en un archivo sin framework ni build: reparto por resto mayor, puntaje ponderado, repaso espaciado SM-2 y un modo muestra con semilla fija."
   html-css: "Una sola página con vistas, tema claro y oscuro, diseño para móvil y una hoja de impresión que convierte el blueprint en PDF."
-  playwright: "16 pruebas de punta a punta sobre file://, incluidas las ocho vistas en ancho de móvil, la portada nueva y que el modo muestra no escriba en el almacenamiento."
+  playwright: "22 pruebas de punta a punta: las ocho vistas en ancho de móvil, el modo muestra sin escribir en el almacenamiento, la migración del repaso espaciado, el uso sin conexión y cero desplazamiento de diseño mientras carga el banco."
   hosting-estatico: "Subdominio estático en hosting compartido, subido por archivo sin borrar nada, con un .htaccess que solo responde por su propio nombre."
   bash: "El despliegue, la exportación al repo público con su auditoría por patrones y el carril de grabación de medios son scripts de Bash."
   git: "El repo público es una exportación filtrada de un solo autor; el historial de trabajo queda privado."
 problem: "Las guías de las certificaciones dan dominios y pesos, pero no una forma de practicar que respete esos pesos ni que explique por qué una opción incorrecta parece correcta. Quería medirme con preguntas propias, repartidas como el examen real, sin cuentas ni servidor."
 results:
-  - { label: "preguntas originales en el banco", value: 218, source: "validador del banco, 2026-10-15" }
-  - { label: "pruebas de punta a punta en verde", value: 16, source: "Playwright, Windows, 2026-10-15" }
+  - { label: "preguntas originales en el banco", value: 240, source: "validador del banco, 2026-10-15" }
+  - { label: "pruebas de punta a punta en verde", value: 22, source: "Playwright, Windows, 2026-10-15" }
 next:
-  - "Llevar el banco a 120 preguntas por certificación."
+  - "Revisión humana de una muestra del banco (hoy lo revisó un modelo)."
   - "Importar un respaldo de progreso: hoy solo se exporta."
 media:
   kind: video
@@ -90,8 +90,8 @@ cronómetro y devuelve un puntaje escalado de 100 a 1000 con aprobado en 720, el
 dominio y las trampas en las que caíste. Cada opción incorrecta del banco lleva una etiqueta de
 trampa, y el validador rechaza la que no la tenga.
 
-El modo de repaso saca primero lo que no viste, lo que fallaste y lo que acertaste hace más de tres
-días. El progreso se guarda en el almacenamiento local y se exporta a JSON; con `?sample=1` todo
+El modo de repaso saca primero lo que no viste y lo que fallaste, y vuelve a lo acertado a intervalos
+crecientes (SM-2 simplificado). El progreso se guarda en el almacenamiento local y se exporta a JSON; con `?sample=1` todo
 vive en memoria con una semilla fija, que es como se graban las capturas.
 
 Límites: ayuda de estudio no oficial, sin afiliación con el emisor de la certificación; la escala
@@ -111,15 +111,15 @@ order: 15
 featured: false
 status: "live"
 maturity: "usable"
-statusNote: "Open source · 218 original questions"
+statusNote: "Open source · 240 original questions"
 published: true
 since: 2026
 date: "2026-10-15"
 family: "claude-code-ecosystem"
 siblings: ["claude-kit", "enjambre"]
 academyRoute: "certify"
-summary: "A static practice app for the CCAR-F and CCDV-F certifications: mocks that spread questions by each domain's official weight, a timer, a scaled 100–1000 score and every wrong option tagged with the kind of trap it represents. Progress lives only in the browser. An unofficial study aid: all 218 questions are original and none reproduces a real exam item."
-oneLine: "I prepare for the Claude Code certifications with my own practice app: 218 original questions, mocks by domain weight and every trap explained."
+summary: "A static practice app for the CCAR-F and CCDV-F certifications: mocks that spread questions by each domain's official weight, a timer, a scaled 100–1000 score and every wrong option tagged with the kind of trap it represents. Progress lives only in the browser. An unofficial study aid: all 240 questions are original and none reproduces a real exam item."
+oneLine: "I prepare for the Claude Code certifications with my own practice app: 240 original questions, mocks by domain weight and every trap explained."
 techLine: "HTML · dependency-free JavaScript · Playwright · static hosting"
 repoUrl: "https://github.com/IchiSieben/claude-cert-studio"
 demoUrl: "https://cert.ichisieben.dev"
@@ -131,18 +131,18 @@ skills:
   - "bash"
   - "git"
 applied:
-  javascript: "The whole app in one file with no framework or build: largest-remainder sampling, weighted scoring, spaced repetition and a sample mode with a fixed seed."
+  javascript: "The whole app in one file with no framework or build: largest-remainder sampling, weighted scoring, SM-2 spaced repetition and a sample mode with a fixed seed."
   html-css: "One page with views, light and dark themes, a mobile layout and a print sheet that turns the blueprint into a PDF."
-  playwright: "16 end-to-end tests over file://, including all eight views at mobile width, the new start page and a check that sample mode never writes to storage."
+  playwright: "22 end-to-end tests: all eight views at mobile width, sample mode never writing to storage, the spaced-repetition migration, offline use and zero layout shift while the bank loads."
   hosting-estatico: "A static subdomain on shared hosting, uploaded file by file without deleting anything, with an .htaccess that only answers to its own name."
   bash: "Deploy, the export to the public repo with its pattern audit, and the media recording lane are Bash scripts."
   git: "The public repo is a filtered single-author export; the working history stays private."
 problem: "The certification guides list domains and weights, but no way to practise that respects those weights or explains why a wrong option looks right. I wanted to measure myself with my own questions, spread like the real exam, with no accounts and no server."
 results:
-  - { label: "original questions in the bank", value: 218, source: "bank validator, 2026-10-15" }
-  - { label: "end-to-end tests passing", value: 16, source: "Playwright, Windows, 2026-10-15" }
+  - { label: "original questions in the bank", value: 240, source: "bank validator, 2026-10-15" }
+  - { label: "end-to-end tests passing", value: 22, source: "Playwright, Windows, 2026-10-15" }
 next:
-  - "Grow the bank to 120 questions per certification."
+  - "Human review of a sample of the bank (today it was reviewed by a model)."
   - "Import a progress backup: today it can only be exported."
 media:
   kind: video
@@ -157,8 +157,8 @@ timer and returns a scaled 100–1000 score with a pass at 720, the per-domain r
 you fell into. Every wrong option in the bank carries a trap tag, and the validator rejects one
 without it.
 
-Review mode serves first what you have not seen, what you missed and what you got right more than
-three days ago. Progress is kept in local storage and exports to JSON; with `?sample=1` everything
+Review mode serves first what you have not seen and what you missed, and comes back to what you got
+right at growing intervals (simplified SM-2). Progress is kept in local storage and exports to JSON; with `?sample=1` everything
 lives in memory under a fixed seed, which is how the screenshots are recorded.
 
 Limits: an unofficial study aid, not affiliated with the certification's issuer; the real scale is

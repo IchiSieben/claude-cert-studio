@@ -277,7 +277,7 @@ td .m{font-family:var(--font-mono);font-size:12px}
       <div id="seq"></div>
     </div>
     <div class="panel">
-      <div class="eyebrow">Ciclo de una pregunta en el repaso espaciado · "para hoy" = sin ver, fallada o acertada hace más de 3 días</div>
+      <div class="eyebrow">Ciclo de una pregunta en el repaso espaciado · "para hoy" = sin ver, fallada o con el intervalo SM-2 vencido</div>
       <div id="states"></div>
     </div>
   </section>
@@ -292,7 +292,7 @@ td .m{font-family:var(--font-mono);font-size:12px}
         <h3>Cómo se guarda</h3>
         <dl class="kv">
           <dt>clave</dt><dd><code>ccs:progress</code> es un solo objeto JSON con una entrada por certificación; <code>ccs:cert</code> y <code>ccs:theme</code> son preferencias.</dd>
-          <dt>respuesta</dt><dd>Por pregunta: veces vista, aciertos, fallos, el resultado de la última vez y cuándo. La fecha es lo que permite el repaso espaciado.</dd>
+          <dt>respuesta</dt><dd>Por pregunta: veces vista, aciertos, fallos, el resultado de la última vez y cuándo. La fecha, la facilidad y el intervalo (SM-2) deciden cuándo vuelve.</dd>
           <dt>simulacro</dt><dd>Fecha, tipo, puntaje, porcentaje ponderado, resultado por dominio, fallos y los ids usados: así el siguiente simulacro saca primero las preguntas que nunca salieron.</dd>
           <dt>trampas</dt><dd>Un contador por tipo de distractor: cuántas veces elegiste una opción con esa etiqueta.</dd>
         </dl>
@@ -320,7 +320,7 @@ td .m{font-family:var(--font-mono);font-size:12px}
             <div class="k"><span>exportación filtrada y auditada al repo público</span><span class="m">export-public.sh</span></div>
             <div class="k"><span>subida por TUS de 6 archivos, nunca borra</span><span class="m">deploy-cert.sh</span></div>
             <div class="k"><span>solo responde por su subdominio; el resto, 404</span><span class="m">.htaccess</span></div>
-            <div class="k"><span>validador del banco + 16 pruebas de punta a punta</span><span class="m">verify.sh</span></div>
+            <div class="k"><span>validador del banco + 21 pruebas de punta a punta</span><span class="m">verify.sh</span></div>
             <div class="k"><span>clip de 7 s y tres capturas desde la URL pública</span><span class="m">Mac · carril media</span></div>
           </div>
           <p style="font-size:12.5px;color:var(--ink2)">Requisitos para estudiar: un navegador. Para las pruebas: Node 22 y el Chromium de Playwright. Para los videos: ffmpeg.</p>
@@ -351,7 +351,8 @@ td .m{font-family:var(--font-mono);font-size:12px}
         <tr><td>Cada opción incorrecta lleva una etiqueta de trampa</td><td>El resultado enseña qué tipo de error cometes, y el validador rechaza una opción sin etiqueta</td><td>Solo marcar correcta / incorrecta</td></tr>
         <tr><td>Reparto por resto mayor</td><td>El simulacro suma exactamente el largo del examen y ningún dominio se aleja más de una pregunta de su cuota</td><td>Redondear cada cuota y ajustar el último dominio</td></tr>
         <tr><td>Puntaje lineal 100–1000 y aprobado en 720</td><td>La escala real no es pública; una lineal ponderada es honesta y se explica en una línea</td><td>Inventar una curva que parezca la oficial</td></tr>
-        <tr><td>Repaso espaciado con una regla de 3 días</td><td>Con 218 preguntas basta; se implementa y se prueba en una línea</td><td>Un planificador por tarjeta tipo SM-2</td></tr>
+        <tr><td>Repaso espaciado SM-2 simplificado por pregunta, con migración perezosa</td><td>Con 240 preguntas, repasar lo ya sabido desperdicia sesiones; el progreso guardado con la regla anterior se interpreta al leer y no se reescribe</td><td>La regla fija de 3 días de la primera versión; FSRS (más preciso, más difícil de explicar en una línea)</td></tr>
+        <tr><td>Enlace a la documentación solo si se verificó</td><td>Un script comprueba 200, el ancla y que la sección contenga el pasaje citado por la revisión; lo demás queda sin enlace y listado aparte</td><td>Enlaces escritos de memoria</td></tr>
         <tr><td>Repo público nuevo de un solo commit</td><td>El historial de trabajo tenía datos personales del autor; el público es una exportación filtrada y auditada</td><td>Reescribir la historia del repo de trabajo</td></tr>
         <tr><td>Modo muestra en memoria con semilla fija</td><td>Capturas reproducibles sin escribir en el almacenamiento del visitante</td><td>Capturar con un perfil real</td></tr>
       </table></div>
@@ -699,13 +700,13 @@ const N = {
   bp:   {x:660,y:40,w:200,h:100,kind:"datos · script",ttl:"blueprints.js",tech:"dominios · pesos · task statements · 10 trampas",color:"blue",
          resp:"Fuente única del examen: 5 dominios y 30 task statements de CCAR-F, 8 dominios y 25 de CCDV-F, con sus pesos oficiales, y la taxonomía de distractores.",
          kv:{"Llena":"window.BLUEPRINTS · window.TRAPS"}},
-  qs:   {x:660,y:160,w:200,h:95,kind:"datos · script",ttl:"questions-*.js",tech:"218 preguntas originales",color:"blue",
-         resp:"106 preguntas de CCAR-F y 112 de CCDV-F. Cada una: escenario, cuatro opciones, clave, etiqueta de trampa por opción incorrecta, explicación, cuándo sí y cuándo no.",
+  qs:   {x:660,y:160,w:200,h:95,kind:"datos · script",ttl:"questions-*.js",tech:"240 preguntas originales",color:"blue",
+         resp:"120 preguntas por certificación, repartidas por el peso oficial de cada dominio. Cada una: escenario, cuatro opciones, clave, etiqueta de trampa por opción incorrecta, explicación, cuándo sí y cuándo no, y el enlace a la sección de la documentación que la respalda cuando se pudo verificar.",
          kv:{"Llena":"window.QUESTIONS","Revisión":"por un modelo contra la documentación; no por una persona"}},
   val:  {x:960,y:40,w:220,h:100,kind:"herramienta · Node",ttl:"validate-bank.mjs",tech:"esquema · tareas · etiquetas",color:"blue",
          resp:"Carga blueprints y bancos y falla ante un id repetido, una tarea inexistente, una clave que no coincide con select o una opción incorrecta sin etiqueta válida.",
          kv:{"Sale con":"1 ante cualquier error"}},
-  e2e:  {x:960,y:180,w:220,h:100,kind:"pruebas · Playwright",ttl:"app.test.mjs",tech:"Chromium · file:// · 16 casos",color:"blue",
+  e2e:  {x:960,y:180,w:220,h:100,kind:"pruebas · Playwright",ttl:"app.test.mjs",tech:"Chromium · file:// · 22 casos",color:"blue",
          resp:"Recorre la app como una persona: práctica, simulacros sin repetidos, resultado, modo muestra sin almacenamiento, PDF de la hoja de repaso, 390 px y cero errores de consola.",
          kv:{"Corre con":"bash tools/verify.sh"}},
   ls:   {x:300,y:360,w:170,h:100,kind:"almacén · navegador",ttl:"localStorage",tech:"ccs:progress · ccs:cert · ccs:theme",color:"blue",
@@ -772,19 +773,19 @@ const FLOWS = [
     ["e2","El subdominio sirve la nueva versión"]]},
 ];
 const STATES = {
-  note:"Una pregunta está para hoy si nunca la viste, si la fallaste la última vez o si la acertaste hace más de 3 días. La regla vive en isDue().",
+  note:"SM-2 simplificado por pregunta: está para hoy si nunca la viste, si la fallaste la última vez o si pasó su intervalo. Aciertos seguidos: 1, 3 y luego iv × facilidad días; un fallo reinicia y baja la facilidad. schedule() calcula, isDue() decide.",
   states:[
     {id:"inicio",kind:"start",x:14,y:60},
     {id:"SIN_VER",x:70,y:50,kind:"wait",d:"Nunca respondida en esta certificación: cuenta para hoy y la práctica 'sin ver primero' la sirve antes que las demás."},
-    {id:"ACERTADA",x:420,y:50,kind:"final",d:"La última respuesta fue correcta y tiene menos de 3 días: no cuenta para hoy."},
+    {id:"ACERTADA",x:420,y:50,kind:"final",d:"La última respuesta fue correcta y su intervalo no ha pasado: no cuenta para hoy. Cada acierto alarga el intervalo."},
     {id:"FALLADA",x:420,y:200,kind:"error",d:"La última respuesta fue incorrecta: cuenta para hoy y entra en 'reintentar mis fallos'."},
-    {id:"VENCIDA",x:770,y:50,kind:"wait",d:"Acertada hace más de 3 días: vuelve a contar para hoy."},
+    {id:"VENCIDA",x:770,y:50,kind:"wait",d:"Pasó el intervalo desde el último acierto: vuelve a contar para hoy."},
   ],
   trans:[
     {a:"inicio",b:"SIN_VER"},
     {a:"SIN_VER",b:"ACERTADA",l:"acierta"},
     {a:"SIN_VER",b:"FALLADA",l:"falla",err:true},
-    {a:"ACERTADA",b:"VENCIDA",l:"pasan 3 días"},
+    {a:"ACERTADA",b:"VENCIDA",l:"pasa el intervalo"},
     {a:"VENCIDA",b:"ACERTADA",l:"acierta",as:"b",bs:"b"},
     {a:"VENCIDA",b:"FALLADA",l:"falla",err:true},
     {a:"FALLADA",b:"ACERTADA",l:"acierta",as:"t",bs:"b"},
@@ -794,10 +795,10 @@ const STATES = {
 const TABLES = [
   {id:"PROGRESO",x:20,y:40,note:"ccs:progress · un objeto por certificación",fields:[{n:"cert",t:"CCAR-F | CCDV-F",pk:true}]},
   {id:"PREFERENCIA",x:20,y:150,note:"claves sueltas",fields:[{n:"ccs:cert",t:"string"},{n:"ccs:theme",t:"light | dark"}]},
-  {id:"RESPUESTA",x:300,y:40,note:"progress[cert].q[id]",fields:[{n:"pregunta_id",t:"string",pk:true,fk:true},{n:"seen",t:"int"},{n:"right",t:"int"},{n:"wrong",t:"int"},{n:"last",t:"right | wrong"},{n:"when",t:"epoch ms",note:"repaso espaciado"}]},
-  {id:"SIMULACRO",x:300,y:230,note:"progress[cert].mocks[]",fields:[{n:"date",t:"YYYY-MM-DD"},{n:"kind",t:"quick | full"},{n:"score",t:"100–1000"},{n:"pct",t:"int"},{n:"byDomain",t:"{dominio: %}"},{n:"misses",t:"int"},{n:"ids",t:"string[]",note:"nunca usadas primero"}]},
-  {id:"CAIDA",x:300,y:450,note:"progress[cert].traps",fields:[{n:"trampa",t:"clave",pk:true,fk:true},{n:"veces",t:"int"}]},
-  {id:"PREGUNTA",x:620,y:40,ext:true,note:"data/questions-*.js (solo lectura)",fields:[{n:"id",t:"string",pk:true},{n:"cert",t:"string"},{n:"domain",t:"int"},{n:"task",t:"string",fk:true},{n:"select",t:"1 | 2"},{n:"answer",t:"letras"},{n:"distractors",t:"{letra: trampa}"},{n:"concept",t:"string"}]},
+  {id:"RESPUESTA",x:300,y:40,note:"progress[cert].q[id]",fields:[{n:"pregunta_id",t:"string",pk:true,fk:true},{n:"seen",t:"int"},{n:"right",t:"int"},{n:"wrong",t:"int"},{n:"last",t:"right | wrong"},{n:"when",t:"epoch ms"},{n:"ef",t:"1,3–2,5",note:"facilidad SM-2"},{n:"iv",t:"días"},{n:"reps",t:"int",note:"aciertos seguidos"}]},
+  {id:"SIMULACRO",x:300,y:300,note:"progress[cert].mocks[]",fields:[{n:"date",t:"YYYY-MM-DD"},{n:"kind",t:"quick | full"},{n:"score",t:"100–1000"},{n:"pct",t:"int"},{n:"byDomain",t:"{dominio: %}"},{n:"misses",t:"int"},{n:"ids",t:"string[]",note:"nunca usadas primero"}]},
+  {id:"CAIDA",x:300,y:540,note:"progress[cert].traps",fields:[{n:"trampa",t:"clave",pk:true,fk:true},{n:"veces",t:"int"}]},
+  {id:"PREGUNTA",x:620,y:40,ext:true,note:"data/questions-*.js (solo lectura)",fields:[{n:"id",t:"string",pk:true},{n:"cert",t:"string"},{n:"domain",t:"int"},{n:"task",t:"string",fk:true},{n:"select",t:"1 | 2"},{n:"answer",t:"letras"},{n:"distractors",t:"{letra: trampa}"},{n:"concept",t:"string"},{n:"ref",t:"URL#sección",note:"verificada"}]},
   {id:"TAREA",x:900,y:40,ext:true,note:"data/blueprints.js",fields:[{n:"id",t:"string",pk:true},{n:"dominio",t:"int"},{n:"peso",t:"% del dominio"}]},
   {id:"TRAMPA",x:900,y:250,ext:true,note:"window.TRAPS · 10 tipos",fields:[{n:"clave",t:"string",pk:true},{n:"name",t:"string"},{n:"hint",t:"string"}]},
 ];

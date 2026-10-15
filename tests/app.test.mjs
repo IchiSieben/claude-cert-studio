@@ -71,6 +71,45 @@ await step("due-today drill only serves due questions", async () => {
   await page.evaluate(() => { S.drill = null; go("home"); });
 });
 
+await step("SM-2: pre-SM-2 progress migrates without loss; intervals 1 -> 3 -> x ef; a miss resets and lowers ef", async () => {
+  const ctx = await browser.newContext(); const s = await ctx.newPage(); watch(s);
+  const day = 864e5, now = Date.now();
+  // progress saved by the previous version: no ef/iv/reps fields
+  await s.addInitScript(([now, day]) => { if (!localStorage.getItem("ccs:progress")) localStorage.setItem("ccs:progress", JSON.stringify({ "CCAR-F": { q: {
+    "CCARF-1.1-01": { seen: 2, right: 2, wrong: 0, last: "right", when: now - 4 * day },
+    "CCARF-1.1-02": { seen: 1, right: 1, wrong: 0, last: "right", when: now - 1 * day },
+    "CCARF-1.2-01": { seen: 3, right: 1, wrong: 2, last: "wrong", when: now - 1 * day } }, traps: { myth: 2 }, mocks: [{ date: "2026-10-01", kind: "quick", score: 600, pct: 55, byDomain: {}, misses: 12, ids: [] }] } })); }, [now, day]);
+  await s.goto(URL_ + "?cert=CCAR-F");
+  const r = await s.evaluate(() => {
+    const p = prog()["CCAR-F"]; const q = id => QS().find(x => x.id === id);
+    const out = { due: ["CCARF-1.1-01", "CCARF-1.1-02", "CCARF-1.2-01"].map(id => isDue(q(id), p.q)), mocks: p.mocks.length, traps: p.traps.myth, ef12: srs(p.q["CCARF-1.2-01"]).ef };
+    const fresh = QS().find(x => !p.q[x.id]); const ivs = [];
+    for (let i = 0; i < 4; i++) { record(fresh, true, fresh.answer); ivs.push(prog()["CCAR-F"].q[fresh.id].iv); }
+    record(fresh, false, Object.keys(fresh.options).filter(k => !fresh.answer.includes(k)).slice(0, fresh.select));
+    const after = prog()["CCAR-F"].q[fresh.id];
+    return { ...out, ivs, after: [after.iv, after.reps, after.ef, isDue(fresh)], stored: JSON.parse(localStorage.getItem("ccs:progress"))["CCAR-F"].q["CCARF-1.1-01"] };
+  });
+  assert.deepEqual(r.due, [true, false, true], "old 3-day rule kept for migrated right answers; misses due now");
+  assert.equal(r.mocks, 1); assert.equal(r.traps, 2);
+  assert.equal(r.ef12, 2.1, "two past misses lower the starting ef");
+  assert.deepEqual(r.ivs, [1, 3, 8, 20]);
+  assert.deepEqual(r.after, [0, 0, 2.3, true]);
+  assert.equal(r.stored.ef, undefined, "reading never rewrites an old record");
+  await ctx.close();
+});
+
+await step("explanations link the verified doc section when the question has a ref", async () => {
+  const r = await page.evaluate(() => {
+    const was = S.cert; setCert("CCDV-F"); const q = QS().find(x => x.ref && x.ref.includes("#")); const n = QS().find(x => !x.ref);
+    const html = c => question(c, { chosen: c.answer.slice(), checked: true });
+    const d = document.createElement("div"); d.innerHTML = html(q); const a = d.querySelector(".docref a");
+    const e = document.createElement("div"); e.innerHTML = n ? html(n) : ""; 
+    const out = { href: a && a.getAttribute("href"), ref: q.ref, target: a && a.target, none: !e.querySelector(".docref"), linked: QS().filter(x => x.ref).length };
+    setCert(was); return out;
+  });
+  assert.equal(r.href, r.ref); assert.equal(r.target, "_blank"); assert.ok(r.none, "no ref, no link"); assert.ok(r.linked > 90, `${r.linked} linked`);
+});
+
 let quickIds = [];
 await step("quick mock: half length, drawn by weight, result page shows a scaled score", async () => {
   const n = await runMock(page, "quick");
@@ -206,6 +245,79 @@ await step("print cheat sheet renders to a multi-page PDF in Chromium", async ()
   assert.equal(pdf.subarray(0, 4).toString(), "%PDF");
   const pages = (pdf.toString("latin1").match(/\/Type\s*\/Page[^s]/g) || []).length;
   assert.ok(pages >= 2, `${pages} pages`);
+});
+
+await step("<title> and description follow cert and view; Academy link per language", async () => {
+  const s = await browser.newPage(); watch(s);
+  await s.goto(URL_ + "?sample=1");
+  assert.match(await s.title(), /^Claude Cert Studio · CCAR-F and CCDV-F practice$/);
+  await s.evaluate(() => { setCert("CCDV-F"); go("mock"); });
+  assert.equal(await s.title(), "CCDV-F mock exam — Claude Cert Studio");
+  assert.match(await s.getAttribute('meta[name="description"]', "content"), /53-item mock for Claude Certified Developer/);
+  await s.goto(URL_ + "?sample=1");
+  assert.equal(await s.getAttribute("#academyLink a", "href"), "https://ichisieben.dev/academy/certify/");
+  await s.goto(URL_ + "?sample=1&lang=es");
+  assert.equal(await s.getAttribute("#academyLink a", "href"), "https://ichisieben.dev/es/academy/certify/");
+  await s.close();
+});
+
+await step("product files: manifest + icons, robots -> sitemap, og:image 1200x630, sw.js stamp current", async () => {
+  const fs = await import("node:fs"); const { execFileSync } = await import("node:child_process");
+  const app = path.resolve(import.meta.dirname, "../app");
+  const man = JSON.parse(fs.readFileSync(path.join(app, "manifest.webmanifest"), "utf8"));
+  man.icons.forEach(i => assert.ok(fs.existsSync(path.join(app, i.src)), i.src));
+  assert.match(fs.readFileSync(path.join(app, "robots.txt"), "utf8"), /Sitemap: https:\/\/cert\.ichisieben\.dev\/sitemap\.xml/);
+  assert.match(fs.readFileSync(path.join(app, "sitemap.xml"), "utf8"), /<loc>https:\/\/cert\.ichisieben\.dev\/<\/loc>/);
+  const png = fs.readFileSync(path.join(app, "og.png"));
+  assert.deepEqual([png.readUInt32BE(16), png.readUInt32BE(20)], [1200, 630]);
+  assert.equal(await page.getAttribute('meta[property="og:image"]', "content"), "https://cert.ichisieben.dev/og.png");
+  assert.equal(await page.getAttribute('link[rel="manifest"]', "href"), "manifest.webmanifest");
+  execFileSync(process.execPath, [path.resolve(import.meta.dirname, "../tools/stamp-sw.mjs"), "--check"]);
+});
+
+await step("offline: the service worker serves the page and the bank with the network off", async () => {
+  const http = await import("node:http"); const fs = await import("node:fs");
+  const app = path.resolve(import.meta.dirname, "../app");
+  const types = { ".html": "text/html", ".js": "text/javascript", ".webmanifest": "application/manifest+json", ".svg": "image/svg+xml", ".png": "image/png" };
+  const srv = http.createServer((req, res) => {
+    const f = path.join(app, decodeURIComponent(new URL(req.url, "http://x").pathname).replace(/\/$/, "/index.html"));
+    if (!f.startsWith(app) || !fs.existsSync(f)) { res.writeHead(404); return res.end(); }
+    res.writeHead(200, { "content-type": types[path.extname(f)] || "application/octet-stream" }); fs.createReadStream(f).pipe(res);
+  });
+  await new Promise(r => srv.listen(0, "127.0.0.1", r));
+  const ctx = await browser.newContext();
+  try {
+    const s = await ctx.newPage(); watch(s);
+    const base = `http://localhost:${srv.address().port}/`;
+    await s.goto(base);
+    await s.evaluate(() => navigator.serviceWorker.ready);
+    await s.reload(); await s.evaluate(() => navigator.serviceWorker.ready);
+    await ctx.setOffline(true);
+    await s.reload();
+    assert.equal(await s.$$eval(".certcard", e => e.length), 2);
+    assert.ok(await s.evaluate(() => window.QUESTIONS["CCDV-F"].length > 100));
+  } finally { await ctx.close(); srv.close(); }
+});
+
+await step("no layout shift while the bank loads (CLS 0 with the data scripts delayed 800 ms)", async () => {
+  const http = await import("node:http"); const fs = await import("node:fs");
+  const app = path.resolve(import.meta.dirname, "../app");
+  const srv = http.createServer((req, res) => {
+    const u = new URL(req.url, "http://x"); const f = path.join(app, u.pathname === "/" ? "index.html" : u.pathname);
+    if (!f.startsWith(app) || !fs.existsSync(f)) { res.writeHead(404); return res.end(); }
+    const send = () => { res.writeHead(200, { "content-type": f.endsWith(".js") ? "text/javascript" : f.endsWith(".html") ? "text/html" : "application/octet-stream" }); res.end(fs.readFileSync(f)); };
+    f.includes("questions-") ? setTimeout(send, 800) : send();
+  });
+  await new Promise(r => srv.listen(0, "127.0.0.1", r));
+  try {
+    for (const width of [412, 1350]) {
+      const s = await browser.newPage({ viewport: { width, height: 840 } }); watch(s);
+      await s.addInitScript(() => { window.__cls = 0; new PerformanceObserver(l => l.getEntries().forEach(e => { if (!e.hadRecentInput) window.__cls += e.value; })).observe({ type: "layout-shift", buffered: true }); });
+      await s.goto(`http://127.0.0.1:${srv.address().port}/`); await s.waitForFunction(() => window.QUESTIONS && document.querySelector(".certcard")); await s.waitForTimeout(300);
+      const cls = await s.evaluate(() => window.__cls);
+      assert.ok(cls < 0.01, `CLS ${cls.toFixed(3)} at ${width}px`); await s.close();
+    }
+  } finally { srv.close(); }
 });
 
 await step("zero console errors", async () => { assert.deepEqual(errors, []); });

@@ -41,7 +41,7 @@ cd claude-cert-studio
 
 # optional, for the tests:
 npm ci && npx playwright install chromium
-bash tools/verify.sh        # bank validator + 16 e2e tests
+bash tools/verify.sh        # bank validator + 22 e2e tests
 ```
 
 URL switches: `?sample=1` (demo progress in memory, your `localStorage` is never touched), `?lang=es` (navigation and start page in Spanish; questions stay in English, like the exam), `?cert=CCDV-F`, `?view=blueprint`.
@@ -50,10 +50,11 @@ URL switches: `?sample=1` (demo progress in memory, your `localStorage` is never
 
 | | |
 |---|---|
-| Original questions | **218**: 106 CCAR-F + 112 CCDV-F (16 + 14 select-two) |
+| Original questions | **240**: 120 CCAR-F + 120 CCDV-F (18 + 15 select-two), spread by each domain's official weight |
+| Review | Model-reviewed against the official docs; human sample pending (`app/data/REVIEW-SAMPLE.md`). The Sep 26 review removed 22 duplicates; on Oct 15 the bank was refilled by domain weight. |
 | Trap types | 10, every wrong option carries one |
 | Task statements covered | 30 (CCAR-F) + 25 (CCDV-F), from the official guides v1.0 |
-| Tests | 16 Playwright e2e over `file://` + a bank validator |
+| Tests | 22 Playwright e2e (`file://` plus a local server for offline use and layout shift) + a bank validator |
 | Study documents | 8 domains, 7 labs, an 8-week plan, a per-objective checklist (Spanish) |
 
 The bank reached 120 + 120; a review on 2026-09-26 against Anthropic's documentation removed 22 (19 duplicates) and corrected 65 with a source. **It was reviewed by a model, not yet by a human.** If you find a wrong question, open an issue with its id (`CCDVF-2.1-01`).

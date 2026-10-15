@@ -1,0 +1,15 @@
+{
+  "name": "Claude Cert Studio",
+  "short_name": "Cert Studio",
+  "description": "Unofficial practice for the CCAR-F and CCDV-F exams: original scenario questions, timed mocks by official weight, every trap explained.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f4ef",
+  "theme_color": "#c9612c",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

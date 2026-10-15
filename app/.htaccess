@@ -5,3 +5,11 @@ RewriteRule ^ - [R=404,L]
 
 # Model-review findings from an earlier upload stay on the server until the owner deletes them; never serve them.
 RewriteRule ^data/review(/|$) - [R=404,L]
+
+# PWA: the manifest's media type, and the service worker is always revalidated (its cache name is versioned)
+AddType application/manifest+json .webmanifest
+<IfModule mod_headers.c>
+  <Files "sw.js">
+    Header set Cache-Control "no-cache"
+  </Files>
+</IfModule>

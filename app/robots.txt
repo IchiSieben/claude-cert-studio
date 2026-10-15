@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://cert.ichisieben.dev/sitemap.xml
