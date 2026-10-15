@@ -1,0 +1,13 @@
+{
+  "name": "claude-cert",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node tests/app.test.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.63.0",
+    "playwright-core": "^1.63.0",
+    "sharp": "^0.33.5"
+  }
+}

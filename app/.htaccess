@@ -1,0 +1,7 @@
+# Serve this folder only through cert.ichisieben.dev; direct access via the main domain path returns 404.
+RewriteEngine On
+RewriteCond %{HTTP_HOST} !^cert\.ichisieben\.dev$ [NC]
+RewriteRule ^ - [R=404,L]
+
+# Model-review findings from an earlier upload stay on the server until the owner deletes them; never serve them.
+RewriteRule ^data/review(/|$) - [R=404,L]

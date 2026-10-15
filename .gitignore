@@ -1,0 +1,12 @@
+node_modules/
+test-results/
+*.log
+.claude/
+*.lock
+dist/
+docs/handoffs/
+_papelera_claude/
+docs/private/
+.enjambre-lane
+tools/evidence/_video-raw/
+/evidence/

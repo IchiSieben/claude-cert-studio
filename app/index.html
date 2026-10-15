@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude Cert Studio</title>
+<link rel="canonical" href="https://cert.ichisieben.dev/">
+<meta property="og:title" content="Claude Cert Studio">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://cert.ichisieben.dev/">
+<meta name="description" content="Independent study environment for the Claude Certified Developer and Architect (Foundations) exams: blueprint, drill by task statement, timed mock exam, distractor taxonomy and progress.">
+<style>
+:root{
+  --bg:#f6f4ef; --panel:#ffffff; --ink:#1c1a17; --muted:#6b665d; --line:#e4dfd4;
+  --accent:#c9612c; --accent-ink:#ffffff; --ok:#2f8f5b; --bad:#c23b3b; --warn:#b98a1c;
+  --d1:#3a7bd5; --d2:#2f9e6f; --d3:#8a5cf6; --d4:#e0921a; --d5:#e0457b; --d6:#1fa3a3; --d7:#b4462f; --d8:#6b7d2c;
+  --radius:10px; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --serif:Georgia,"Times New Roman",serif; --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#16120f; --panel:#1f1a16; --ink:#efe9df; --muted:#a39c90; --line:#33291f;
+  --accent:#e98a58; --accent-ink:#1b120c; --ok:#5fc48a; --bad:#ef6b6b; --warn:#e2b84a;
+}}
+:root[data-theme="dark"]{
+  --bg:#16120f; --panel:#1f1a16; --ink:#efe9df; --muted:#a39c90; --line:#33291f;
+  --accent:#e98a58; --accent-ink:#1b120c; --ok:#5fc48a; --bad:#ef6b6b; --warn:#e2b84a;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.5}
+a{color:var(--accent)}
+button{font:inherit;cursor:pointer}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+header{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+header .wrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:10px 16px}
+.brand{font-family:var(--serif);font-size:20px;letter-spacing:.2px;margin-right:auto}
+.brand small{display:block;font-family:var(--sans);font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+nav{display:flex;gap:4px;flex-wrap:wrap}
+nav button{background:transparent;border:1px solid transparent;color:var(--muted);padding:6px 10px;border-radius:8px}
+nav button.active{color:var(--ink);border-color:var(--line);background:var(--panel)}
+.cert{display:flex;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:3px}
+.cert button{border:0;background:transparent;padding:5px 10px;border-radius:6px;color:var(--muted);font-family:var(--mono);font-size:12px}
+.cert button.active{background:var(--accent);color:var(--accent-ink)}
+.theme{border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:8px;padding:5px 9px}
+main{padding:24px 0 80px}
+h1{font-family:var(--serif);font-weight:500;font-size:30px;margin:0 0 6px}
+h2{font-family:var(--serif);font-weight:500;font-size:22px;margin:28px 0 10px}
+h3{font-size:15px;margin:18px 0 6px}
+p.lead{color:var(--muted);margin:0 0 18px;max-width:70ch}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+.card h3{margin-top:0}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:14px 0}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.kpi b{display:block;font-size:24px;font-family:var(--mono);font-weight:500}
+.kpi span{font-size:12px;color:var(--muted)}
+.bar{height:8px;background:var(--line);border-radius:6px;overflow:hidden;margin:6px 0}
+.bar i{display:block;height:100%;background:var(--accent)}
+.dom{display:flex;align-items:center;gap:10px;margin:6px 0}
+.dot{width:10px;height:10px;border-radius:50%;flex:none}
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;padding:2px 7px;border-radius:5px;border:1px solid var(--line);color:var(--muted);margin:2px 4px 2px 0}
+.tag.trap{border-color:color-mix(in srgb,var(--bad) 40%,var(--line));color:var(--bad)}
+.tag.ok{border-color:color-mix(in srgb,var(--ok) 40%,var(--line));color:var(--ok)}
+.btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:8px;padding:10px 16px;font-weight:600}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.sm{padding:6px 10px;font-size:13px;font-weight:500}
+.btn:disabled{opacity:.5;cursor:default}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.muted{color:var(--muted)}
+.mono{font-family:var(--mono)}
+.stem{font-size:17px;line-height:1.55;margin:8px 0 16px}
+.opt{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;margin:8px 0;color:var(--ink)}
+.opt .k{font-family:var(--mono);flex:none;width:26px;height:26px;border-radius:6px;border:1px solid var(--line);display:grid;place-items:center;font-size:13px}
+.opt.sel{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 35%,transparent)}
+.opt.correct{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 8%,var(--panel))}
+.opt.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 8%,var(--panel))}
+.opt .why{font-size:13px;color:var(--muted);margin-top:4px}
+.expl{border-left:3px solid var(--accent);padding:10px 14px;margin:14px 0;background:var(--panel);border-radius:0 var(--radius) var(--radius) 0}
+.expl h4{margin:0 0 6px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.timer{font-family:var(--mono);font-size:14px;padding:4px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.timer.low{color:var(--bad);border-color:var(--bad)}
+.progressline{display:flex;gap:3px;flex-wrap:wrap;margin:10px 0}
+.progressline i{width:14px;height:6px;border-radius:2px;background:var(--line);display:block}
+.progressline i.done{background:var(--accent)} .progressline i.cur{background:var(--ink)}
+.progressline i.ok{background:var(--ok)} .progressline i.bad{background:var(--bad)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+.score{font-family:var(--mono);font-size:56px;line-height:1;margin:6px 0}
+.score.pass{color:var(--ok)} .score.fail{color:var(--bad)}
+label.chk{display:flex;gap:8px;align-items:center;padding:6px 0;cursor:pointer}
+input[type=checkbox]{width:16px;height:16px}
+details{border:1px solid var(--line);border-radius:var(--radius);padding:8px 14px;margin:8px 0;background:var(--panel)}
+summary{cursor:pointer;font-weight:600}
+.task{display:grid;grid-template-columns:52px 1fr auto;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);align-items:start}
+.task:last-child{border-bottom:0}
+.task .mono{color:var(--muted)}
+.mini{font-size:12px;color:var(--muted);white-space:nowrap}
+kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;color:var(--muted)}
+footer{border-top:1px solid var(--line);color:var(--muted);font-size:12px;padding:16px 0}
+footer p{margin:0 0 6px}
+.grid.two{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.certcard{display:flex;flex-direction:column;gap:6px}.certcard h3{margin:0}.certcard p{margin:0}.certcard .btn{align-self:flex-start;margin-top:auto}
+.wbar{display:flex;height:12px;border-radius:6px;overflow:hidden;margin:6px 0}.wbar i{display:block;height:100%}
+.wlist{list-style:none;padding:0;margin:0 0 10px;font-size:13px}.wlist li{display:flex;align-items:center;gap:8px;padding:2px 0}
+.how li{margin:6px 0}
+.samplebar{margin:12px 0 0;padding:8px 12px;border:1px dashed var(--warn);border-radius:var(--radius);font-size:13px}
+.search{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);margin:0 0 14px}
+.concept p{margin:6px 0 0;font-size:14px}
+.printonly{display:none}
+@media (max-width:640px){ h1{font-size:24px} .stem{font-size:16px} .task{grid-template-columns:44px 1fr} .task .mini{grid-column:2} }
+@media print{
+  :root{--bg:#fff;--panel:#fff;--ink:#000;--muted:#444;--line:#bbb}
+  header,footer,nav,.btn,.noprint{display:none!important}
+  main{padding:0} .wrap{max-width:none;padding:0}
+  details{border:0;padding:0;margin:0 0 6px;break-inside:avoid-page}
+  summary{list-style:none;font-size:14px} summary::-webkit-details-marker{display:none}
+  .task{grid-template-columns:36px 1fr 120px;padding:3px 0;font-size:11px;break-inside:avoid}
+  .task .muted{font-size:10px!important}
+  h1{font-size:18px} p.lead{font-size:11px;margin-bottom:6px}
+  .printonly{display:block}
+  .bar{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="brand">Claude Cert Studio<small>independent study environment · not affiliated with Anthropic</small></div>
+  <div class="cert" id="certSwitch"></div>
+  <nav id="nav"></nav>
+  <button class="theme" id="themeBtn" title="Toggle theme">◐</button>
+</div></header>
+<div class="wrap" id="sampleBanner" hidden></div>
+<main><div class="wrap" id="view"></div></main>
+<footer><div class="wrap"><p id="disclaimer"><b>Unofficial study aid. Not affiliated with or endorsed by Anthropic. All questions are original; none reproduces a real exam item (the real items are confidential).</b></p><p id="footNote">Blueprints transcribed from the official exam guides v1.0 (July 2026). Progress is stored only in this browser. Keys: <kbd>A</kbd>–<kbd>D</kbd> select · <kbd>Enter</kbd> check / next.</p></div></footer>
+
+<script src="data/blueprints.js"></script>
+<script src="data/questions-ccar-f.js"></script>
+<script src="data/questions-ccdv-f.js"></script>
+<script>
+// ---------- state ----------
+const CERTS = Object.keys(window.BLUEPRINTS);
+const S = { cert: 'CCAR-F', view: 'start', drill: null, mock: null };
+// URL switches: ?sample=1 (demo progress in memory, localStorage never touched), ?lang=es (UI chrome in Spanish),
+// ?cert=CCDV-F, ?view=home|blueprint|concepts|drill|mock|traps|progress
+const URLP = new URLSearchParams(location.search);
+const SAMPLE = URLP.get('sample') === '1';
+const LANG = URLP.get('lang') === 'es' ? 'es' : 'en';
+const MEM = {};
+const store = SAMPLE ? {
+  get(k, d){ return k in MEM ? JSON.parse(MEM[k]) : d; },
+  set(k, v){ MEM[k] = JSON.stringify(v); }
+} : {
+  get(k, d){ try{ const v = localStorage.getItem('ccs:'+k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem('ccs:'+k, JSON.stringify(v)); }catch(e){} }
+};
+// sample mode is deterministic: seeded PRNG for every shuffle, so public captures are reproducible
+function mulberry32(a){ return function(){ a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+if(SAMPLE) Math.random = mulberry32(42);
+function seedSample(){
+  const now = Date.now(); const p = {};
+  Object.keys(window.QUESTIONS).forEach(cert => {
+    const c = p[cert] = { q:{}, traps:{}, mocks:[] };
+    window.QUESTIONS[cert].forEach(q => {
+      if(Math.random() > 0.6) return;
+      const ok = Math.random() < 0.55 + 0.05*(q.domain % 4);
+      c.q[q.id] = { seen:1, right:ok?1:0, wrong:ok?0:1, last:ok?'right':'wrong', when: now - Math.floor(Math.random()*6)*864e5 };
+      if(!ok){ const k = Object.keys(q.options).find(x => !q.answer.includes(x)); const t = q.distractors[k]; if(t) c.traps[t] = (c.traps[t]||0)+1; }
+    });
+    [[562,51],[648,61],[731,70]].forEach(([score,pct],i) => c.mocks.push({ date: new Date(now-(6-2*i)*864e5).toISOString().slice(0,10), kind: i<2?'quick':'full', score, pct, byDomain:{}, misses: 30-8*i, ids:[] }));
+  });
+  store.set('progress', p);
+}
+// UI chrome strings; questions, explanations and the blueprint stay in English (the exam is in English)
+const T = {
+  en: { views:{ start:'Start', home:'Overview', blueprint:'Blueprint', concepts:'Concepts', drill:'Drill', mock:'Mock exam', traps:'Traps', progress:'Progress' },
+    sample:'Sample mode · demo progress held in memory; nothing is saved in this browser.', sampleExit:'Study for real',
+    startH:'Two Claude certifications, one study environment',
+    startLead:'Practise for the Claude Certified Architect and Developer (Foundations) exams with original scenario questions, a timed mock scored like the real one, and feedback on which kind of trap caught you.',
+    items:'items', min:'min', pass:'pass', bank:'original questions', study:'Study', weights:'Where the points are',
+    howH:'What the app does, in 90 seconds',
+    how:['<b>Pick a certification</b> — the blueprint shows every domain with its official weight and task statements.','<b>Diagnose</b> — a half-length mock drawn by weight shows your weakest domain.','<b>Drill</b> — by domain or single task statement; every wrong option is tagged with one of ten trap types.','<b>Sit the full mock</b> — timed, scored 100–1000 (pass 720), with a per-domain result and your misses.','<b>Come back</b> — “Due today” resurfaces misses and anything not seen for 3 days. Progress stays in your browser.'],
+    who:'Who can sit the real exams: as of 2026-10-15 the <a href="https://anthropic-partners.skilljar.com/page/faq-certifications" rel="noopener">official FAQ</a> limits them to people at Claude Partner Network organizations, registering with a company email.',
+    note:'Blueprints transcribed from the official exam guides v1.0 (July 2026). Progress is stored only in this browser. Keys: <kbd>A</kbd>–<kbd>D</kbd> select · <kbd>Enter</kbd> check / next.' },
+  es: { views:{ start:'Inicio', home:'Resumen', blueprint:'Blueprint', concepts:'Conceptos', drill:'Práctica', mock:'Simulacro', traps:'Trampas', progress:'Progreso' },
+    sample:'Modo muestra · progreso de demostración en memoria; no se guarda nada en este navegador.', sampleExit:'Estudiar de verdad',
+    startH:'Dos certificaciones de Claude, un solo entorno de estudio',
+    startLead:'Practica para los exámenes Claude Certified Architect y Developer (Foundations) con preguntas de escenario originales, un simulacro cronometrado con la misma escala que el real y la trampa exacta en la que caíste. Las preguntas están en inglés, como el examen.',
+    items:'ítems', min:'min', pass:'aprueba', bank:'preguntas originales', study:'Estudiar', weights:'Dónde están los puntos',
+    howH:'Qué hace la app, en 90 segundos',
+    how:['<b>Elige una certificación</b>: el blueprint muestra cada dominio con su peso oficial y sus task statements.','<b>Diagnostica</b>: un simulacro de media longitud, extraído por peso, te dice tu dominio más débil.','<b>Practica</b>: por dominio o por task statement; cada opción incorrecta lleva uno de diez tipos de trampa.','<b>Rinde el simulacro completo</b>: cronometrado, escala 100–1000 (aprueba con 720), con resultado por dominio y tus fallos.','<b>Vuelve</b>: “Due today” te devuelve los fallos y lo que no ves hace 3 días. El progreso queda en tu navegador.'],
+    who:'Quién puede rendir los exámenes reales: al 2026-10-15, la <a href="https://anthropic-partners.skilljar.com/page/faq-certifications" rel="noopener">FAQ oficial</a> los limita a personas de organizaciones del Claude Partner Network, con correo corporativo.',
+    note:'Blueprints transcritos de las guías oficiales v1.0 (julio 2026). El progreso se guarda solo en este navegador. Teclas: <kbd>A</kbd>–<kbd>D</kbd> elegir · <kbd>Enter</kbd> comprobar / siguiente.' }
+}[LANG];
+// progress shape: { [cert]: { q: { [id]: {seen, right, wrong, last} }, traps: {key:count}, mocks:[{date, score, pct, byDomain, misses}] } }
+function prog(){ const p = store.get('progress', {}); if(!p[S.cert]) p[S.cert] = {q:{}, traps:{}, mocks:[]}; return p; }
+function saveProg(p){ store.set('progress', p); }
+const BP = () => window.BLUEPRINTS[S.cert];
+const QS = () => window.QUESTIONS[S.cert] || [];
+const domColor = d => `var(--d${d})`;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const shuffle = a => { a = a.slice(); for(let i=a.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+
+// ---------- routing ----------
+const VIEWS = T.views;
+function go(v){ S.view = v; if(v!=='drill') S.drill = S.drill && S.drill.active ? S.drill : null; render(); window.scrollTo(0,0); }
+function setCert(c){ S.cert = c; S.drill = null; S.mock = null; store.set('cert', c); render(); }
+function render(){
+  document.getElementById('certSwitch').innerHTML = CERTS.map(c => `<button class="${c===S.cert?'active':''}" onclick="setCert('${c}')">${c}</button>`).join('');
+  document.getElementById('nav').innerHTML = Object.entries(VIEWS).map(([k,v]) => `<button class="${k===S.view?'active':''}" onclick="go('${k}')">${v}</button>`).join('');
+  const fn = { start, home, blueprint, concepts, drill, mock, traps, progress }[S.view];
+  document.getElementById('view').innerHTML = fn();
+}
+
+// ---------- helpers ----------
+function domainStats(){
+  const p = prog()[S.cert].q; const out = {};
+  BP().domains.forEach(d => out[d.id] = { seen:0, right:0, total: QS().filter(q=>q.domain===d.id).length, tasks:{} });
+  QS().forEach(q => { const r = p[q.id]; const o = out[q.domain]; if(!o.tasks[q.task]) o.tasks[q.task] = {seen:0,right:0,total:0}; o.tasks[q.task].total++; if(r){ o.seen++; o.tasks[q.task].seen++; if(r.last==='right'){ o.right++; o.tasks[q.task].right++; } } });
+  return out;
+}
+function record(q, ok, chosen){
+  const p = prog(); const c = p[S.cert]; const r = c.q[q.id] || {seen:0,right:0,wrong:0};
+  r.seen++; ok ? r.right++ : r.wrong++; r.last = ok ? 'right' : 'wrong'; r.when = Date.now(); c.q[q.id] = r;
+  if(!ok){ chosen.filter(k => !q.answer.includes(k)).forEach(k => { const t = q.distractors[k]; if(t) c.traps[t] = (c.traps[t]||0)+1; }); }
+  saveProg(p);
+}
+// spaced practice: due = never seen, last answer wrong, or right but older than DUE_DAYS
+const DUE_DAYS = 3;
+function isDue(q, p){ const r = (p || prog()[S.cert].q)[q.id]; return !r || r.last!=='right' || !r.when || Date.now()-r.when > DUE_DAYS*864e5; }
+function dueCount(){ const p = prog()[S.cert].q; return QS().filter(q => isDue(q, p)).length; }
+function grade(q, chosen){ const a = q.answer.slice().sort().join(''); const c = chosen.slice().sort().join(''); return a===c; }
+function bar(pct, color){ return `<div class="bar"><i style="width:${Math.max(0,Math.min(100,pct))}%;background:${color||'var(--accent)'}"></i></div>`; }
+
+// ---------- views ----------
+function start(){
+  const card = code => { const b = window.BLUEPRINTS[code]; const n = (window.QUESTIONS[code]||[]).length;
+    return `<div class="card certcard"><p class="mono muted" style="margin:0">${code}</p><h3>${esc(b.name)}</h3><p class="muted">${esc(b.audience)}</p>
+    <p class="mono" style="font-size:13px">${b.items} ${T.items} · ${b.minutes} ${T.min} · ${T.pass} ${b.pass}/1000 · ${n} ${T.bank}</p>
+    <div class="wbar" role="img" aria-label="${T.weights}: ${b.domains.map(d => d.id+' '+d.weight+'%').join(', ')}">${b.domains.map(d => `<i style="width:${d.weight}%;background:${domColor(d.id)}" title="${d.id}. ${esc(d.name)} · ${d.weight}%"></i>`).join('')}</div>
+    <ul class="wlist">${b.domains.map(d => `<li><span class="dot" style="background:${domColor(d.id)}"></span>${d.id}. ${esc(d.name)} <span class="mono muted">${d.weight}%</span></li>`).join('')}</ul>
+    <button class="btn" onclick="setCert('${code}');go('home')">${T.study} ${code} →</button></div>`; };
+  return `<h1>${T.startH}</h1><p class="lead">${T.startLead}</p>
+  <div class="grid two">${CERTS.map(card).join('')}</div>
+  <h2>${T.howH}</h2><ol class="how">${T.how.map(s => `<li>${s}</li>`).join('')}</ol>
+  <p class="muted" style="font-size:14px">${T.who}</p>`;
+}
+function home(){
+  const b = BP(); const st = domainStats(); const c = prog()[S.cert];
+  const seen = Object.keys(c.q).length; const right = Object.values(c.q).filter(r=>r.last==='right').length;
+  const lastMock = c.mocks[c.mocks.length-1];
+  return `
+  <h1>${esc(b.name)}</h1>
+  <p class="lead">${esc(b.audience)}</p>
+  <div class="kpis">
+    <div class="kpi"><b>${b.items}</b><span>items · ${b.minutes} min</span></div>
+    <div class="kpi"><b>${b.pass}</b><span>pass mark (scale 100–1000)</span></div>
+    <div class="kpi"><b>${QS().length}</b><span>original questions in the bank</span></div>
+    <div class="kpi"><b>${seen?Math.round(100*right/seen):'–'}${seen?'%':''}</b><span>last-answer accuracy (${seen} seen)</span></div>
+    <div class="kpi"><b>${lastMock?lastMock.score:'–'}</b><span>last mock score</span></div>
+    <div class="kpi"><b id="dueKpi">${dueCount()}</b><span>due today · <a href="#" onclick="startDrill({due:true});return false">practise</a></span></div>
+  </div>
+  <div class="grid">
+    <div class="card"><h3>1 · Diagnose</h3><p class="muted">A short weighted mock (half length) tells you which domains to work first. Take it before reading anything.</p><button class="btn" onclick="startMock('quick')">Quick diagnostic</button></div>
+    <div class="card"><h3>2 · Drill by task statement</h3><p class="muted">Pick domains or single task statements. Immediate feedback with the distractor type of every wrong option.</p><button class="btn ghost" onclick="go('drill')">Open drill</button></div>
+    <div class="card"><h3>3 · Sit the full mock</h3><p class="muted">${b.items} items in ${b.minutes} minutes, drawn by official weight, scored 100–1000. Review your misses by trap type afterwards.</p><button class="btn ghost" onclick="startMock('full')">Full mock</button></div>
+  </div>
+  <h2>Where the points are</h2>
+  ${b.domains.map(d => `<div class="dom"><span class="dot" style="background:${domColor(d.id)}"></span><div style="flex:1"><div class="row" style="justify-content:space-between"><span>${d.id}. ${esc(d.name)}</span><span class="mono muted">${d.weight}% · ≈${Math.round(b.items*d.weight/100)} items · ${st[d.id].seen?Math.round(100*st[d.id].right/st[d.id].seen)+'% right':'not started'}</span></div>${bar(d.weight*100/30, domColor(d.id))}</div></div>`).join('')}
+  <h2>How the exam is written</h2>
+  <p class="lead">Every item is a production scenario with one dominant constraint (usually in capitals: MOST reliable, LOWEST cost, without changing the model) and four plausible options. Three of the four are recognisable traps. Read the constraint first, strike the parameter patches and the prompt-only fixes, then choose the option that uses the platform primitive named for that job. The <a href="#" onclick="go('traps');return false">Traps</a> tab lists the ten distractor types this bank uses.</p>`;
+}
+
+function blueprint(){
+  const b = BP(); const st = domainStats();
+  return `<h1>Blueprint · ${b.code}</h1><p class="lead">Official domains, weights and task statements (exam guide v1.0). Mastery = share of a task's questions whose last answer was correct.</p>
+  <p class="printonly muted">Cheat sheet printed ${new Date().toISOString().slice(0,10)} · ${b.items} items · ${b.minutes} min · pass ${b.pass}/1000</p>
+  <div class="row noprint" style="margin:0 0 12px"><button class="btn sm ghost" id="printBtn" onclick="window.print()">Print cheat sheet</button><span class="muted" style="font-size:13px">Prints every task statement with your mastery; interactive controls are hidden.</span></div>
+  ${b.domains.map(d => `<details ${d.weight>=15?'open':''}><summary><span class="dot" style="display:inline-block;background:${domColor(d.id)};margin-right:8px"></span>${d.id}. ${esc(d.name)} <span class="mono muted">· ${d.weight}%</span></summary>
+    ${d.tasks.map(t => { const s = st[d.id].tasks[t.id] || {seen:0,right:0,total:0}; const pct = s.seen? Math.round(100*s.right/s.seen) : null;
+      return `<div class="task"><span class="mono">${t.id}</span><div><b>${esc(t.name)}</b><div class="muted" style="font-size:14px">${esc(t.text)}</div></div><div class="mini">${s.total} q · ${pct===null?'—':pct+'%'} <button class="btn sm ghost" onclick="startDrill({tasks:['${t.id}']})">drill</button><div class="printonly">${bar(pct||0, pct===null?'var(--line)':pct>=75?'var(--ok)':pct>=50?'var(--warn)':'var(--bad)')}</div></div></div>`; }).join('')}
+  </details>`).join('')}`;
+}
+// print: open every domain so the cheat sheet is complete, restore afterwards
+let printOpened = [];
+window.addEventListener('beforeprint', () => { printOpened = [...document.querySelectorAll('details:not([open])')]; printOpened.forEach(d => d.open = true); });
+window.addEventListener('afterprint', () => { printOpened.forEach(d => d.open = false); printOpened = []; });
+
+// ---------- concepts ----------
+function conceptIndex(){
+  const by = new Map();
+  QS().forEach(q => { const k = q.concept; if(!by.has(k)) by.set(k, { concept:k, learn:q.learn, apply:q.apply, tasks:new Set(), n:0, domain:q.domain }); const c = by.get(k); c.tasks.add(q.task); c.n++; });
+  return [...by.values()].sort((a,b) => a.domain-b.domain || [...a.tasks][0].localeCompare([...b.tasks][0], undefined, {numeric:true}) || a.concept.localeCompare(b.concept));
+}
+function concepts(){
+  const list = conceptIndex();
+  return `<h1>Concepts · ${S.cert}</h1><p class="lead">One card per concept the bank tests: when it is the right call, when it is not, and how to spot it in your own code. ${list.length} concepts.</p>
+  <input class="search" id="conceptSearch" type="search" placeholder="Search concepts, e.g. cache, hook, stop_reason…" oninput="filterConcepts(this.value)" aria-label="Search concepts">
+  <p class="muted" id="conceptCount" style="font-size:13px;margin:-6px 0 10px"></p>
+  <div class="grid" id="conceptGrid">${list.map(c => `<div class="card concept" data-text="${esc((c.concept+' '+c.learn+' '+c.apply+' '+[...c.tasks].join(' ')).toLowerCase())}">
+    <div class="row" style="justify-content:space-between"><h3 style="margin:0">${esc(c.concept)}</h3><span class="mono muted" style="font-size:12px">${c.n} q</span></div>
+    <div>${[...c.tasks].sort().map(t => `<a href="#" class="tag" style="text-decoration:none" title="Drill task ${t}" onclick="startDrill({tasks:['${t}']});return false">${t} · drill</a>`).join('')}</div>
+    <p><b>Learn:</b> <span class="muted">${esc(c.learn)}</span></p>
+    <p><b>Apply:</b> <span class="muted">${esc(c.apply)}</span></p></div>`).join('')}</div>`;
+}
+function filterConcepts(v){
+  const words = v.toLowerCase().split(/\s+/).filter(Boolean); let shown = 0;
+  document.querySelectorAll('#conceptGrid .concept').forEach(el => { const ok = words.every(w => el.dataset.text.includes(w)); el.style.display = ok ? '' : 'none'; if(ok) shown++; });
+  document.getElementById('conceptCount').textContent = words.length ? `${shown} match${shown===1?'':'es'}` : '';
+}
+
+// ---------- drill ----------
+function startDrill(opt){
+  let pool = QS();
+  if(opt.tasks) pool = pool.filter(q => opt.tasks.includes(q.task));
+  else if(opt.domains) pool = pool.filter(q => opt.domains.includes(q.domain));
+  if(opt.missedOnly){ const p = prog()[S.cert].q; pool = pool.filter(q => p[q.id] && p[q.id].last==='wrong'); }
+  if(opt.due){ const p = prog()[S.cert].q; pool = pool.filter(q => isDue(q, p)); }
+  if(opt.unseenFirst){ const p = prog()[S.cert].q; pool = pool.slice().sort((a,b)=> (p[a.id]?1:0)-(p[b.id]?1:0)); }
+  else pool = shuffle(pool);
+  if(!pool.length){ alert('No questions match that filter yet.'); return; }
+  S.drill = { active:true, pool, i:0, chosen:[], checked:false, right:0 };
+  S.view = 'drill'; render(); window.scrollTo(0,0);
+}
+function drill(){
+  const d = S.drill;
+  if(!d || !d.active){
+    const b = BP(); const st = domainStats(); const missed = Object.values(prog()[S.cert].q).filter(r=>r.last==='wrong').length; const due = dueCount();
+    return `<h1>Drill</h1><p class="lead">Untimed. One question at a time, feedback after each. Choose what to practise.</p>
+    <div class="card"><h3>By domain</h3>${b.domains.map(d => `<label class="chk"><input type="checkbox" class="domchk" value="${d.id}" checked> <span class="dot" style="background:${domColor(d.id)}"></span> ${d.id}. ${esc(d.name)} <span class="muted mono">${d.weight}% · ${st[d.id].total} q</span></label>`).join('')}
+    <div class="row" style="margin-top:10px"><button class="btn" onclick="startDrill({domains:[...document.querySelectorAll('.domchk:checked')].map(e=>+e.value), unseenFirst:true})">Start (unseen first)</button><button class="btn ghost" onclick="startDrill({domains:[...document.querySelectorAll('.domchk:checked')].map(e=>+e.value)})">Start (random)</button><button class="btn ghost" ${missed?'':'disabled'} onclick="startDrill({domains:[1,2,3,4,5,6,7,8],missedOnly:true})">Retry my ${missed} misses</button></div></div>
+    <div class="card" style="margin-top:14px"><h3>Due today · ${due}</h3><p class="muted">Spaced practice: questions never seen, answered wrong last time, or answered right more than ${DUE_DAYS} days ago — in the domains ticked above.</p><button class="btn" id="dueBtn" ${due?'':'disabled'} onclick="startDrill({domains:[...document.querySelectorAll('.domchk:checked')].map(e=>+e.value), due:true, unseenFirst:true})">Practise due questions</button></div>
+    <p class="muted" style="margin-top:14px">To drill a single task statement, use the <a href="#" onclick="go('blueprint');return false">Blueprint</a> tab.</p>`;
+  }
+  const q = d.pool[d.i]; const dom = BP().domains.find(x=>x.id===q.domain); const task = dom.tasks.find(t=>t.id===q.task);
+  return `<div class="row" style="justify-content:space-between"><div><span class="tag" style="border-color:${domColor(q.domain)};color:${domColor(q.domain)}">D${q.domain} · ${esc(dom.name)}</span><span class="tag">${q.task} ${esc(task?task.name:'')}</span></div><span class="mono muted">${d.i+1} / ${d.pool.length} · ${d.right} right</span></div>
+  <div class="progressline">${d.pool.map((_,i)=>`<i class="${i<d.i?(d.results&&d.results[i]?'ok':'bad'):i===d.i?'cur':''}"></i>`).join('')}</div>
+  ${question(q, d)}
+  <div class="row" style="margin-top:14px">
+    ${d.checked ? `<button class="btn" onclick="drillNext()">${d.i+1<d.pool.length?'Next →':'Finish'}</button>` : `<button class="btn" onclick="drillCheck()" ${d.chosen.length===q.select?'':'disabled'}>Check answer</button>`}
+    <button class="btn ghost" onclick="S.drill=null;render()">Quit drill</button>
+  </div>`;
+}
+function question(q, ctx){
+  const multi = q.select>1;
+  return `<p class="muted mono" style="font-size:12px;margin:14px 0 0">${q.id} · ${multi?`select ${q.select}`:'select one'}</p>
+  <div class="stem">${esc(q.stem)}</div>
+  ${['A','B','C','D'].map(k => { let cls = ctx.chosen.includes(k)?'sel':''; let why='';
+    if(ctx.checked){ if(q.answer.includes(k)) cls='correct'; else if(ctx.chosen.includes(k)) cls='wrong'; if(!q.answer.includes(k)) why = `<div class="why"><span class="tag trap">${esc(window.TRAPS[q.distractors[k]]?window.TRAPS[q.distractors[k]].name:q.distractors[k])}</span> ${esc(q.why_wrong[k]||'')}</div>`; }
+    return `<button class="opt ${cls}" onclick="pick('${k}')" ${ctx.checked?'disabled':''}><span class="k">${k}</span><span>${esc(q.options[k])}${why}</span></button>`; }).join('')}
+  ${ctx.checked ? `<div class="expl"><h4>${grade(q, ctx.chosen)?'Correct':'Not quite'} · concept: ${esc(q.concept)}</h4><p style="margin:0 0 8px">${esc(q.explanation)}</p><p class="muted" style="margin:0 0 6px"><b>When to use / when not:</b> ${esc(q.learn)}</p><p class="muted" style="margin:0"><b>In your own code:</b> ${esc(q.apply)}</p></div>` : ''}`;
+}
+function pick(k){
+  const ctx = S.drill && S.drill.active ? S.drill : S.mock; if(!ctx || ctx.checked) return;
+  const q = ctx.pool[ctx.i];
+  if(q.select===1) ctx.chosen = [k]; else { ctx.chosen = ctx.chosen.includes(k) ? ctx.chosen.filter(x=>x!==k) : (ctx.chosen.length<q.select ? [...ctx.chosen,k] : ctx.chosen); }
+  if(S.mock && !S.drill) { S.mock.answers[ctx.i] = ctx.chosen.slice(); }
+  render();
+}
+function drillCheck(){ const d = S.drill; const q = d.pool[d.i]; const ok = grade(q, d.chosen); d.checked = true; d.results = d.results||[]; d.results[d.i] = ok; if(ok) d.right++; record(q, ok, d.chosen); render(); }
+function drillNext(){ const d = S.drill; if(d.i+1 >= d.pool.length){ S.drill = null; go('progress'); return; } d.i++; d.chosen=[]; d.checked=false; render(); window.scrollTo(0,0); }
+
+// ---------- mock ----------
+function startMock(kind){
+  const b = BP(); const n = kind==='quick' ? Math.ceil(b.items/2) : b.items; const minutes = kind==='quick' ? Math.ceil(b.minutes/2) : b.minutes;
+  // draw by official weight, largest remainder so the counts sum to n
+  const want = b.domains.map(d => ({id:d.id, raw:n*d.weight/100})); let counts = want.map(w=>({id:w.id, n:Math.floor(w.raw), frac:w.raw-Math.floor(w.raw)}));
+  let left = n - counts.reduce((a,c)=>a+c.n,0); counts.sort((a,b)=>b.frac-a.frac); for(let i=0;i<left;i++) counts[i%counts.length].n++;
+  // no repeats: within each domain prefer questions used in the fewest previous mocks (never used first)
+  const uses = mockUses(); const fresh = qs => shuffle(qs).sort((a,b) => (uses[a.id]||0) - (uses[b.id]||0));
+  let pool = [];
+  counts.forEach(c => { const qs = fresh(QS().filter(q=>q.domain===c.id)); pool = pool.concat(qs.slice(0, c.n)); });
+  if(pool.length < n){ const used = new Set(pool.map(q=>q.id)); pool = pool.concat(fresh(QS().filter(q=>!used.has(q.id))).slice(0, n-pool.length)); }
+  pool = shuffle(pool);
+  S.mock = { kind, pool, i:0, chosen:[], answers:{}, checked:false, start:Date.now(), end:Date.now()+minutes*60000, submitted:false };
+  S.drill = null; S.view = 'mock'; render(); window.scrollTo(0,0); tick();
+}
+// { [questionId]: number of submitted mocks that used it }, from the ids stored with each mock
+function mockUses(){ const u = {}; prog()[S.cert].mocks.forEach(m => (m.ids||[]).forEach(id => u[id] = (u[id]||0)+1)); return u; }
+let tickTimer = null;
+function tick(){ clearTimeout(tickTimer); const m = S.mock; if(!m || m.submitted) return; const el = document.getElementById('timer'); if(el){ const left = Math.max(0, m.end-Date.now()); const mm = Math.floor(left/60000), ss = Math.floor(left%60000/1000); el.textContent = `${mm}:${String(ss).padStart(2,'0')}`; el.classList.toggle('low', left<10*60000); if(left<=0){ submitMock(); return; } } tickTimer = setTimeout(tick, 1000); }
+function mock(){
+  const m = S.mock; const b = BP();
+  if(!m){ return `<h1>Mock exam</h1><p class="lead">Timed, no feedback until you submit. Items are drawn by the official domain weights; the score is scaled 100–1000 like the real exam (linear approximation — the real scaling is not published). Pass is ${b.pass}.</p>
+    <div class="grid"><div class="card"><h3>Quick diagnostic</h3><p class="muted">${Math.ceil(b.items/2)} items · ${Math.ceil(b.minutes/2)} min. Use it first to find weak domains.</p><button class="btn" onclick="startMock('quick')">Start quick</button></div>
+    <div class="card"><h3>Full mock</h3><p class="muted">${b.items} items · ${b.minutes} min. Same shape as the real sitting.</p><button class="btn" onclick="startMock('full')">Start full</button></div></div>
+    <p class="muted" style="margin-top:14px" id="mockFresh">The bank has ${QS().length} questions; ${(u => QS().filter(q=>!u[q.id]).length)(mockUses())} have not appeared in any of your mocks yet. Each new mock draws those first (per domain, by official weight), so repeats only start once a domain's fresh questions run out. Use Drill for spaced practice.</p>`; }
+  if(m.submitted) return mockResult();
+  const q = m.pool[m.i]; const answered = Object.keys(m.answers).filter(i=>m.answers[i].length).length;
+  m.chosen = m.answers[m.i] || [];
+  return `<div class="row" style="justify-content:space-between"><span class="mono muted">Item ${m.i+1} of ${m.pool.length} · ${answered} answered</span><span class="timer" id="timer">—</span></div>
+  <div class="progressline">${m.pool.map((_,i)=>`<i class="${i===m.i?'cur':(m.answers[i]&&m.answers[i].length?'done':'')}" onclick="S.mock.i=${i};render()" style="cursor:pointer"></i>`).join('')}</div>
+  ${question(q, {chosen:m.chosen, checked:false})}
+  <div class="row" style="margin-top:14px"><button class="btn ghost" onclick="S.mock.i=Math.max(0,S.mock.i-1);render()" ${m.i===0?'disabled':''}>← Prev</button><button class="btn" onclick="S.mock.i=Math.min(S.mock.pool.length-1,S.mock.i+1);render();window.scrollTo(0,0)" ${m.i===m.pool.length-1?'disabled':''}>Next →</button><span style="flex:1"></span><button class="btn ghost" onclick="if(confirm('Submit the exam now?'))submitMock()">Submit exam</button></div>`;
+}
+function submitMock(){
+  const m = S.mock; if(!m || m.submitted) return; m.submitted = true; clearTimeout(tickTimer);
+  const b = BP(); const by = {}; b.domains.forEach(d=>by[d.id]={right:0,total:0,weight:d.weight});
+  const misses = []; const p = prog();
+  m.pool.forEach((q,i) => { const ch = m.answers[i]||[]; const ok = grade(q, ch); by[q.domain].total++; if(ok) by[q.domain].right++; else misses.push({q, chosen:ch}); record(q, ok, ch); });
+  // weighted percent: each domain contributes weight * (right/total); domains with no items contribute nothing (renormalised)
+  let wsum=0, acc=0; Object.values(by).forEach(d => { if(d.total){ wsum+=d.weight; acc += d.weight*d.right/d.total; } });
+  const pct = wsum ? acc/wsum : 0; const score = Math.round(100 + 900*pct);
+  m.result = { score, pct, by, misses, minutes: Math.round((Date.now()-m.start)/60000) };
+  const p2 = prog(); p2[S.cert].mocks.push({ date: new Date().toISOString().slice(0,10), kind:m.kind, score, pct:Math.round(pct*100), byDomain: Object.fromEntries(Object.entries(by).map(([k,v])=>[k, v.total?Math.round(100*v.right/v.total):null])), misses: misses.length, ids: m.pool.map(q=>q.id) }); saveProg(p2);
+  render(); window.scrollTo(0,0);
+}
+function mockResult(){
+  const m = S.mock; const r = m.result; const b = BP(); const pass = r.score >= b.pass;
+  const trapCount = {}; r.misses.forEach(({q,chosen}) => chosen.filter(k=>!q.answer.includes(k)).forEach(k => { const t=q.distractors[k]; trapCount[t]=(trapCount[t]||0)+1; }));
+  const weakest = Object.entries(r.by).filter(([,d])=>d.total).sort((a,b)=>(a[1].right/a[1].total)-(b[1].right/b[1].total))[0];
+  return `<h1>${m.kind==='quick'?'Diagnostic':'Mock'} result</h1>
+  <div class="score ${pass?'pass':'fail'}">${r.score}</div><p class="muted">${pass?'PASS':'below the pass mark'} · pass mark ${b.pass} · ${Math.round(r.pct*100)}% weighted correct · ${r.minutes} min used · ${r.misses.length} misses</p>
+  <h2>By domain</h2>
+  ${b.domains.map(d => { const x = r.by[d.id]; const pct = x.total? Math.round(100*x.right/x.total) : null; return `<div class="dom"><span class="dot" style="background:${domColor(d.id)}"></span><div style="flex:1"><div class="row" style="justify-content:space-between"><span>${d.id}. ${esc(d.name)} <span class="muted mono">${d.weight}%</span></span><span class="mono">${pct===null?'—':x.right+'/'+x.total+' · '+pct+'%'}</span></div>${bar(pct||0, pct===null?'var(--line)':pct>=75?'var(--ok)':pct>=60?'var(--warn)':'var(--bad)')}</div></div>`; }).join('')}
+  ${weakest ? `<p class="lead" style="margin-top:14px">Work <b>domain ${weakest[0]}</b> first: it is your weakest and it carries ${r.by[weakest[0]].weight}% of the exam. <button class="btn sm" onclick="startDrill({domains:[${weakest[0]}]})">Drill domain ${weakest[0]}</button></p>` : ''}
+  <h2>Which traps caught you</h2>
+  ${Object.keys(trapCount).length ? Object.entries(trapCount).sort((a,b)=>b[1]-a[1]).map(([t,n]) => `<div class="dom"><span class="tag trap">${esc(window.TRAPS[t]?window.TRAPS[t].name:t)}</span><span class="mono">${n}×</span><span class="muted" style="font-size:13px">${esc(window.TRAPS[t]?window.TRAPS[t].hint:'')}</span></div>`).join('') : '<p class="muted">No wrong options selected.</p>'}
+  <h2>Review misses</h2>
+  ${r.misses.length ? r.misses.map(({q,chosen}) => `<details><summary>${q.id} · ${esc(q.concept)} <span class="muted mono">you: ${chosen.join('')||'blank'} · key: ${q.answer.join('')}</span></summary>${question(q,{chosen, checked:true})}</details>`).join('') : '<p class="muted">Nothing to review.</p>'}
+  <div class="row" style="margin-top:18px"><button class="btn" onclick="S.mock=null;go('progress')">Save & see progress</button><button class="btn ghost" onclick="S.mock=null;go('home')">Back to overview</button></div>`;
+}
+
+// ---------- traps ----------
+function traps(){
+  const c = prog()[S.cert].traps;
+  return `<h1>Distractor taxonomy</h1><p class="lead">Every wrong option in this bank is one of these ten. Recognising the type is faster than knowing the fact: strike the type, and the correct option is usually what remains. Counts are how often each type has caught you in ${S.cert}.</p>
+  ${Object.entries(window.TRAPS).map(([k,t]) => `<div class="card" style="margin:10px 0"><div class="row" style="justify-content:space-between"><h3 style="margin:0">${esc(t.name)}</h3><span class="mono muted">${c[k]||0}× caught</span></div><p class="muted" style="margin:6px 0 0">${esc(t.hint)}</p></div>`).join('')}
+  <h2>Elimination order</h2>
+  <ol class="muted"><li>Underline the dominant constraint (cost, latency, reuse, security, determinism, reliability).</li><li>Strike every parameter patch when the problem is architectural.</li><li>Strike every option that trusts a prompt for something with consequences.</li><li>Among what is left, pick the option that uses the platform primitive named for that job: stop_reason, tool_choice, hooks, schemas, Batches, caching, subagents, .mcp.json, rules with paths…</li></ol>`;
+}
+
+// ---------- progress ----------
+function progress(){
+  const c = prog()[S.cert]; const st = domainStats(); const b = BP();
+  const seen = Object.keys(c.q).length; const right = Object.values(c.q).filter(r=>r.last==='right').length;
+  return `<h1>Progress · ${S.cert}</h1>
+  <div class="kpis"><div class="kpi"><b>${seen}/${QS().length}</b><span>questions seen</span></div><div class="kpi"><b>${seen?Math.round(100*right/seen):'–'}${seen?'%':''}</b><span>last-answer accuracy</span></div><div class="kpi"><b>${c.mocks.length}</b><span>mocks taken</span></div><div class="kpi"><b>${c.mocks.length?Math.max(...c.mocks.map(m=>m.score)):'–'}</b><span>best mock</span></div></div>
+  <h2>Mastery by task statement</h2>
+  ${b.domains.map(d => `<details open><summary><span class="dot" style="display:inline-block;background:${domColor(d.id)};margin-right:8px"></span>${d.id}. ${esc(d.name)} <span class="mono muted">${st[d.id].seen?Math.round(100*st[d.id].right/st[d.id].seen)+'%':'—'}</span></summary>
+   ${d.tasks.map(t => { const s = st[d.id].tasks[t.id]||{seen:0,right:0,total:0}; const pct = s.seen?Math.round(100*s.right/s.seen):null; return `<div class="task"><span class="mono">${t.id}</span><div>${esc(t.name)}${bar(pct||0, pct===null?'var(--line)':pct>=75?'var(--ok)':pct>=50?'var(--warn)':'var(--bad)')}</div><div class="mini">${s.seen}/${s.total} seen · ${pct===null?'—':pct+'%'}</div></div>`; }).join('')}</details>`).join('')}
+  <h2>Mock history</h2>
+  ${c.mocks.length ? `<table><tr><th>Date</th><th>Kind</th><th>Score</th><th>Weighted %</th><th>Misses</th><th>By domain</th></tr>${c.mocks.slice().reverse().map(m=>`<tr><td class="mono">${m.date}</td><td>${m.kind}</td><td class="mono" style="color:${m.score>=b.pass?'var(--ok)':'var(--bad)'}">${m.score}</td><td class="mono">${m.pct}%</td><td class="mono">${m.misses}</td><td class="mono muted">${Object.entries(m.byDomain).map(([k,v])=>`D${k}:${v===null?'—':v}`).join(' ')}</td></tr>`).join('')}</table>` : '<p class="muted">No mocks yet.</p>'}
+  <div class="row" style="margin-top:20px"><button class="btn ghost sm" onclick="exportProgress()">Export progress (JSON)</button><button class="btn ghost sm" onclick="if(confirm('Erase all progress for ${S.cert}?')){const p=prog();delete p['${S.cert}'];saveProg(p);render();}">Reset ${S.cert}</button></div>`;
+}
+function exportProgress(){ const blob = new Blob([JSON.stringify(store.get('progress',{}),null,2)],{type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'claude-cert-progress.json'; a.click(); }
+
+// ---------- keyboard & theme ----------
+document.addEventListener('keydown', e => {
+  if(e.target.tagName==='INPUT') return;
+  const k = e.key.toUpperCase();
+  if(['A','B','C','D'].includes(k)) { pick(k); return; }
+  if(['1','2','3','4'].includes(k)) { pick('ABCD'[+k-1]); return; }
+  if(e.key==='Enter'){ if(S.drill && S.drill.active){ S.drill.checked ? drillNext() : (S.drill.chosen.length===S.drill.pool[S.drill.i].select && drillCheck()); } else if(S.mock && !S.mock.submitted){ S.mock.i = Math.min(S.mock.pool.length-1, S.mock.i+1); render(); } }
+});
+document.getElementById('themeBtn').onclick = () => { const cur = document.documentElement.dataset.theme; const next = cur==='dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = next; store.set('theme', next); };
+(function init(){
+  document.documentElement.lang = LANG;
+  document.getElementById('footNote').innerHTML = T.note;
+  if(SAMPLE){ seedSample(); const sb = document.getElementById('sampleBanner'); sb.hidden = false; sb.innerHTML = `<p class="samplebar">${T.sample} <a href="${location.pathname}${LANG==='es'?'?lang=es':''}">${T.sampleExit}</a></p>`; }
+  const t = store.get('theme'); if(t) document.documentElement.dataset.theme = t;
+  const c = store.get('cert'); if(c && CERTS.includes(c)){ S.cert = c; S.view = 'home'; }
+  const qc = URLP.get('cert'); if(qc && CERTS.includes(qc)) S.cert = qc;
+  const qv = URLP.get('view'); if(qv && VIEWS[qv]) S.view = qv;
+  render();
+})();
+</script>
+</body>
+</html>
