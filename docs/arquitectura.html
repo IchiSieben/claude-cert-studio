@@ -1,0 +1,937 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Arquitectura Cert Studio</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a drafting-table page. One sticky tab bar; each tab is a view of the same system
+   (C4 containers → hexagonal components → data → UML flows → deployment → user stories → repository).
+   Dark-first (control room / blueprint); light theme mirrors it. */
+:root{
+  --bg:#0a1020; --paper:#111a2e; --paper2:#162238; --ink:#e7edf8; --ink2:#9fb0cc; --line:#263654; --grid:rgba(127,166,234,.07);
+  --blue:#7fa6ea; --cyan:#4cc9f0; --amber:#f0b545; --green:#5fcf8f; --red:#f08a7c; --violet:#b58cf5;
+  --blue-soft:#18284a; --cyan-soft:#0f2b3a; --amber-soft:#3a2d0f; --green-soft:#12301f; --red-soft:#3b1a16; --violet-soft:#2a1f45;
+  --font-display:"Archivo","Archivo Narrow","Arial Narrow",system-ui,sans-serif;
+  --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
+  --bg:#eef2f8; --paper:#ffffff; --paper2:#f5f8fd; --ink:#15213a; --ink2:#4b5873; --line:#d3dbea; --grid:rgba(31,78,156,.06);
+  --blue:#1f4e9c; --cyan:#0a7ea4; --amber:#b56f00; --green:#1d7a4b; --red:#b8382c; --violet:#6b3fc2;
+  --blue-soft:#e3ebfa; --cyan-soft:#dff3fa; --amber-soft:#fff3d6; --green-soft:#dff3e7; --red-soft:#fbe3df; --violet-soft:#ece3fb;
+  color-scheme:light}}
+:root[data-theme="light"]{
+  --bg:#eef2f8; --paper:#ffffff; --paper2:#f5f8fd; --ink:#15213a; --ink2:#4b5873; --line:#d3dbea; --grid:rgba(31,78,156,.06);
+  --blue:#1f4e9c; --cyan:#0a7ea4; --amber:#b56f00; --green:#1d7a4b; --red:#b8382c; --violet:#6b3fc2;
+  --blue-soft:#e3ebfa; --cyan-soft:#dff3fa; --amber-soft:#fff3d6; --green-soft:#dff3e7; --red-soft:#fbe3df; --violet-soft:#ece3fb;
+  color-scheme:light}
+
+*{box-sizing:border-box}
+body{background:var(--bg);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:28px 28px;color:var(--ink);font-family:var(--font-body);font-size:14.5px;line-height:1.5;padding-inline:clamp(16px,3vw,40px);padding-block:18px 70px}
+h1,h2,h3,h4{font-family:var(--font-display);text-wrap:balance;margin:0;line-height:1.1}
+h1{font-size:clamp(26px,3.6vw,42px);font-weight:800;font-stretch:85%;letter-spacing:-.01em}
+h2{font-size:clamp(19px,2.2vw,25px);font-weight:700;font-stretch:90%}
+h3{font-size:15.5px;font-weight:700;font-stretch:90%}
+h4{font-size:13.5px;font-weight:700;font-stretch:90%;color:var(--ink2)}
+p{margin:0}
+a{color:var(--cyan)}
+code,pre{font-family:var(--font-mono)}
+code{font-size:12.5px;background:var(--paper2);border:1px solid var(--line);padding:1px 5px;border-radius:4px}
+pre{font-size:12px;line-height:1.5;background:var(--paper2);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow-x:auto;margin:0}
+pre code{background:none;border:0;padding:0;font-size:inherit}
+.eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2)}
+button{font:inherit;cursor:pointer}
+button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.wrap{max-width:1280px;margin:0 auto;display:grid;gap:22px}
+.head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:14px 30px}
+.head .sub{color:var(--ink2);max-width:66ch;margin-top:6px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--ink2)}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px;background:var(--c)}
+
+/* tabs */
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;gap:4px;overflow-x:auto;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:8px 0;scrollbar-width:thin}
+.tab{appearance:none;border:1px solid transparent;background:none;color:var(--ink2);padding:7px 12px;border-radius:8px;white-space:nowrap;font-weight:500;display:flex;gap:8px;align-items:center}
+.tab .k{font-family:var(--font-mono);font-size:10.5px;color:var(--cyan);opacity:.9}
+.tab[aria-selected="true"]{background:var(--paper);border-color:var(--line);color:var(--ink)}
+.view{display:none;gap:18px}
+.view.active{display:grid}
+
+/* panels */
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:grid;gap:10px;min-width:0;align-content:start}
+.panel.flush{padding:0;overflow:hidden}
+.two{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(280px,.8fr);gap:16px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:11.5px;padding:2px 8px;border-radius:99px;background:var(--blue-soft);color:var(--blue);font-weight:500;border:1px solid transparent}
+.chip.cyan{background:var(--cyan-soft);color:var(--cyan)}.chip.amber{background:var(--amber-soft);color:var(--amber)}.chip.green{background:var(--green-soft);color:var(--green)}.chip.violet{background:var(--violet-soft);color:var(--violet)}.chip.red{background:var(--red-soft);color:var(--red)}.chip.ghost{background:transparent;border-color:var(--line);color:var(--ink2)}
+.btn{border:1px solid var(--line);background:var(--paper2);color:var(--ink);border-radius:8px;padding:7px 12px;font-weight:500;font-size:13px}
+.btn[aria-pressed="true"]{border-color:var(--cyan);box-shadow:inset 0 0 0 1px var(--cyan);color:var(--cyan)}
+.btn.sm{padding:4px 9px;font-size:12px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);font-weight:500}
+.tbl{overflow-x:auto}
+td .m{font-family:var(--font-mono);font-size:12px}
+.ok{color:var(--green)}.warn{color:var(--amber)}.bad{color:var(--red)}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:4px 10px;font-size:13px}
+.kv dt{color:var(--ink2);font-family:var(--font-mono);font-size:11px;letter-spacing:.04em;text-transform:uppercase;padding-top:2px}
+.kv dd{margin:0;min-width:0}
+.note{border-left:3px solid var(--cyan);padding:8px 12px;background:var(--cyan-soft);border-radius:0 8px 8px 0;font-size:13.5px}
+.note.amber{border-color:var(--amber);background:var(--amber-soft)}
+.note.green{border-color:var(--green);background:var(--green-soft)}
+.verdict{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:8px;font-weight:600;font-family:var(--font-display);font-stretch:90%;font-size:15px}
+.verdict.ok{background:var(--green-soft);color:var(--green)}.verdict.warn{background:var(--amber-soft);color:var(--amber)}.verdict.bad{background:var(--red-soft);color:var(--red)}
+
+/* diagram */
+.dia{position:relative;background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.dia svg{width:100%;height:auto;display:block;font-family:var(--font-body)}
+.dia text{fill:var(--ink)}
+.dia .mono{font-family:var(--font-mono)}
+.dia .muted{fill:var(--ink2)}
+.node{cursor:pointer}
+.node rect.box{fill:var(--paper2);stroke:var(--line);stroke-width:1.2;transition:stroke .2s,filter .2s}
+.node:hover rect.box,.node.sel rect.box{stroke:var(--cyan);stroke-width:1.8;filter:drop-shadow(0 0 8px color-mix(in srgb,var(--cyan) 45%,transparent))}
+.node.ext rect.box{stroke-dasharray:5 4}
+.node .kind{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;fill:var(--ink2)}
+.node .ttl{font-family:var(--font-display);font-weight:700;font-stretch:90%;font-size:14px}
+.node .tech{font-size:10.5px;fill:var(--ink2)}
+.node .tag{font-family:var(--font-mono);font-size:9.5px}
+.edge{fill:none;stroke:var(--line);stroke-width:1.6;transition:stroke .3s,stroke-width .3s}
+.edge.hot{stroke:var(--cyan);stroke-width:2.6;filter:drop-shadow(0 0 6px color-mix(in srgb,var(--cyan) 60%,transparent))}
+.edge.dim{opacity:.25}
+.elabel{font-family:var(--font-mono);font-size:9.5px;fill:var(--ink2);paint-order:stroke;stroke:var(--paper);stroke-width:3px;stroke-linejoin:round}
+.pk{fill:var(--cyan);opacity:.55}
+.pk.one{opacity:1;fill:var(--amber)}
+.dia .toolbar{display:flex;flex-wrap:wrap;gap:6px;padding:12px 12px 4px;border-bottom:1px dashed var(--line);align-items:center}
+.steps{display:grid;gap:6px;list-style:none;padding:0;margin:0;counter-reset:s}
+.steps li{display:grid;grid-template-columns:22px 1fr;gap:8px;font-size:13px;opacity:.45;transition:opacity .3s}
+.steps li.on{opacity:1}
+.steps li::before{counter-increment:s;content:counter(s);font-family:var(--font-mono);font-size:11px;color:var(--cyan);border:1px solid var(--line);border-radius:50%;width:20px;height:20px;display:grid;place-items:center}
+.steps li.on::before{background:var(--cyan);color:var(--bg);border-color:var(--cyan)}
+
+/* hexagonal view */
+.hex{display:grid;grid-template-columns:1fr 1fr 1.1fr 1fr 1fr;gap:10px;align-items:start}
+.col{display:grid;gap:8px}
+.col h4{text-align:center;padding-bottom:6px;border-bottom:1px dashed var(--line)}
+.cell{background:var(--paper2);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:12.5px;display:grid;gap:3px;transition:border-color .2s,box-shadow .2s}
+.cell b{font-family:var(--font-display);font-stretch:90%;font-size:13.5px;font-weight:700}
+.cell small{color:var(--ink2);font-size:11.5px}
+.cell.core{border-color:var(--blue);background:var(--blue-soft)}
+.cell.port{border-style:dashed}
+.cell.lit{border-color:var(--cyan);box-shadow:0 0 0 1px var(--cyan),0 0 14px color-mix(in srgb,var(--cyan) 35%,transparent)}
+.cell.off{opacity:.35}
+.routes{display:flex;flex-wrap:wrap;gap:6px}
+
+/* deploy */
+.deploy{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:start}
+.deploy .arrow{align-self:center;font-family:var(--font-mono);color:var(--ink2);padding-top:40px}
+.svc{display:grid;gap:6px}
+.svc div{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;background:var(--paper2);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:12.5px}
+.svc div .m{font-family:var(--font-mono);font-size:11px;color:var(--ink2);white-space:nowrap}
+.svc div.k{border-color:var(--cyan)}
+.svc div.x{border-color:var(--violet)}
+.hu{display:grid;gap:10px}
+.hu .card{background:var(--paper2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:grid;gap:6px;font-size:13px}
+.hu .card .id{font-family:var(--font-mono);font-size:11px;color:var(--cyan)}
+.hu .card ul{margin:0;padding-left:18px;color:var(--ink2);font-size:12.5px}
+.av-bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding-bottom:10px;margin-bottom:6px;border-bottom:1px dashed var(--line)}
+.av-scroll{overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin}
+.av-svg{display:block;width:100%;height:auto;font-family:var(--font-body)}
+.av-svg text{fill:var(--ink)}
+.av-err{color:var(--red);font-family:var(--font-mono);font-size:12px;white-space:pre-wrap}
+.av-life{stroke:var(--line);stroke-width:1.2;stroke-dasharray:4 5}
+.av-head rect.box{fill:var(--paper2);stroke:var(--line);stroke-width:1.2}
+.av-kind{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;fill:var(--ink2)!important}
+.av-ttl{font-family:var(--font-display);font-weight:700;font-stretch:90%;font-size:13.5px}
+.av-row{transition:opacity .3s}
+.av-row.todo{opacity:.16}
+.av-msg{font-size:11.5px;fill:var(--ink2)!important}
+.av-row.on .av-msg{fill:var(--ink)!important}
+.av-proto{font-family:var(--font-mono);font-size:9.5px;fill:var(--ink2)!important;opacity:.75}
+.av-arrow,.av-self{fill:none;stroke:var(--ink2);stroke-width:1.4}
+.av-arrow.rev{stroke-dasharray:5 4}
+.av-row.on .av-arrow,.av-row.on .av-self{stroke:var(--cyan);stroke-width:2.4;filter:drop-shadow(0 0 5px color-mix(in srgb,var(--cyan) 55%,transparent))}
+.av-num circle{fill:var(--paper);stroke:var(--line)}
+.av-num text{font-family:var(--font-mono);font-size:10px;fill:var(--cyan)!important}
+.av-row.on .av-num circle{fill:var(--cyan);stroke:var(--cyan)}
+.av-row.on .av-num text{fill:var(--bg)!important}
+.av-note rect{fill:var(--amber-soft);stroke:var(--amber);stroke-width:1}
+.av-note text{font-size:11.5px}
+.av-seq,.av-states,.av-er,.av-two>*{min-width:0;max-width:100%}
+.av-two{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:14px;align-items:start}
+.av-two.below{grid-template-columns:minmax(0,1fr)}
+.av-detail{background:var(--paper2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:8px;font-size:13px;align-content:start}
+.av-detail h4{color:var(--ink)}
+.av-detail p{color:var(--ink2)}
+.av-detail ul{margin:0;padding-left:16px;color:var(--ink2);font-size:12.5px}
+.av-st{cursor:pointer}
+.av-st rect.box{fill:var(--paper2);stroke:var(--line);stroke-width:1.2;transition:stroke .2s,fill .3s}
+.av-st:hover rect.box,.av-st.sel rect.box{stroke:var(--cyan);stroke-width:1.8}
+.av-st.on rect.box{stroke:var(--cyan);stroke-width:1.8;fill:var(--cyan-soft)}
+.av-st .lbl{font-family:var(--font-mono);font-size:11px;font-weight:500}
+.av-st .pin{fill:var(--ink)}
+.av-st .ring{fill:none;stroke:var(--ink);stroke-width:1.5}
+.av-tr{fill:none;stroke:var(--ink2);stroke-width:1.4;transition:stroke .3s}
+.av-tr.err{stroke:var(--red);stroke-dasharray:5 4}
+.av-tr.on{stroke:var(--cyan);stroke-width:2.4;stroke-dasharray:none}
+.av-tl{font-family:var(--font-mono);font-size:9.5px;fill:var(--ink2)!important;paint-order:stroke;stroke:var(--paper);stroke-width:3px;stroke-linejoin:round}
+.av-tl.err{fill:var(--red)!important}
+.av-pill rect{fill:var(--paper);stroke:var(--line);stroke-width:1}
+.av-pill.err rect{stroke:color-mix(in srgb,var(--red) 55%,var(--line))}
+.av-pill text{stroke:none}
+.av-seq .av-scroll{max-height:min(70vh,640px);overflow:auto}
+.av-list{display:none;list-style:none;margin:0;padding:0;max-height:min(64vh,520px);overflow-y:auto}
+.av-list li{display:grid;grid-template-columns:24px minmax(0,1fr);gap:8px;align-items:start;padding:8px 6px;border-bottom:1px dashed var(--line);font-size:13px;color:var(--ink2);border-radius:6px;transition:opacity .3s,background .3s}
+.av-list .n{font-family:var(--font-mono);font-size:11px;color:var(--cyan);border:1px solid var(--line);border-radius:50%;width:20px;height:20px;display:grid;place-items:center}
+.av-list .who{font-family:var(--font-mono);font-size:11.5px;font-weight:500;color:var(--ink)}
+.av-list li.rev .who::after{content:" (respuesta)";font-weight:400;color:var(--ink2)}
+.av-list li.nt{color:var(--amber);font-style:italic}
+.av-list li.nt .n{border-color:var(--amber);color:var(--amber)}
+.av-list li.todo{opacity:.35}
+.av-list li.on{background:var(--cyan-soft);color:var(--ink)}
+.av-list li.on .n{background:var(--cyan);border-color:var(--cyan);color:var(--bg)}
+@media (max-width:599.98px){.av-seq .av-scroll{display:none}.av-seq .av-list{display:block}}
+.av-tok{fill:var(--amber)}
+.av-tb{transition:opacity .2s}
+.av-tb rect.card{fill:var(--paper2);stroke:var(--line);stroke-width:1.2}
+.av-tb rect.hd{fill:var(--blue-soft)}
+.av-tb.ext rect.card{stroke-dasharray:5 4}
+.av-tb.ext rect.hd{fill:var(--violet-soft)}
+.av-tb .tn{font-family:var(--font-display);font-weight:700;font-stretch:90%;font-size:13px}
+.av-tb .fn{font-family:var(--font-mono);font-size:11px}
+.av-tb .ft{font-family:var(--font-mono);font-size:9.5px;fill:var(--ink2)!important}
+.av-tb .kpk{fill:var(--amber)!important}.av-tb .kfk{fill:var(--cyan)!important}.av-tb .kuk{fill:var(--violet)!important}
+.av-tb.lit rect.card{stroke:var(--cyan);stroke-width:1.8}
+.av-rel{transition:opacity .2s}
+.av-rel .ln,.av-rel .mk{fill:none;stroke:var(--ink2);stroke-width:1.3}
+.av-rel .mk.o{fill:var(--paper)}
+.av-rel .hit{fill:none;stroke:transparent;stroke-width:12;pointer-events:stroke;cursor:help}
+.av-rel.lit .ln,.av-rel.lit .mk{stroke:var(--cyan);stroke-width:2}
+.av-er.hov .av-tb:not(.lit),.av-er.hov .av-rel:not(.lit){opacity:.22}
+.steps li.nt{opacity:.45;font-style:italic;color:var(--amber)}
+.steps li.nt::before{content:"!";counter-increment:none;color:var(--amber)}
+.steps li.nt.on{opacity:1}
+.node.pulse rect.box{stroke:var(--amber);stroke-width:2.2}
+@media (max-width:980px){.av-two{grid-template-columns:minmax(0,1fr)}}
+@media (prefers-reduced-motion:reduce){.av-row,.av-tr,.av-st rect.box,.av-tb,.av-rel,.av-list li{transition:none}}
+.foot{color:var(--ink2);font-size:12.5px;display:flex;flex-wrap:wrap;gap:8px 20px;justify-content:space-between}
+@media (max-width:980px){.two{grid-template-columns:1fr}.hex{grid-template-columns:1fr 1fr}.deploy{grid-template-columns:1fr}.deploy .arrow{display:none}}
+@media (max-width:560px){.hex{grid-template-columns:1fr}.kv{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.edge,.node rect.box,.cell{transition:none}}
+</style>
+</head><body>
+
+
+<div class="wrap">
+  <header class="head">
+    <div>
+      <div class="eyebrow">Cert Studio · app estática · HTML + JavaScript sin dependencias</div>
+      <h1>Arquitectura de Cert Studio</h1>
+      <p class="sub">Un solo archivo HTML y tres archivos de datos: el navegador hace todo el trabajo y el progreso nunca sale de él. El C4 es chico; lo interesante son los flujos (cómo se arma y puntúa un simulacro, cómo nace una pregunta) y el modelo de datos que vive en el almacenamiento local. Haz clic en una caja; reproduce un flujo para ver el recorrido.</p>
+    </div>
+    <div class="legend">
+      <span style="--c:var(--blue)">este repo</span>
+      <span style="--c:var(--violet)">persona o navegador</span>
+      <span style="--c:var(--amber)">servicio externo</span>
+      <span style="--c:var(--cyan)">tráfico</span>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" id="tabs">
+    <button class="tab" role="tab" data-v="c4" aria-selected="true"><span class="k">C4·2</span>Contenedores</button>
+    <button class="tab" role="tab" data-v="flows"><span class="k">UML</span>Flujos</button>
+    <button class="tab" role="tab" data-v="data"><span class="k">ER</span>Datos · localStorage</button>
+    <button class="tab" role="tab" data-v="deploy"><span class="k">OPS</span>Despliegue</button>
+    <button class="tab" role="tab" data-v="decisions"><span class="k">ADR</span>Decisiones</button>
+  </nav>
+
+  <section class="view active" data-v="c4">
+    <div class="two">
+      <div class="dia" id="c4dia">
+        <div class="toolbar" id="flowbar"></div>
+        <svg viewBox="0 0 1200 690" id="c4svg" aria-label="Diagrama de contenedores"></svg>
+      </div>
+      <div class="panel" id="c4panel">
+        <div class="eyebrow">Detalle</div>
+        <h3 id="pn-t">Haz clic en un contenedor</h3>
+        <p id="pn-r" style="color:var(--ink2)">Cada caja es una pieza que existe por separado: la página, sus archivos de datos, el almacenamiento del navegador, las herramientas del repo y los dos servicios externos. Las líneas son llamadas reales: mecanismo y qué viaja.</p>
+        <dl class="kv" id="pn-kv"></dl>
+        <div class="chips" id="pn-chips"></div>
+        <div id="pn-steps-wrap" hidden>
+          <div class="eyebrow" style="margin-top:6px">Flujo en curso</div>
+          <ol class="steps" id="pn-steps"></ol>
+        </div>
+      </div>
+    </div>
+    <div class="grid3">
+      <div class="panel"><h3>Por qué datos en .js y no en .json</h3><p style="color:var(--ink2);font-size:13.5px">Un <code>fetch()</code> de un JSON local lo bloquea el navegador cuando la página se abre con <code>file://</code>. Como scripts, los datos cargan igual desde un clon, desde el hosting o desde la Mac que graba los videos, sin servidor.</p></div>
+      <div class="panel"><h3>Por qué el progreso no sale del navegador</h3><p style="color:var(--ink2);font-size:13.5px">No hay cuentas ni backend que mantener, y nada que proteger del lado del servidor. El costo: el progreso no viaja entre navegadores. Se exporta a JSON; la importación todavía no existe.</p></div>
+      <div class="panel"><h3>Por qué un modo muestra</h3><p style="color:var(--ink2);font-size:13.5px">Las capturas públicas necesitan datos creíbles y repetibles sin tocar el almacenamiento de nadie. <code>?sample=1</code> guarda todo en memoria y fija la semilla del azar: dos cargas dan exactamente el mismo estado.</p></div>
+    </div>
+  </section>
+
+  <section class="view" data-v="flows">
+    <div class="panel">
+      <div class="eyebrow">Secuencias · una por flujo · los mismos pasos que reproduce el C4</div>
+      <div id="seq"></div>
+    </div>
+    <div class="panel">
+      <div class="eyebrow">Ciclo de una pregunta en el repaso espaciado · "para hoy" = sin ver, fallada o acertada hace más de 3 días</div>
+      <div id="states"></div>
+    </div>
+  </section>
+
+  <section class="view" data-v="data">
+    <div class="panel">
+      <div class="eyebrow">Modelo de datos · lo dinámico vive en localStorage (claves ccs:*), lo estático en data/*.js · pasa el cursor por una relación</div>
+      <div id="er"></div>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <h3>Cómo se guarda</h3>
+        <dl class="kv">
+          <dt>clave</dt><dd><code>ccs:progress</code> es un solo objeto JSON con una entrada por certificación; <code>ccs:cert</code> y <code>ccs:theme</code> son preferencias.</dd>
+          <dt>respuesta</dt><dd>Por pregunta: veces vista, aciertos, fallos, el resultado de la última vez y cuándo. La fecha es lo que permite el repaso espaciado.</dd>
+          <dt>simulacro</dt><dd>Fecha, tipo, puntaje, porcentaje ponderado, resultado por dominio, fallos y los ids usados: así el siguiente simulacro saca primero las preguntas que nunca salieron.</dd>
+          <dt>trampas</dt><dd>Un contador por tipo de distractor: cuántas veces elegiste una opción con esa etiqueta.</dd>
+        </dl>
+      </div>
+      <div class="panel">
+        <h3>Lo que no se guarda</h3>
+        <dl class="kv">
+          <dt>servidor</dt><dd>Nada. La página no hace ninguna llamada de red después de cargar.</dd>
+          <dt>muestra</dt><dd>Con <code>?sample=1</code> el mismo objeto vive solo en memoria y se pierde al cerrar la pestaña.</dd>
+          <dt>import</dt><dd>No hay importación de progreso: un respaldo JSON hoy solo se puede leer, no restaurar desde la app.</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="view" data-v="deploy">
+    <div class="panel">
+      <div class="eyebrow">Despliegue · lo que hay y lo que cambiaría</div>
+      <h2>Hoy un subdominio estático. Mañana cualquier hosting estático, sin cambiar una línea.</h2>
+      <p style="color:var(--ink2);max-width:80ch">El repo de trabajo es privado; el público es una exportación filtrada de un solo autor. La web se sube por archivo y la Mac graba los medios desde la URL pública.</p>
+      <div class="deploy">
+        <div class="panel" style="background:var(--paper2)">
+          <h3>Hoy · Hostinger + GitHub + Mac mini</h3>
+          <div class="svc">
+            <div class="k"><span>exportación filtrada y auditada al repo público</span><span class="m">export-public.sh</span></div>
+            <div class="k"><span>subida por TUS de 6 archivos, nunca borra</span><span class="m">deploy-cert.sh</span></div>
+            <div class="k"><span>solo responde por su subdominio; el resto, 404</span><span class="m">.htaccess</span></div>
+            <div class="k"><span>validador del banco + 16 pruebas de punta a punta</span><span class="m">verify.sh</span></div>
+            <div class="k"><span>clip de 8 s y tres capturas desde la URL pública</span><span class="m">Mac · carril media</span></div>
+          </div>
+          <p style="font-size:12.5px;color:var(--ink2)">Requisitos para estudiar: un navegador. Para las pruebas: Node 22 y el Chromium de Playwright. Para los videos: ffmpeg.</p>
+        </div>
+        <div class="arrow">→ mismos archivos →</div>
+        <div class="panel" style="background:var(--paper2)">
+          <h3>Al escalar · más visitantes</h3>
+          <div class="svc">
+            <div class="k"><span>CDN delante del estático</span><span class="m">sin cambios en el código</span></div>
+            <div class="k"><span>miles de personas estudiando a la vez</span><span class="m">el cómputo es de cada navegador</span></div>
+            <div class="x"><span>progreso entre dispositivos</span><span class="m">necesitaría cuentas y un backend</span></div>
+            <div class="x"><span>banco revisado por personas</span><span class="m">hoy lo revisó un modelo</span></div>
+          </div>
+          <p style="font-size:12.5px;color:var(--ink2)">Qué gana: costo variable cero. Qué no gana: sincronizar el progreso, que es justo lo que obligaría a tener servidor.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="view" data-v="decisions">
+    <div class="panel">
+      <div class="eyebrow">Decisiones · con la alternativa descartada</div>
+      <h2>Cada decisión dice qué se eligió, qué se dejó y por qué</h2>
+      <div class="tbl"><table>
+        <tr><th>Decisión</th><th>Por qué</th><th>Descartado</th></tr>
+        <tr><td>Un archivo HTML sin framework ni build</td><td>Se abre desde disco, se audita leyendo un archivo y no envejece con sus dependencias</td><td>Un SPA con bundler: más rápido de escribir, más caro de mantener para 1 000 líneas</td></tr>
+        <tr><td>Datos como scripts que llenan <code>window</code></td><td><code>file://</code> funciona igual que el hosting</td><td>JSON con <code>fetch()</code>: falla abierto desde disco</td></tr>
+        <tr><td>Cada opción incorrecta lleva una etiqueta de trampa</td><td>El resultado enseña qué tipo de error cometes, y el validador rechaza una opción sin etiqueta</td><td>Solo marcar correcta / incorrecta</td></tr>
+        <tr><td>Reparto por resto mayor</td><td>El simulacro suma exactamente el largo del examen y ningún dominio se aleja más de una pregunta de su cuota</td><td>Redondear cada cuota y ajustar el último dominio</td></tr>
+        <tr><td>Puntaje lineal 100–1000 y aprobado en 720</td><td>La escala real no es pública; una lineal ponderada es honesta y se explica en una línea</td><td>Inventar una curva que parezca la oficial</td></tr>
+        <tr><td>Repaso espaciado con una regla de 3 días</td><td>Con 218 preguntas basta; se implementa y se prueba en una línea</td><td>Un planificador por tarjeta tipo SM-2</td></tr>
+        <tr><td>Repo público nuevo de un solo commit</td><td>El historial de trabajo tenía datos personales del autor; el público es una exportación filtrada y auditada</td><td>Reescribir la historia del repo de trabajo</td></tr>
+        <tr><td>Modo muestra en memoria con semilla fija</td><td>Capturas reproducibles sin escribir en el almacenamiento del visitante</td><td>Capturar con un perfil real</td></tr>
+      </table></div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span>Arquitectura v1 · 2026-10-15 · Cert Studio</span>
+    <span>C4 · UML (secuencia y estados) · ER · despliegue · decisiones</span>
+  </footer>
+</div>
+
+<script>
+/* ===== arq-viva engine v1 · no dependencies · schema: shared/arquitectura-viva/SCHEMA.md =====
+   Reads one data object D = {N, E, FLOWS, STATES, TABLES, REL}. Each renderer draws only inside
+   the root element it is given. Colours come from the page's CSS tokens (var(--…)). */
+const ArqViva = (() => {
+  const NS = "http://www.w3.org/2000/svg";
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const COL = {blue:"var(--blue)",violet:"var(--violet)",amber:"var(--amber)",green:"var(--green)",red:"var(--red)",cyan:"var(--cyan)"};
+  let uid = 0;
+  function el(tag, attrs, parent){ const e = document.createElementNS(NS, tag); for(const k in attrs||{}) e.setAttribute(k, attrs[k]); if(parent) parent.appendChild(e); return e; }
+  function h(tag, cls, parent, text){ const e = document.createElement(tag); if(cls) e.className = cls; if(text != null) e.textContent = text; if(parent) parent.appendChild(e); return e; }
+  function txt(parent, x, y, cls, s, extra){ const t = el("text", Object.assign({x, y, class:cls}, extra||{}), parent); t.textContent = s; return t; }
+  function wrap(s, max){ const out = []; let line = ""; String(s).split(/\s+/).forEach(w=>{ if(line && (line+" "+w).length > max){ out.push(line); line = w; } else line = line ? line+" "+w : w; }); if(line) out.push(line); return out; }
+  function svgRoot(parent, W, H, label, minScale){
+    const sc = h("div", "av-scroll", parent);
+    const svg = el("svg", {viewBox:`0 0 ${W} ${H}`, class:"av-svg", role:"img", "aria-label":label}, sc);
+    svg.style.minWidth = Math.round(W*(minScale||.72))+"px";
+    const defs = el("defs", {}, svg), id = "av"+(++uid);
+    [["a","var(--ink2)"],["h","var(--cyan)"],["r","var(--red)"]].forEach(([k,c])=>{
+      const m = el("marker", {id:id+k, viewBox:"0 0 10 10", refX:"9", refY:"5", markerWidth:"7", markerHeight:"7", orient:"auto-start-reverse"}, defs);
+      el("path", {d:"M0,0 L10,5 L0,10 z", fill:c}, m); });
+    return {sc, svg, mk:k=>`url(#${id}${k})`};
+  }
+  // smooth-scroll the nearest scrollable ancestor (up to `stop`) so `n` is visible; never moves the page
+  function reveal(n, stop){
+    const a = n.getBoundingClientRect(); if(!a.width && !a.height) return;   // hidden view
+    for(let p = n.parentElement; p && p !== stop; p = p.parentElement){
+      const cs = getComputedStyle(p), sy = /auto|scroll/.test(cs.overflowY) && p.scrollHeight > p.clientHeight+1, sx = /auto|scroll/.test(cs.overflowX) && p.scrollWidth > p.clientWidth+1;
+      if(!sy && !sx) continue;
+      const b = p.getBoundingClientRect(); let top = p.scrollTop, left = p.scrollLeft;
+      if(sy && (a.top < b.top+8 || a.bottom > b.bottom-8)) top += (a.top+a.height/2) - (b.top+b.height/2);
+      if(sx && (a.left < b.left+8 || a.right > b.right-8)) left += (a.left+a.width/2) - (b.left+b.width/2);
+      if(top !== p.scrollTop || left !== p.scrollLeft) p.scrollTo({top, left, behavior: reduce ? "auto" : "smooth"});
+      return;
+    }
+  }
+  function fail(root, errs){ if(!errs.length) return false; h("pre", "av-err", root, "arq-viva: datos inválidos\n"+errs.join("\n")); console.error("arq-viva:", errs); return true; }
+
+  /* ---------- flow steps: one grammar for the C4 and the sequence ---------- */
+  function norm(D, s){
+    if(Array.isArray(s)){
+      const [id, t, o] = s, e = (D.E||[]).find(x=>x.id===id), rev = !!(o && o.rev);
+      if(e) return {k:"edge", e, t, rev, from: rev ? e.b : e.a, to: rev ? e.a : e.b};
+      if(D.N && D.N[id]) return {k:"self", node:id, t};
+      return {k:"bad", id, t};
+    }
+    if(s && typeof s.note === "string") return {k:"note", t:s.note, over:s.over||[]};
+    return {k:"bad", id:JSON.stringify(s)};
+  }
+  function validate(D){
+    const errs = [], N = D.N||{}, E = D.E||[], seen = new Set();
+    E.forEach(e=>{ if(seen.has(e.id)) errs.push(`E.${e.id}: id repetido`); seen.add(e.id);
+      if(N[e.id]) errs.push(`E.${e.id}: el id choca con un nodo de N`);
+      [e.a,e.b].forEach(n=>{ if(!N[n]) errs.push(`E.${e.id}: nodo inexistente "${n}"`); }); });
+    (D.FLOWS||[]).forEach(f=>f.steps.forEach((s,i)=>{ const n = norm(D, s);
+      if(n.k==="bad") errs.push(`FLOWS.${f.id}[${i}]: id inexistente ${n.id}`);
+      if(n.k==="note") n.over.forEach(o=>{ if(!N[o]) errs.push(`FLOWS.${f.id}[${i}]: note.over inexistente "${o}"`); }); }));
+    if(D.STATES){ const ids = new Set(D.STATES.states.map(s=>s.id));
+      D.STATES.trans.forEach((t,i)=>[t.a,t.b].forEach(x=>{ if(!ids.has(x)) errs.push(`STATES.trans[${i}]: estado inexistente "${x}"`); }));
+      (D.STATES.happy||[]).forEach(x=>{ if(!ids.has(x)) errs.push(`STATES.happy: estado inexistente "${x}"`); }); }
+    if(D.TABLES){ const ids = new Set(D.TABLES.map(t=>t.id));
+      (D.REL||[]).forEach((r,i)=>[r.a,r.b].forEach(x=>{ if(!ids.has(x)) errs.push(`REL[${i}]: tabla inexistente "${x}"`); })); }
+    return errs;
+  }
+
+  /* ---------- the player: one clock, any number of views listening ---------- */
+  function player(D){
+    const subs = []; let timers = [];
+    const emit = (...a)=>subs.forEach(fn=>{ try{ fn(...a); }catch(e){ console.error(e); } });
+    function stop(){ timers.forEach(clearTimeout); timers = []; }
+    function play(id){
+      stop(); const f = (D.FLOWS||[]).find(x=>x.id===id); if(!f) return;
+      const steps = f.steps.map(s=>norm(D, s)); emit("start", f, steps);
+      let t = 0;
+      steps.forEach((s,i)=>{ timers.push(setTimeout(()=>emit("step", f, steps, i), t)); t += reduce ? 150 : (s.k==="note" ? 1500 : s.rev ? 800 : 1100); });
+      timers.push(setTimeout(()=>emit("end", f, steps), t + 700));
+    }
+    return {play, stop, on: fn=>subs.push(fn)};
+  }
+
+  /* ---------- shared geometry: auto sides + anchors spread along each side ---------- */
+  function sideOf(a, b){ const dx = (b.x+b.w/2)-(a.x+a.w/2), dy = (b.y+b.h/2)-(a.y+a.h/2); return Math.abs(dx) >= Math.abs(dy) ? (dx>0?"r":"l") : (dy>0?"b":"t"); }
+  const OPP = {l:"r", r:"l", t:"b", b:"t"}, DIR = {l:[-1,0], r:[1,0], t:[0,-1], b:[0,1]};
+  function routes(box, links){
+    const ends = {};
+    links.forEach((L,i)=>{ const A = box[L.a], B = box[L.b];
+      L._as = L.as || sideOf(A, B); L._bs = L.bs || (L.as ? OPP[L.as] : OPP[L._as]);
+      if(L.a===L.b){ L._as = L.as||"r"; L._bs = L.bs||"t"; }
+      [[L.a,L._as,B,"a"],[L.b,L._bs,A,"b"]].forEach(([id,side,other,end])=>{ (ends[id+side] ||= []).push({L, end, key: (side==="l"||side==="r") ? other.y+other.h/2 : other.x+other.w/2, i}); }); });
+    Object.entries(ends).forEach(([k, list])=>{
+      list.sort((p,q)=>p.key-q.key || p.i-q.i);
+      list.forEach((p,j)=>{ const side = p.end==="a" ? p.L._as : p.L._bs, b = box[p.end==="a" ? p.L.a : p.L.b];
+        const len = (side==="l"||side==="r") ? b.h : b.w, off = ((j+1)/(list.length+1) - .5) * len * .8 + (p.end==="a" ? (p.L.ao||0) : (p.L.bo||0));
+        const pt = side==="l" ? [b.x, b.y+b.h/2+off] : side==="r" ? [b.x+b.w, b.y+b.h/2+off] : side==="t" ? [b.x+b.w/2+off, b.y] : [b.x+b.w/2+off, b.y+b.h];
+        p.L[p.end==="a" ? "_pa" : "_pb"] = pt; }); });
+    links.forEach(L=>{ const [x1,y1] = L._pa, [x2,y2] = L._pb, da = DIR[L._as], db = DIR[L._bs];
+      const k = Math.max(30, Math.hypot(x2-x1, y2-y1)/2.4);
+      L._c = [x1, y1, x1+da[0]*k, y1+da[1]*k, x2+db[0]*k, y2+db[1]*k, x2, y2];
+      L._d = `M${x1},${y1} C${L._c[2]},${L._c[3]} ${L._c[4]},${L._c[5]} ${x2},${y2}`;
+      L._mid = [(x1+x2)/2 + (da[0]+db[0])*k*.37, (y1+y2)/2 + (da[1]+db[1])*k*.37]; });
+  }
+
+  // point on a routed cubic at parameter t
+  function bez(L, t){ const c = L._c, u = 1-t, f = (i)=>u*u*u*c[i] + 3*u*u*t*c[i+2] + 3*u*t*t*c[i+4] + t*t*t*c[i+6]; return [f(0), f(1)]; }
+
+  /* ---------- sequence: lifelines from FLOWS (a numbered list below 600 px) ---------- */
+  function sequence(root, D, P, opt){
+    opt = opt||{}; root.classList.add("av-seq");
+    if(fail(root, validate(D))) return;
+    const bar = h("div", "av-bar", root);
+    h("span", "chip cyan", bar, opt.label || "reproducir flujo");
+    const btns = D.FLOWS.map(f=>{ const b = h("button", "btn sm", bar, f.t); b.dataset.f = f.id; b.setAttribute("aria-pressed","false"); b.addEventListener("click", ()=>P.play(f.id)); return b; });
+    const host = h("div", "", root);
+    let rows = [], shown = null, R = null;
+    function draw(f){
+      host.innerHTML = ""; shown = f.id; rows = [];
+      const steps = f.steps.map(s=>norm(D, s)), lanes = (f.lanes||[]).slice();
+      const add = id=>{ if(id && !lanes.includes(id)) lanes.push(id); };
+      steps.forEach(s=>{ if(s.k==="edge"){ add(s.from); add(s.to); } else if(s.k==="self") add(s.node); else if(s.k==="note") s.over.forEach(add); });
+      const CW = 180, PAD = 20, HH = 58, last = lanes[lanes.length-1];
+      const extra = steps.some(s=>s.k==="self" && s.node===last) ? 80 : 0;
+      const W = PAD*2 + lanes.length*CW + extra, X = id=>PAD + lanes.indexOf(id)*CW + CW/2;
+      // measure first, then draw at the final height
+      let y = HH + 40; const plan = [];
+      steps.forEach(s=>{
+        if(s.k==="edge"){ const span = Math.abs(X(s.to)-X(s.from)); const lines = wrap(s.t, Math.max(16, Math.floor((span-30)/6.3)));
+          const proto = !s.rev && s.e.l ? s.e.l : ""; plan.push({s, y, lines, proto}); y += lines.length*15 + (proto?14:0) + 22; }
+        else if(s.k==="self"){ const lines = wrap(s.t, 19); plan.push({s, y, lines}); y += Math.max(30, lines.length*15+8) + 16; }
+        else { const xs = s.over.map(X), x1 = Math.min(...xs)-CW*.42, x2 = Math.max(...xs)+CW*.42; const lines = wrap(s.t, Math.floor((x2-x1-20)/6.3));
+          plan.push({s, y, lines, x1, x2}); y += lines.length*15 + 22; }
+      });
+      const H = y + 10;
+      R = svgRoot(host, W, H, "Secuencia: "+f.t, .8);
+      const gL = el("g", {}, R.svg), gH = el("g", {}, R.svg), gR = el("g", {}, R.svg);
+      lanes.forEach(id=>{ const n = D.N[id], x = X(id);
+        el("line", {x1:x, y1:HH+10, x2:x, y2:H-6, class:"av-life"}, gL);
+        const g = el("g", {class:"av-head"}, gH); el("title", {}, g).textContent = n.resp || n.ttl;
+        el("rect", {class:"box", x:x-CW/2+10, y:10, width:CW-20, height:HH, rx:"10"}, g);
+        el("rect", {x:x-CW/2+10, y:10, width:"5", height:HH, rx:"2.5", fill:COL[n.color]||COL.blue}, g);
+        txt(g, x-CW/2+24, 30, "av-kind", wrap(n.kind, 24)[0]);
+        txt(g, x-CW/2+24, 50, "av-ttl", n.ttl.length > 21 ? n.ttl.slice(0,20)+"…" : n.ttl);
+      });
+      let num = 0;
+      plan.forEach(p=>{ const s = p.s, g = el("g", {class:"av-row"}, gR), r = {g, s};
+        if(s.k==="edge"){
+          num++; const x1 = X(s.from), x2 = X(s.to), dir = x2>x1 ? 1 : -1, ay = p.y + p.lines.length*15 - 2;
+          p.lines.forEach((ln,k)=>txt(g, (x1+x2)/2, p.y+k*15, "av-msg", ln, {"text-anchor":"middle"}));
+          r.path = el("path", {d:`M${x1+dir*11},${ay} L${x2-dir*2},${ay}`, class:"av-arrow"+(s.rev?" rev":""), "marker-end":R.mk("a")}, g);
+          if(p.proto) txt(g, (x1+x2)/2, ay+14, "av-proto", p.proto, {"text-anchor":"middle"});
+          const b = el("g", {class:"av-num"}, g); el("circle", {cx:x1, cy:ay, r:"9"}, b); txt(b, x1, ay+3.5, "", String(num), {"text-anchor":"middle"});
+        } else if(s.k==="self"){
+          num++; const x = X(s.node), ay = p.y;
+          r.path = el("path", {d:`M${x+11},${ay} h30 v16 h-28`, class:"av-self", "marker-end":R.mk("a")}, g);
+          p.lines.forEach((ln,k)=>txt(g, x+50, ay+4+k*15, "av-msg", ln));
+          const b = el("g", {class:"av-num"}, g); el("circle", {cx:x, cy:ay, r:"9"}, b); txt(b, x, ay+3.5, "", String(num), {"text-anchor":"middle"});
+        } else {
+          const n = el("g", {class:"av-note"}, g); el("rect", {x:p.x1, y:p.y-14, width:p.x2-p.x1, height:p.lines.length*15+10, rx:"6"}, n);
+          p.lines.forEach((ln,k)=>txt(n, p.x1+10, p.y+k*15, "", ln));
+        }
+        rows.push(r); });
+      // the same steps as a list: "origin → target: text"; CSS swaps it in below 600 px
+      const ol = h("ol", "av-list", host), name = id=>D.N[id].ttl; ol.setAttribute("aria-label", "Pasos: "+f.t); num = 0;
+      rows.forEach(r=>{ const s = r.s, li = h("li", s.k==="note" ? "nt" : s.rev ? "rev" : "", ol); r.li = li;
+        h("span", "n", li, s.k==="note" ? "!" : String(++num));
+        const d = h("div", "", li);
+        h("span", "who", d, s.k==="edge" ? name(s.from)+" → "+name(s.to) : s.k==="self" ? name(s.node)+" (interno)" : "nota · "+s.over.map(name).join(", "));
+        d.appendChild(document.createTextNode(": "+s.t)); });
+    }
+    P.on((ev, f, steps, i)=>{
+      if(ev==="start"){ draw(f); btns.forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.f===f.id))); rows.forEach(r=>{ r.g.classList.add("todo"); r.li.classList.add("todo"); }); }
+      if(ev==="step"){ if(shown!==f.id) draw(f);
+        rows.forEach((r,k)=>{ [r.g, r.li].forEach(x=>{ x.classList.toggle("todo", k>i); x.classList.toggle("on", k===i); }); if(r.path) r.path.setAttribute("marker-end", R.mk(k===i?"h":"a")); });
+        const r = rows[i]; reveal(r.g, root); reveal(r.li, root);   // before the packet: its circle starts at 0,0
+        if(r.path && !reduce && r.s.k==="edge"){ const c = el("circle", {r:"5", class:"pk one"}, r.g); const am = el("animateMotion", {dur:".7s", begin:"indefinite", fill:"freeze", path:r.path.getAttribute("d")}, c); am.beginElement(); setTimeout(()=>c.remove(), 900); }
+      }
+      if(ev==="end"){ rows.forEach(r=>{ r.g.classList.remove("todo","on"); r.li.classList.remove("todo","on"); if(r.path) r.path.setAttribute("marker-end", R.mk("a")); }); btns.forEach(b=>b.setAttribute("aria-pressed","false")); }
+    });
+    draw(D.FLOWS[0]);
+  }
+
+  /* ---------- state machine ---------- */
+  function states(root, D, opt){
+    opt = opt||{}; root.classList.add("av-states");
+    if(fail(root, validate({STATES:D.STATES}))) return;
+    const S = D.STATES, box = {};
+    S.states.forEach(s=>{ const pt = s.kind==="start"||s.kind==="end"; box[s.id] = {x:s.x, y:s.y, w: pt ? 20 : (s.w||150), h: pt ? 20 : (s.h||40), s}; });
+    const W = S.w || Math.max(...Object.values(box).map(b=>b.x+b.w)) + 20, H = S.h || Math.max(...Object.values(box).map(b=>b.y+b.h)) + 30;
+    const T = S.trans.map(t=>Object.assign({}, t)); routes(box, T);
+    // happy path: given, or follow the first non-error transition from the start state
+    let happy = S.happy;
+    if(!happy){ happy = []; let cur = (S.states.find(s=>s.kind==="start")||S.states[0]).id; const seen = new Set();
+      while(cur && !seen.has(cur)){ happy.push(cur); seen.add(cur); const nx = T.find(t=>t.a===cur && !t.err); cur = nx && nx.b; } }
+    // opt.play === false: a plain directed graph (e.g. a file lineage): no happy path, no legend
+    const bar = opt.play === false ? null : h("div", "av-bar", root);
+    const play = bar ? h("button", "btn sm", bar, opt.play || "▶ recorrer el camino feliz") : null;
+    if(bar){ play.setAttribute("aria-pressed","false");
+      h("span", "chip ghost", bar, opt.okLabel || "— transición normal");
+      h("span", "chip red", bar, opt.errLabel || "- - error / desvío"); }
+    const two = h("div", "av-two" + (opt.detail === "below" ? " below" : ""), root);   // detail: "below" for a wide graph
+    const R = svgRoot(two, W, H, opt.label || "Máquina de estados", .75);
+    const pn = h("div", "av-detail", two);
+    const defaultPanel = ()=>{ pn.innerHTML = ""; h("div", "eyebrow", pn, "Detalle"); h("h4", "", pn, opt.hint || "Haz clic en un estado"); if(S.note) h("p", "", pn, S.note); };
+    defaultPanel();
+    const gT = el("g", {}, R.svg), gP = el("g", {}, R.svg), gS = el("g", {}, R.svg), gK = el("g", {}, R.svg), sEl = {};
+    // curve labels: a pill on the curve itself, at the first point near its middle that covers no state, pill or other line
+    const pills = [], boxes = Object.values(box).map(b=>({x:b.x-4, y:b.y-4, w:b.w+8, h:b.h+8}));
+    const hit = (r,q)=>r.x < q.x+q.w && q.x < r.x+r.w && r.y < q.y+q.h && q.y < r.y+r.h;
+    T.forEach(t=>{ t.path = el("path", {d:t._d, class:"av-tr"+(t.err?" err":""), "marker-end":R.mk(t.err?"r":"a")}, gT);
+      if(!t.l) return;
+      const hz = (t._as==="l"||t._as==="r") && (t._bs==="l"||t._bs==="r");
+      if(hz){ txt(gT, t._mid[0], Math.min(t._pa[1], t._pb[1])-26, "av-tl"+(t.err?" err":""), t.l, {"text-anchor":"middle"}); return; }
+      const w = t.l.length*5.9 + 14, ph = 16, near = T.filter(o=>o!==t).flatMap(o=>Array.from({length:41}, (_,i)=>bez(o, i/40)));
+      const cands = [.5,.44,.56,.38,.62,.32,.68,.26,.74].map(u=>{ const [x,y] = bez(t, u); return {x:x-w/2, y:y-ph/2, w, h:ph}; });
+      const ok = r=>!boxes.some(b=>hit(r,b)) && !pills.some(p=>hit(r,p)) && !near.some(([x,y])=>x > r.x-2 && x < r.x+r.w+2 && y > r.y-2 && y < r.y+r.h+2);
+      const r = cands.find(ok) || cands[0]; pills.push(r);
+      const g = el("g", {class:"av-pill"+(t.err?" err":"")}, gP);
+      el("rect", {x:r.x, y:r.y, width:w, height:ph, rx:"8"}, g);
+      txt(g, r.x+w/2, r.y+11.5, "av-tl"+(t.err?" err":""), t.l, {"text-anchor":"middle"}); });
+    S.states.forEach(s=>{ const b = box[s.id], g = el("g", {class:"av-st", tabindex:"0", role:"button", "aria-label":s.id}, gS); sEl[s.id] = g;
+      if(s.kind==="start") el("circle", {cx:b.x+10, cy:b.y+10, r:"8", class:"pin"}, g);
+      else if(s.kind==="end"){ el("circle", {cx:b.x+10, cy:b.y+10, r:"9", class:"ring"}, g); el("circle", {cx:b.x+10, cy:b.y+10, r:"5", class:"pin"}, g); }
+      else { el("rect", {class:"box", x:b.x, y:b.y, width:b.w, height:b.h, rx:String(b.h/2)}, g);
+        const c = s.kind==="error" ? COL.red : s.kind==="wait" ? COL.amber : s.kind==="final" ? COL.green : COL.blue;
+        el("circle", {cx:b.x+16, cy:b.y+b.h/2, r:"4", fill:c}, g);
+        txt(g, b.x+b.w/2+6, b.y+b.h/2+4, "lbl", s.label || s.id, {"text-anchor":"middle"}); }
+      const pick = ()=>{ Object.values(sEl).forEach(x=>x.classList.toggle("sel", x===g)); pn.innerHTML = "";
+        h("div", "eyebrow", pn, s.kind==="error" ? "estado de error" : s.kind==="wait" ? "estado de espera" : (opt.item || "estado"));
+        h("h4", "", pn, s.label || s.id); if(s.d) h("p", "", pn, s.d);
+        const out = T.filter(t=>t.a===s.id), inn = T.filter(t=>t.b===s.id);
+        if(out.length){ h("div", "eyebrow", pn, opt.outLabel || "sale hacia"); const ul = h("ul", "", pn); out.forEach(t=>h("li", "", ul, t.b + (t.l ? " · "+t.l : ""))); }
+        if(inn.length){ h("div", "eyebrow", pn, opt.inLabel || "llega desde"); const ul = h("ul", "", pn); inn.forEach(t=>h("li", "", ul, t.a + (t.l ? " · "+t.l : ""))); } };
+      g.addEventListener("click", pick); g.addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); pick(); } });
+    });
+    let timers = [];
+    if(play) play.addEventListener("click", ()=>{
+      timers.forEach(clearTimeout); timers = []; gK.innerHTML = "";
+      T.forEach(t=>t.path.classList.remove("on")); Object.values(sEl).forEach(x=>x.classList.remove("on"));
+      play.setAttribute("aria-pressed","true");
+      const gap = reduce ? 200 : 750;
+      happy.forEach((id,i)=>timers.push(setTimeout(()=>{
+        sEl[id].classList.add("on");
+        const prev = happy[i-1], t = prev && T.find(x=>x.a===prev && x.b===id);
+        if(t){ t.path.classList.add("on");
+          if(!reduce){ const c = el("circle", {r:"5", class:"av-tok"}, gK); const am = el("animateMotion", {dur:(gap/1000*.9)+"s", begin:"indefinite", fill:"freeze", path:t._d}, c); am.beginElement(); setTimeout(()=>c.remove(), gap); } }
+      }, i*gap)));
+      timers.push(setTimeout(()=>play.setAttribute("aria-pressed","false"), happy.length*gap));
+    });
+  }
+
+  /* ---------- entity-relationship ---------- */
+  function er(root, D, opt){
+    opt = opt||{}; root.classList.add("av-er");
+    if(fail(root, validate({TABLES:D.TABLES, REL:D.REL}))) return;
+    const RH = 17, HD = 30, box = {};
+    D.TABLES.forEach(t=>{ box[t.id] = {x:t.x, y:t.y, w:t.w||220, h:HD + t.fields.length*RH + 8, t}; });
+    const W = D.ER_W || Math.max(...Object.values(box).map(b=>b.x+b.w)) + 20, H = D.ER_H || Math.max(...Object.values(box).map(b=>b.y+b.h)) + 20;
+    const L = (D.REL||[]).map(r=>Object.assign({}, r)); routes(box, L);
+    const R = svgRoot(root, W, H, opt.label || "Modelo entidad-relación", .75);
+    const gR = el("g", {}, R.svg), gT = el("g", {}, R.svg), tEl = {};
+    // cardinality mark at point p, leaving the table in direction d: "1" | "0..1" | "1..n" | "0..n"
+    function mark(g, p, side, card){ const [ux,uy] = DIR[side], px = -uy, py = ux, at = k=>[p[0]+ux*k, p[1]+uy*k];
+      const many = /n$/.test(card), zero = /^0/.test(card);
+      if(many){ const [fx,fy] = at(13); el("path", {class:"mk", d:`M${fx},${fy} L${p[0]+px*7},${p[1]+py*7} M${fx},${fy} L${p[0]},${p[1]} M${fx},${fy} L${p[0]-px*7},${p[1]-py*7}`}, g); }
+      else { const [bx,by] = at(5); el("path", {class:"mk", d:`M${bx+px*6},${by+py*6} L${bx-px*6},${by-py*6}`}, g); }
+      if(zero){ const [cx,cy] = at(20); el("circle", {class:"mk o", cx, cy, r:"4"}, g); }
+      else { const [bx,by] = at(many ? 18 : 10); el("path", {class:"mk", d:`M${bx+px*6},${by+py*6} L${bx-px*6},${by-py*6}`}, g); } }
+    const lit = (tables, rels)=>{ root.classList.toggle("av-er", true); root.classList.toggle("hov", !!tables);
+      Object.entries(tEl).forEach(([id,g])=>g.classList.toggle("lit", !!tables && tables.includes(id)));
+      L.forEach(r=>r.g.classList.toggle("lit", !!rels && rels.includes(r))); };
+    L.forEach(r=>{ const g = r.g = el("g", {class:"av-rel", tabindex:"0"}, gR);
+      el("title", {}, g).textContent = `${r.a} ${r.ca||"1"} — ${r.cb||"0..n"} ${r.b}${r.l ? " · "+r.l : ""}`;
+      el("path", {class:"ln", d:r._d}, g); el("path", {class:"hit", d:r._d}, g);
+      mark(g, r._pa, r._as, r.ca||"1"); mark(g, r._pb, r._bs, r.cb||"0..n");
+      if(r.l) txt(g, r._mid[0], r._mid[1]-4, "av-tl", r.l, {"text-anchor":"middle"});
+      const on = ()=>lit([r.a, r.b], [r]), off = ()=>lit(null);
+      g.addEventListener("mouseenter", on); g.addEventListener("mouseleave", off); g.addEventListener("focus", on); g.addEventListener("blur", off); });
+    D.TABLES.forEach(t=>{ const b = box[t.id], g = el("g", {class:"av-tb"+(t.ext?" ext":""), tabindex:"0", "data-id":t.id}, gT); tEl[t.id] = g;
+      if(t.note) el("title", {}, g).textContent = t.note;
+      el("rect", {class:"card", x:b.x, y:b.y, width:b.w, height:b.h, rx:"8"}, g);
+      el("path", {class:"hd", d:`M${b.x},${b.y+8} a8,8 0 0 1 8,-8 h${b.w-16} a8,8 0 0 1 8,8 v${HD-8} h${-b.w} z`, fill:t.ext ? "var(--violet-soft)" : "var(--blue-soft)"}, g);
+      txt(g, b.x+12, b.y+20, "tn", t.label || t.id);
+      t.fields.forEach((f,i)=>{ const y = b.y + HD + 13 + i*RH;
+        const k = f.pk ? ["PK","kpk"] : f.fk ? ["FK","kfk"] : f.uk ? ["UK","kuk"] : null;
+        if(k) txt(g, b.x+10, y, "ft "+k[1], k[0]);
+        const fn = txt(g, b.x+34, y, "fn", f.n); if(f.note){ el("title", {}, fn).textContent = f.note; }
+        if(f.t) txt(g, b.x+b.w-10, y, "ft", f.t, {"text-anchor":"end"}); });
+      const mine = L.filter(r=>r.a===t.id || r.b===t.id);
+      const on = ()=>lit([t.id, ...mine.flatMap(r=>[r.a, r.b])], mine), off = ()=>lit(null);
+      g.addEventListener("mouseenter", on); g.addEventListener("mouseleave", off); g.addEventListener("focus", on); g.addEventListener("blur", off); });
+  }
+
+  return {validate, norm, player, reveal, sequence, states, er};
+})();
+</script>
+
+<script>
+const $ = (s, r=document) => r.querySelector(s);
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- tabs ---------- */
+const tabs = [...document.querySelectorAll(".tab")], views = [...document.querySelectorAll(".view")];
+function showTab(v){
+  tabs.forEach(t=>t.setAttribute("aria-selected", String(t.dataset.v===v)));
+  views.forEach(s=>s.classList.toggle("active", s.dataset.v===v));
+  try{ localStorage.setItem("arq-tab", v); }catch(e){}
+}
+tabs.forEach(t=>t.addEventListener("click", ()=>showTab(t.dataset.v)));
+let initial = "c4"; try{ initial = localStorage.getItem("arq-tab") || "c4"; }catch(e){}
+if(location.hash && tabs.some(t=>t.dataset.v===location.hash.slice(1))) initial = location.hash.slice(1);
+if(!tabs.some(t=>t.dataset.v===initial)) initial = tabs[0].dataset.v; // stored tab may belong to another page on this origin
+showTab(initial);
+
+/* ---------- C4 containers ---------- */
+const N = {
+  vis:  {x:20,y:40,w:190,h:110,kind:"persona · navegador",ttl:"Quien estudia",tech:"cualquier navegador moderno",color:"violet",ext:true,
+         resp:"Elige una certificación, practica por dominio o por task statement y rinde simulacros cronometrados. Todo ocurre en su navegador.",
+         kv:{"Entrada":"clics · teclas A–D y Enter","Sin":"cuenta, registro ni cookies"}},
+  host: {x:20,y:200,w:190,h:110,kind:"externo · hosting estático",ttl:"Hostinger",tech:"subdominio cert.ichisieben.dev · .htaccess",color:"amber",ext:true,
+         resp:"Sirve los archivos tal cual. Una regla de reescritura devuelve 404 si la petición no llega por el subdominio y bloquea material de trabajo antiguo.",
+         kv:{"Sirve":"index.html · data/*.js · README","Protocolo":"HTTPS"}},
+  dep:  {x:20,y:360,w:190,h:100,kind:"script · bash + curl",ttl:"deploy-cert.sh",tech:"subida TUS 1.0.0 · claves de corta vida",color:"blue",
+         resp:"Sube seis archivos al directorio del subdominio. Solo sobrescribe: nunca borra. Las claves llegan por variables de entorno y no se imprimen.",
+         kv:{"Comprueba":"201 al crear, 204 al subir, por archivo"}},
+  gh:   {x:20,y:510,w:190,h:100,kind:"externo · git",ttl:"GitHub",tech:"repo público · un autor noreply",color:"amber",ext:true,
+         resp:"Copia pública del proyecto. Quien lo clona abre app/index.html desde disco y estudia sin servidor.",
+         kv:{"Licencia":"Apache-2.0 (código) · CC BY 4.0 (contenido)"}},
+  page: {x:300,y:40,w:260,h:240,kind:"página · HTML + JS",ttl:"index.html",tech:"vistas · router · motor de simulacro · puntaje · repaso espaciado",color:"blue",
+         resp:"Toda la aplicación: inicio con las dos certificaciones, resumen, blueprint, conceptos, práctica, simulacro, trampas y progreso. Arma los simulacros por peso, puntúa y guarda el progreso.",
+         kv:{"Tamaño":"un archivo, sin dependencias","Parámetros":"?sample=1 · ?lang=es · ?cert · ?view","Red":"ninguna llamada después de cargar"}},
+  exp:  {x:300,y:510,w:260,h:100,kind:"script · bash",ttl:"export-public.sh",tech:"git archive · filtro · auditoría por patrones",color:"blue",
+         resp:"Exporta el árbol publicable del repo de trabajo, quita notas y material privado, falla si encuentra nombres de terceros o rutas personales, y commitea con un autor noreply.",
+         kv:{"Nunca":"empuja solo: el push es una decisión aparte"}},
+  bp:   {x:660,y:40,w:200,h:100,kind:"datos · script",ttl:"blueprints.js",tech:"dominios · pesos · task statements · 10 trampas",color:"blue",
+         resp:"Fuente única del examen: 5 dominios y 30 task statements de CCAR-F, 8 dominios y 25 de CCDV-F, con sus pesos oficiales, y la taxonomía de distractores.",
+         kv:{"Llena":"window.BLUEPRINTS · window.TRAPS"}},
+  qs:   {x:660,y:160,w:200,h:95,kind:"datos · script",ttl:"questions-*.js",tech:"218 preguntas originales",color:"blue",
+         resp:"106 preguntas de CCAR-F y 112 de CCDV-F. Cada una: escenario, cuatro opciones, clave, etiqueta de trampa por opción incorrecta, explicación, cuándo sí y cuándo no.",
+         kv:{"Llena":"window.QUESTIONS","Revisión":"por un modelo contra la documentación; no por una persona"}},
+  val:  {x:960,y:40,w:220,h:100,kind:"herramienta · Node",ttl:"validate-bank.mjs",tech:"esquema · tareas · etiquetas",color:"blue",
+         resp:"Carga blueprints y bancos y falla ante un id repetido, una tarea inexistente, una clave que no coincide con select o una opción incorrecta sin etiqueta válida.",
+         kv:{"Sale con":"1 ante cualquier error"}},
+  e2e:  {x:960,y:180,w:220,h:100,kind:"pruebas · Playwright",ttl:"app.test.mjs",tech:"Chromium · file:// · 16 casos",color:"blue",
+         resp:"Recorre la app como una persona: práctica, simulacros sin repetidos, resultado, modo muestra sin almacenamiento, PDF de la hoja de repaso, 390 px y cero errores de consola.",
+         kv:{"Corre con":"bash tools/verify.sh"}},
+  ls:   {x:300,y:360,w:170,h:100,kind:"almacén · navegador",ttl:"localStorage",tech:"ccs:progress · ccs:cert · ccs:theme",color:"blue",
+         resp:"El progreso de cada certificación en un objeto JSON. Vive en el navegador de cada persona; no se envía a ninguna parte.",
+         kv:{"Alcance":"un navegador, un origen"}},
+  mem:  {x:490,y:360,w:150,h:100,kind:"almacén · memoria",ttl:"Modo muestra",tech:"?sample=1 · semilla 42",color:"blue",
+         resp:"Mismo modelo de datos, en memoria. El azar se reemplaza por un generador con semilla fija, así cada carga produce el mismo progreso de demostración.",
+         kv:{"Para":"capturas y video públicos"}},
+  pdf:  {x:660,y:360,w:200,h:100,kind:"salida · archivo",ttl:"Hoja de repaso y respaldo",tech:"window.print · Blob JSON",color:"blue",
+         resp:"El blueprint se imprime como hoja de repaso con el dominio de cada task statement. El progreso se descarga como JSON.",
+         kv:{"Formato":"PDF del navegador · JSON"}},
+};
+const E = [
+  {id:"e1",a:"vis",as:"r",b:"page",bs:"l",l:"clics",ay:0,by:-70},
+  {id:"e2",a:"host",as:"r",b:"page",bs:"l",l:"HTTPS",ay:0,by:40},
+  {id:"e3",a:"page",as:"r",b:"bp",bs:"l",l:"<script>",ay:-75,by:0},
+  {id:"e4",a:"page",as:"r",b:"qs",bs:"l",l:"<script>",ay:40,by:0},
+  {id:"e5",a:"page",as:"b",b:"ls",bs:"t",l:"progreso",ay:-80,by:0},
+  {id:"e6",a:"page",as:"b",b:"mem",bs:"t",l:"en memoria",ay:35,by:0},
+  {id:"e7",a:"page",as:"b",b:"pdf",bs:"t",l:"print · JSON",ay:115,by:0},
+  {id:"e8",a:"val",as:"l",b:"bp",bs:"r",l:"require",ay:0,by:0},
+  {id:"e9",a:"val",as:"l",b:"qs",bs:"r",l:"require",ay:30,by:0},
+  {id:"e10",a:"val",as:"b",b:"e2e",bs:"t",l:"luego",ay:-50,by:-50},
+  {id:"e11",a:"e2e",as:"b",b:"page",bs:"r",l:"file://",ay:0,by:105},
+  {id:"e12",a:"dep",as:"t",b:"host",bs:"b",l:"TUS",ay:0,by:0},
+  {id:"e13",a:"exp",as:"l",b:"gh",bs:"r",l:"commit",ay:0,by:0},
+];
+const FLOWS = [
+  {id:"abrir",t:"Abrir la app",steps:[
+    ["e2","El hosting entrega index.html por el subdominio"],
+    ["e3","Carga los blueprints: dominios, pesos, tareas y trampas"],
+    ["e4","Carga los dos bancos de preguntas"],
+    ["e5","Lee la certificación elegida y el progreso guardado"],
+    ["page","Primera visita: página de inicio con las dos certificaciones. Si ya hay progreso: el resumen"]]},
+  {id:"simulacro",t:"Simulacro: peso → cronómetro → puntaje → trampas",steps:[
+    ["e1","Elige el simulacro completo"],
+    ["e3","Lee el peso oficial de cada dominio"],
+    ["page","Reparte los ítems por resto mayor: la suma da exactamente el largo del examen"],
+    ["e5","Lee los ids de los simulacros anteriores"],
+    ["e4","Saca de cada dominio primero las preguntas que nunca salieron"],
+    ["page","Cronómetro en marcha, sin corrección hasta enviar"],
+    ["e1","Responde y envía"],
+    ["page","Puntaje = 100 + 900 × porcentaje ponderado por dominio; aprueba con 720"],
+    ["e5","Guarda el simulacro, las respuestas y las trampas en las que cayó"],
+    ["e1","Resultado: dominio más débil y qué trampas lo atraparon",{rev:true}]]},
+  {id:"pregunta",t:"Cómo nace una pregunta",steps:[
+    ["bp","Se parte de un task statement oficial y de su peso"],
+    ["qs","Se escribe una pregunta original: escenario con una restricción dominante y cuatro opciones"],
+    ["qs","Cada opción incorrecta recibe una de las diez etiquetas de trampa"],
+    {note:"Un lote con una etiqueta mal puesta se rechaza entero, no se parchea", over:["qs","val"]},
+    ["e9","El validador carga el banco"],
+    ["e8","Comprueba que la tarea exista y que cada etiqueta sea válida"],
+    ["e10","Después corren las pruebas de punta a punta"],
+    ["e11","Chromium abre la página desde disco y rinde simulacros completos"]]},
+  {id:"muestra",t:"Captura pública en modo muestra",steps:[
+    ["e1","Abre la app con ?sample=1"],
+    ["e6","El almacenamiento pasa a memoria y el azar a una semilla fija"],
+    ["mem","Siembra un progreso de demostración idéntico en cada carga"],
+    ["e7","La hoja de repaso y el respaldo funcionan igual; localStorage queda intacto"]]},
+  {id:"publicar",t:"Publicar una versión",steps:[
+    ["exp","Exporta el árbol publicable y lo audita"],
+    ["e13","Commit con autor noreply en el repo público"],
+    ["e12","Sube los seis archivos de la app, sin borrar nada"],
+    ["e2","El subdominio sirve la nueva versión"]]},
+];
+const STATES = {
+  note:"Una pregunta está para hoy si nunca la viste, si la fallaste la última vez o si la acertaste hace más de 3 días. La regla vive en isDue().",
+  states:[
+    {id:"inicio",kind:"start",x:14,y:60},
+    {id:"SIN_VER",x:70,y:50,kind:"wait",d:"Nunca respondida en esta certificación: cuenta para hoy y la práctica 'sin ver primero' la sirve antes que las demás."},
+    {id:"ACERTADA",x:420,y:50,kind:"final",d:"La última respuesta fue correcta y tiene menos de 3 días: no cuenta para hoy."},
+    {id:"FALLADA",x:420,y:200,kind:"error",d:"La última respuesta fue incorrecta: cuenta para hoy y entra en 'reintentar mis fallos'."},
+    {id:"VENCIDA",x:770,y:50,kind:"wait",d:"Acertada hace más de 3 días: vuelve a contar para hoy."},
+  ],
+  trans:[
+    {a:"inicio",b:"SIN_VER"},
+    {a:"SIN_VER",b:"ACERTADA",l:"acierta"},
+    {a:"SIN_VER",b:"FALLADA",l:"falla",err:true},
+    {a:"ACERTADA",b:"VENCIDA",l:"pasan 3 días"},
+    {a:"VENCIDA",b:"ACERTADA",l:"acierta",as:"b",bs:"b"},
+    {a:"VENCIDA",b:"FALLADA",l:"falla",err:true},
+    {a:"FALLADA",b:"ACERTADA",l:"acierta",as:"t",bs:"b"},
+  ],
+  happy:["inicio","SIN_VER","ACERTADA","VENCIDA"],
+};
+const TABLES = [
+  {id:"PROGRESO",x:20,y:40,note:"ccs:progress · un objeto por certificación",fields:[{n:"cert",t:"CCAR-F | CCDV-F",pk:true}]},
+  {id:"PREFERENCIA",x:20,y:150,note:"claves sueltas",fields:[{n:"ccs:cert",t:"string"},{n:"ccs:theme",t:"light | dark"}]},
+  {id:"RESPUESTA",x:300,y:40,note:"progress[cert].q[id]",fields:[{n:"pregunta_id",t:"string",pk:true,fk:true},{n:"seen",t:"int"},{n:"right",t:"int"},{n:"wrong",t:"int"},{n:"last",t:"right | wrong"},{n:"when",t:"epoch ms",note:"repaso espaciado"}]},
+  {id:"SIMULACRO",x:300,y:230,note:"progress[cert].mocks[]",fields:[{n:"date",t:"YYYY-MM-DD"},{n:"kind",t:"quick | full"},{n:"score",t:"100–1000"},{n:"pct",t:"int"},{n:"byDomain",t:"{dominio: %}"},{n:"misses",t:"int"},{n:"ids",t:"string[]",note:"nunca usadas primero"}]},
+  {id:"CAIDA",x:300,y:450,note:"progress[cert].traps",fields:[{n:"trampa",t:"clave",pk:true,fk:true},{n:"veces",t:"int"}]},
+  {id:"PREGUNTA",x:620,y:40,ext:true,note:"data/questions-*.js (solo lectura)",fields:[{n:"id",t:"string",pk:true},{n:"cert",t:"string"},{n:"domain",t:"int"},{n:"task",t:"string",fk:true},{n:"select",t:"1 | 2"},{n:"answer",t:"letras"},{n:"distractors",t:"{letra: trampa}"},{n:"concept",t:"string"}]},
+  {id:"TAREA",x:900,y:40,ext:true,note:"data/blueprints.js",fields:[{n:"id",t:"string",pk:true},{n:"dominio",t:"int"},{n:"peso",t:"% del dominio"}]},
+  {id:"TRAMPA",x:900,y:250,ext:true,note:"window.TRAPS · 10 tipos",fields:[{n:"clave",t:"string",pk:true},{n:"name",t:"string"},{n:"hint",t:"string"}]},
+];
+const REL = [
+  {a:"PROGRESO",b:"RESPUESTA",ca:"1",cb:"0..n",l:"registra"},
+  {a:"PROGRESO",b:"SIMULACRO",ca:"1",cb:"0..n",l:"guarda"},
+  {a:"PROGRESO",b:"CAIDA",ca:"1",cb:"0..n",l:"cuenta"},
+  {a:"PREGUNTA",b:"RESPUESTA",ca:"1",cb:"0..1",l:"responde"},
+  {a:"SIMULACRO",b:"PREGUNTA",ca:"0..n",cb:"0..n",l:"usa"},
+  {a:"TAREA",b:"PREGUNTA",ca:"1",cb:"0..n",l:"evalúa"},
+  {a:"TRAMPA",b:"CAIDA",ca:"1",cb:"0..1",l:"atrapa"},
+  {a:"TRAMPA",b:"PREGUNTA",ca:"1",cb:"0..n",l:"etiqueta"},
+];
+const svg = $("#c4svg"), NS = "http://www.w3.org/2000/svg";
+function el(tag, attrs={}, parent=svg){ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; }
+function anchor(n, side, off=0){ const c=N[n]; const m={l:[c.x,c.y+c.h/2+off],r:[c.x+c.w,c.y+c.h/2+off],t:[c.x+c.w/2+off,c.y],b:[c.x+c.w/2+off,c.y+c.h]}; return m[side]; }
+function pathFor(e){
+  const [x1,y1]=anchor(e.a,e.as,e.ay), [x2,y2]=anchor(e.b,e.bs,e.by);
+  const h = (e.as==="l"||e.as==="r"), k = Math.max(40, Math.abs(h?x2-x1:y2-y1)/2);
+  const c1 = h ? [x1+(e.as==="r"?k:-k), y1] : [x1, y1+(e.as==="b"?k:-k)];
+  const c2 = (e.bs==="l"||e.bs==="r") ? [x2+(e.bs==="l"?-k:k), y2] : [x2, y2+(e.bs==="t"?-k:k)];
+  return {d:`M${x1},${y1} C${c1[0]},${c1[1]} ${c2[0]},${c2[1]} ${x2},${y2}`, mid:[(x1+x2)/2,(y1+y2)/2]};
+}
+const defs = el("defs");
+const mk = el("marker",{id:"arr",viewBox:"0 0 10 10",refX:"9",refY:"5",markerWidth:"7",markerHeight:"7",orient:"auto-start-reverse"},defs);
+el("path",{d:"M0,0 L10,5 L0,10 z",fill:"var(--line)"},mk);
+const gE = el("g"), gL = el("g"), gN = el("g"), gP = el("g");
+E.forEach(e=>{
+  const p = pathFor(e);
+  const path = el("path",{id:"p-"+e.id,d:p.d,class:"edge","marker-end":"url(#arr)"},gE);
+  if(e.dash) path.setAttribute("stroke-dasharray","4 4");
+  e.path = path;
+  if(e.l){ el("text",{x:p.mid[0],y:p.mid[1]-6,class:"elabel","text-anchor":"middle"},gL).textContent = e.l; }
+  if(!reduce && !e.dash){ // ambient traffic
+    const c = el("circle",{r:"3.2",class:"pk"},gP);
+    const am = el("animateMotion",{dur:(2.8+Math.random()*1.6).toFixed(1)+"s",repeatCount:"indefinite",begin:(Math.random()*3).toFixed(1)+"s"},c);
+    const mp = el("mpath",{},am); mp.setAttribute("href","#p-"+e.id); mp.setAttributeNS("http://www.w3.org/1999/xlink","xlink:href","#p-"+e.id);
+  }
+});
+const COL = {blue:"var(--blue)",violet:"var(--violet)",amber:"var(--amber)"};
+Object.entries(N).forEach(([id,n])=>{
+  const g = el("g",{class:"node"+(n.ext?" ext":""),"data-id":id,tabindex:"0",role:"button"},gN);
+  el("rect",{class:"box",x:n.x,y:n.y,width:n.w,height:n.h,rx:"10"},g);
+  el("rect",{x:n.x,y:n.y,width:"5",height:n.h,rx:"2.5",fill:COL[n.color]},g);
+  el("text",{x:n.x+16,y:n.y+18,class:"kind"},g).textContent = n.kind;
+  el("text",{x:n.x+16,y:n.y+38,class:"ttl"},g).textContent = n.ttl;
+  // wrap tech line
+  const words = n.tech.split(" "); let line="", ly=n.y+56, lines=[];
+  words.forEach(w=>{ if((line+" "+w).length>Math.max(18,Math.floor(n.w/6.2))){lines.push(line);line=w;} else line=(line?line+" ":"")+w; }); lines.push(line);
+  lines.slice(0, Math.floor((n.h-60)/14)).forEach((t,i)=>{ el("text",{x:n.x+16,y:ly+i*14,class:"tech"},g).textContent=t; });
+  if(id==="usr"){ ["Operador","Revisor","Validador ×4","Analista","Auditor","Admin plantillas"].forEach((r,i)=>{ const y=n.y+90+i*19; el("rect",{x:n.x+16,y:y-11,width:"110",height:"16",rx:"8",fill:"var(--violet-soft)"},g); el("text",{x:n.x+24,y:y+1,class:"tag",fill:"var(--violet)"},g).textContent=r; }); }
+  if(id==="wrk"){ ["normalizar","clasificar","extraer"].forEach((r,i)=>{ const x=n.x+16+i*64; el("rect",{x:x,y:n.y+118,width:"58",height:"18",rx:"9",fill:"var(--blue-soft)"},g); el("text",{x:x+29,y:n.y+130,class:"tag","text-anchor":"middle",fill:"var(--blue)"},g).textContent=r; }); }
+  if(id==="api"){ ["dominio","reglas","puertos"].forEach((r,i)=>{ const x=n.x+16+i*64; el("rect",{x:x,y:n.y+100,width:"58",height:"18",rx:"9",fill:"var(--blue-soft)"},g); el("text",{x:x+29,y:n.y+112,class:"tag","text-anchor":"middle",fill:"var(--blue)"},g).textContent=r; }); }
+  g.addEventListener("click", ()=>selectNode(id));
+  g.addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();selectNode(id);} });
+});
+// frame labels
+el("text",{x:300,y:640,class:"mono muted","font-size":"10"}).textContent = "C4 · nivel 2 (contenedores) · tráfico ambiente = llamadas reales · clic en una caja para el detalle";
+el("text",{x:300,y:660,class:"mono muted","font-size":"10"}).textContent = "caja punteada = existe fuera del proyecto · las líneas son llamadas reales del código";
+
+function selectNode(id){
+  PLAYER.stop();
+  document.querySelectorAll("#flowbar .btn").forEach(b=>b.setAttribute("aria-pressed","false"));
+  document.querySelectorAll(".node").forEach(n=>{ n.classList.toggle("sel", n.dataset.id===id); n.classList.remove("pulse"); });
+  const n = N[id];
+  $("#pn-t").textContent = n.ttl; $("#pn-r").textContent = n.resp;
+  $("#pn-kv").innerHTML = Object.entries(n.kv||{}).map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join("");
+  $("#pn-chips").innerHTML = `<span class="chip ${n.color==='violet'?'violet':n.color==='amber'?'amber':''}">${n.kind}</span>` + n.tech.split("·").map(t=>`<span class="chip ghost">${t.trim()}</span>`).join("");
+  $("#pn-steps-wrap").hidden = true;
+  // dim unrelated edges
+  E.forEach(e=>{ e.path.classList.toggle("dim", !(e.a===id||e.b===id)); e.path.classList.remove("hot"); });
+}
+const PLAYER = ArqViva.player({N,E,FLOWS});
+function packet(e, rev){
+  const c = el("circle",{r:"5",class:"pk one"},gP);
+  const am = el("animateMotion",{dur:"1s",begin:"indefinite",fill:"freeze"},c);
+  if(rev){ am.setAttribute("keyPoints","1;0"); am.setAttribute("keyTimes","0;1"); am.setAttribute("calcMode","linear"); }
+  const mp = el("mpath",{},am); mp.setAttribute("href","#p-"+e.id); mp.setAttributeNS("http://www.w3.org/1999/xlink","xlink:href","#p-"+e.id);
+  am.beginElement(); setTimeout(()=>c.remove(), 1200);
+}
+const nodeEl = id => document.querySelector(`#c4svg .node[data-id="${id}"]`);
+PLAYER.on((ev, f, steps, i)=>{
+  if(ev==="start"){
+    document.querySelectorAll("#c4svg .node").forEach(n=>n.classList.remove("sel","pulse"));
+    document.querySelectorAll("#flowbar .btn").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.f===f.id)));
+    E.forEach(e=>{ e.path.classList.remove("hot"); e.path.classList.add("dim"); });
+    $("#pn-t").textContent = f.t; $("#pn-r").textContent = "Mira el recorrido en el diagrama. Cada paso enciende la llamada real que lo cumple.";
+    $("#pn-kv").innerHTML = ""; $("#pn-chips").innerHTML = "";
+    const ol = $("#pn-steps"); ol.innerHTML = "";
+    steps.forEach(s=>{ const li = document.createElement("li"); li.textContent = s.t; if(s.k==="note") li.className = "nt"; ol.appendChild(li); });
+    $("#pn-steps-wrap").hidden = false;
+  }
+  if(ev==="step"){
+    const s = steps[i];
+    [...$("#pn-steps").children].forEach((li,k)=>{ li.classList.toggle("on", k===i); if(k===i) ArqViva.reveal(li); });
+    document.querySelectorAll("#c4svg .node.pulse").forEach(n=>n.classList.remove("pulse"));
+    if(s.k==="edge"){
+      E.forEach(e=>e.path.classList.remove("hot"));
+      s.e.path.classList.remove("dim"); s.e.path.classList.add("hot");
+      [s.e.a,s.e.b].forEach(id=>nodeEl(id).classList.add("sel"));
+      if(!reduce) packet(s.e, s.rev);
+    } else if(s.k==="self"){ nodeEl(s.node).classList.add("sel","pulse"); }
+    else if(s.k==="note"){ s.over.forEach(id=>nodeEl(id).classList.add("pulse")); }
+  }
+  if(ev==="end"){ E.forEach(e=>e.path.classList.remove("dim")); document.querySelectorAll("#c4svg .node.pulse").forEach(n=>n.classList.remove("pulse")); }
+});
+$("#flowbar").innerHTML = `<span class="chip cyan" style="align-self:center">reproducir flujo</span>` + FLOWS.map(f=>`<button class="btn sm" data-f="${f.id}" aria-pressed="false">${f.t}</button>`).join("");
+$("#flowbar").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; PLAYER.play(b.dataset.f); });
+if(reduce && svg.pauseAnimations) svg.pauseAnimations();
+
+/* ---------- hexagonal ---------- */
+const HEX = {cols:[],cells:[],routes:[]};
+if($("#hex")){ // the hex view is optional (manual §1.5): its section may be deleted
+$("#hex").innerHTML = HEX.cols.map((c,i)=>`<div class="col"><h4>${c}</h4>${HEX.cells[i].map(x=>`<div class="cell ${x.core?'core':''} ${x.port?'port':''}" data-id="${x.id}"><b>${x.b}</b><small>${x.s}</small></div>`).join("")}</div>`).join("");
+$("#routes").innerHTML = HEX.routes.map(r=>`<button class="btn sm" data-r="${r.id}" aria-pressed="false">${r.t}</button>`).join("");
+$("#routes").addEventListener("click", e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  const r = HEX.routes.find(x=>x.id===b.dataset.r);
+  const same = b.getAttribute("aria-pressed")==="true";
+  document.querySelectorAll("#routes .btn").forEach(x=>x.setAttribute("aria-pressed","false"));
+  document.querySelectorAll("#hex .cell").forEach(c=>{ c.classList.remove("lit","off"); });
+  if(same) return;
+  b.setAttribute("aria-pressed","true");
+  document.querySelectorAll("#hex .cell").forEach(c=>{ c.classList.toggle("lit", r.on.includes(c.dataset.id)); c.classList.toggle("off", !r.on.includes(c.dataset.id)); });
+});
+}
+
+/* ---------- user stories ---------- */
+const HU = [];
+if($("#hulist")) $("#hulist").innerHTML = HU.map(h=>`<div class="card"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><span class="id">${h.id} · semana ${h.w.slice(1)}</span><span class="chips">${h.comp.map(c=>`<span class="chip ghost">${c}</span>`).join("")}</span></div><div><b>Como</b> ${h.como}, <b>quiero</b> ${h.quiero}, <b>para</b> ${h.para}.</div><ul>${h.crit.map(c=>`<li>${c}</li>`).join("")}</ul></div>`).join("");
+
+if($("#seq")) ArqViva.sequence($("#seq"), {N,E,FLOWS}, PLAYER);
+if($("#states")) ArqViva.states($("#states"), {STATES});
+if($("#er")) ArqViva.er($("#er"), {TABLES,REL});
+</script>
+
+</body></html>

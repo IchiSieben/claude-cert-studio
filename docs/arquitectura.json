@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "slug": "cert-studio",
+  "name": {"es": "Cert Studio", "en": "Cert Studio"},
+  "oneLiner": {
+    "es": "Entorno de estudio estático para las certificaciones CCAR-F y CCDV-F: simulacros por peso oficial, trampas etiquetadas y progreso que nunca sale del navegador.",
+    "en": "Static study environment for the CCAR-F and CCDV-F certifications: mocks drawn by official weight, tagged traps and progress that never leaves the browser."
+  },
+  "machines": ["Navegador del usuario", "Hostinger", "GitHub", "PC Windows", "Mac mini"],
+  "containers": 13,
+  "calls": 13,
+  "flows": 5,
+  "views": ["c4", "flows", "data", "deploy", "decisions"],
+  "hasCore": false,
+  "updated": "2026-10-15",
+  "status": "done",
+  "landing": {"projectSlug": "cert-studio", "order": 75}
+}
