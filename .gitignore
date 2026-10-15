@@ -9,5 +9,6 @@ _papelera_claude/
 docs/private/
 .enjambre-lane
 tools/evidence/_video-raw/
-/evidence/
+/evidence/*
+!/evidence/ui/
 /TASK-*.md

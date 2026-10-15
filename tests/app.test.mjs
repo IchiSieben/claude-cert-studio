@@ -5,6 +5,7 @@ import { chromium } from "playwright";
 import { pathToFileURL } from "node:url";
 import path from "node:path";
 import assert from "node:assert/strict";
+import { axeAll } from "../tools/axe.mjs";
 
 const URL_ = pathToFileURL(path.resolve(import.meta.dirname, "../app/index.html")).href;
 const errors = [];
@@ -320,7 +321,27 @@ await step("no layout shift while the bank loads (CLS 0 with the data scripts de
   } finally { srv.close(); }
 });
 
-await step("zero console errors", async () => { assert.deepEqual(errors, []); });
+await step("UI rules: no dash placeholders on a fresh profile, at most one filled primary per view, header one line", async () => {
+  const f = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  await f.goto(URL_);
+  await f.evaluate(() => { localStorage.clear(); setCert("CCDV-F"); go("home"); });
+  assert.equal(await f.$$eval(".kpi b", els => els.filter(e => /^[–—-]$/.test(e.textContent.trim())).length), 0);
+  assert.ok(await f.$("#kpiNote"), "missing data is said in a sentence");
+  for (const v of ["start", "home", "blueprint", "concepts", "drill", "mock", "traps", "progress"]) {
+    await f.evaluate(x => go(x), v);
+    const n = await f.$$eval("#view .btn:not(.ghost):not(.link)", els => els.filter(e => e.offsetParent).length);
+    assert.ok(n <= 1, `${v}: ${n} filled buttons`);
+  }
+  assert.equal(await f.$eval(".bar1", e => e.getBoundingClientRect().height), 48);
+  await f.close();
+});
+
+await step("axe: no violations on the 8 views, an answered drill and a mock result (light/dark, 1280/390)", async () => {
+  const found = await axeAll(browser);
+  assert.deepEqual(found, [], found.join(" | "));
+});
+
+await step("zero console errors", async () => { assert.deepEqual(errors, [], errors.join(" | ")); });
 
 await browser.close();
 for (const [s, n] of results) console.log(`${s}  ${n}`);

@@ -109,7 +109,7 @@ Una página sin servidor ni build (`app/index.html` + tres `.js` de datos) se pu
 
 ## Por qué importa aquí
 
-Los datos van como `.js` y no como `.json` justamente para que `file://` funcione: un `fetch()` de un JSON local lo bloquea el navegador. Así la misma copia corre desde un clon, desde Hostinger y desde la Mac sin cambiar nada. `npm test` cubre 22 casos: simulacros sin repetidos, resultado, modo muestra sin `localStorage`, PDF de la hoja de repaso, 390 px sin scroll horizontal, migración del repaso espaciado, uso sin conexión, cero desplazamiento de diseño y cero errores de consola.
+Los datos van como `.js` y no como `.json` justamente para que `file://` funcione: un `fetch()` de un JSON local lo bloquea el navegador. Así la misma copia corre desde un clon, desde Hostinger y desde la Mac sin cambiar nada. `npm test` cubre 24 casos: simulacros sin repetidos, resultado, modo muestra sin `localStorage`, PDF de la hoja de repaso, 390 px sin scroll horizontal, migración del repaso espaciado, uso sin conexión, cero desplazamiento de diseño y cero errores de consola.
 
 ## Ejemplo real
 

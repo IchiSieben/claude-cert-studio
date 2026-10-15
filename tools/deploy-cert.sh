@@ -7,7 +7,10 @@ set -euo pipefail
 node "$(dirname "$0")/stamp-sw.mjs" --check   # never ship a stale service-worker cache name
 : "${HSTG_UP_URL:?}" "${HSTG_AUTH:?}" "${HSTG_REST:?}"
 cd "$(dirname "$0")/../app"
-FILES=(index.html .htaccess README.md data/blueprints.js data/questions-ccar-f.js data/questions-ccdv-f.js
+# fonts first: sw.js caches them with addAll (all or nothing), so they must exist before the new sw.js does
+FILES=(fonts/space-grotesk-latin-wght-normal.woff2 fonts/jetbrains-mono-latin-wght-normal.woff2
+       fonts/space-grotesk-OFL.txt fonts/jetbrains-mono-OFL.txt
+       index.html .htaccess README.md data/blueprints.js data/questions-ccar-f.js data/questions-ccdv-f.js
        sw.js manifest.webmanifest robots.txt sitemap.xml og.png icon.svg icon-192.png icon-512.png)
 fail=0
 for f in "${FILES[@]}"; do

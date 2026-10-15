@@ -41,7 +41,7 @@ cd claude-cert-studio
 
 # optional, for the tests:
 npm ci && npx playwright install chromium
-bash tools/verify.sh        # bank validator + 22 e2e tests
+bash tools/verify.sh        # bank validator + 24 e2e tests (incl. axe)
 ```
 
 URL switches: `?sample=1` (demo progress in memory, your `localStorage` is never touched), `?lang=es` (navigation and start page in Spanish; questions stay in English, like the exam), `?cert=CCDV-F`, `?view=blueprint`.
