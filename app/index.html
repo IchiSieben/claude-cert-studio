@@ -186,7 +186,7 @@ footer p{margin:0 0 6px}
   <button class="theme" id="themeBtn" title="Toggle theme" aria-label="Toggle light or dark theme">◐</button></div>
   <nav id="nav" aria-label="Views"><button class="active" onclick="go('start')">Start</button><button class="" onclick="go('home')">Overview</button><button class="" onclick="go('blueprint')">Blueprint</button><button class="" onclick="go('concepts')">Concepts</button><button class="" onclick="go('drill')">Drill</button><button class="" onclick="go('mock')">Mock exam</button><button class="" onclick="go('traps')">Traps</button><button class="" onclick="go('progress')">Progress</button></nav>
 </div></header>
-<main><div class="wrap"><div id="sampleBanner" hidden></div><div id="view"></div></div></main>
+<main><div class="wrap"><div id="sampleBanner" hidden></div><div id="view" data-pre="start"><!-- pre-rendered start heading: it is the LCP element and must not wait for the ~0.6 MB bank; render() replaces it --><h1>Two Claude certifications, one study environment</h1><p class="lead">Practise for the Claude Certified Architect and Developer (Foundations) exams with original scenario questions, a timed mock scored like the real one, and feedback on which kind of trap caught you.</p></div></div></main>
 <footer><div class="wrap"><p id="disclaimer"><b>Unofficial study aid. Not affiliated with or endorsed by Anthropic. All questions are original; none reproduces a real exam item (the real items are confidential).</b></p><p id="footNote">Blueprints transcribed from the official exam guides v1.0 (July 2026). Progress is stored only in this browser. Keys: <kbd>A</kbd>–<kbd>D</kbd> select · <kbd>Enter</kbd> check / next.</p></div></footer>
 
 <script src="data/blueprints.js?v=63e84a76"></script>
@@ -270,7 +270,11 @@ function render(){
   document.getElementById('certSwitch').innerHTML = CERTS.map(c => `<button class="${c===S.cert?'active':''}" aria-pressed="${c===S.cert}" onclick="setCert('${c}')">${c}</button>`).join('');
   document.getElementById('nav').innerHTML = Object.entries(VIEWS).map(([k,v]) => `<button class="${k===S.view?'active':''}"${k===S.view?' aria-current="page"':''} onclick="go('${k}')">${v}</button>`).join('');
   const fn = { start, home, blueprint, concepts, drill, mock, traps, progress }[S.view];
-  document.getElementById('view').innerHTML = fn();
+  const v = document.getElementById('view'); const html = fn();
+  // first paint of the start page keeps the pre-rendered heading nodes (re-creating them restarts LCP) and appends the rest
+  if(v.dataset.pre === 'start' && S.view === 'start' && html.startsWith(v.innerHTML.replace(/<!--[\s\S]*?-->/, ''))) v.insertAdjacentHTML('beforeend', html.slice(v.innerHTML.replace(/<!--[\s\S]*?-->/, '').length));
+  else v.innerHTML = html;
+  delete v.dataset.pre;
   setMeta();
 }
 // <title> and description follow the certification and the view (the page is indexed; shared links read them)

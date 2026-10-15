@@ -29,7 +29,7 @@ Lecciones de la ruta "Certifícate": los 8 documentos de `01-dominios/` y los 7 
 frontmatter (órdenes 1–15; nivel 2 los dominios, 3 los laboratorios). `tools/import-academia.py`
 los lee con `lesson_meta` sin cambios.
 
-Cifras de `results`: 240 preguntas originales (validador del banco, 2026-10-15); 24 pruebas de
+Cifras de `results`: 240 preguntas originales (validador del banco, 2026-10-15); 25 pruebas de
 punta a punta en verde (Playwright, Windows, 2026-10-15).
 
 ## `Landing/src/content/projects/es/cert-studio.md`
@@ -66,14 +66,14 @@ skills:
 applied:
   javascript: "Toda la app en un archivo sin framework ni build: reparto por resto mayor, puntaje ponderado, repaso espaciado SM-2 y un modo muestra con semilla fija."
   html-css: "Una sola página con vistas, tema claro y oscuro, diseño para móvil y una hoja de impresión que convierte el blueprint en PDF."
-  playwright: "24 pruebas de punta a punta: las ocho vistas en ancho de móvil, el modo muestra sin escribir en el almacenamiento, la migración del repaso espaciado, el uso sin conexión y cero desplazamiento de diseño mientras carga el banco."
+  playwright: "25 pruebas de punta a punta: axe sin violaciones en las ocho vistas en claro y oscuro, las ocho vistas en ancho de móvil, el modo muestra sin escribir en el almacenamiento, la migración del repaso espaciado, el uso sin conexión y cero desplazamiento de diseño mientras carga el banco."
   hosting-estatico: "Subdominio estático en hosting compartido, subido por archivo sin borrar nada, con un .htaccess que solo responde por su propio nombre."
   bash: "El despliegue, la exportación al repo público con su auditoría por patrones y el carril de grabación de medios son scripts de Bash."
   git: "El repo público es una exportación filtrada de un solo autor; el historial de trabajo queda privado."
 problem: "Las guías de las certificaciones dan dominios y pesos, pero no una forma de practicar que respete esos pesos ni que explique por qué una opción incorrecta parece correcta. Quería medirme con preguntas propias, repartidas como el examen real, sin cuentas ni servidor."
 results:
   - { label: "preguntas originales en el banco", value: 240, source: "validador del banco, 2026-10-15" }
-  - { label: "pruebas de punta a punta en verde", value: 22, source: "Playwright, Windows, 2026-10-15" }
+  - { label: "pruebas de punta a punta en verde", value: 25, source: "Playwright, Windows, 2026-10-15" }
 next:
   - "Revisión humana de una muestra del banco (hoy lo revisó un modelo)."
   - "Importar un respaldo de progreso: hoy solo se exporta."
@@ -133,14 +133,14 @@ skills:
 applied:
   javascript: "The whole app in one file with no framework or build: largest-remainder sampling, weighted scoring, SM-2 spaced repetition and a sample mode with a fixed seed."
   html-css: "One page with views, light and dark themes, a mobile layout and a print sheet that turns the blueprint into a PDF."
-  playwright: "22 end-to-end tests: all eight views at mobile width, sample mode never writing to storage, the spaced-repetition migration, offline use and zero layout shift while the bank loads."
+  playwright: "25 end-to-end tests: axe with zero violations on all eight views in light and dark, all eight views at mobile width, sample mode never writing to storage, the spaced-repetition migration, offline use and zero layout shift while the bank loads."
   hosting-estatico: "A static subdomain on shared hosting, uploaded file by file without deleting anything, with an .htaccess that only answers to its own name."
   bash: "Deploy, the export to the public repo with its pattern audit, and the media recording lane are Bash scripts."
   git: "The public repo is a filtered single-author export; the working history stays private."
 problem: "The certification guides list domains and weights, but no way to practise that respects those weights or explains why a wrong option looks right. I wanted to measure myself with my own questions, spread like the real exam, with no accounts and no server."
 results:
   - { label: "original questions in the bank", value: 240, source: "bank validator, 2026-10-15" }
-  - { label: "end-to-end tests passing", value: 22, source: "Playwright, Windows, 2026-10-15" }
+  - { label: "end-to-end tests passing", value: 25, source: "Playwright, Windows, 2026-10-15" }
 next:
   - "Human review of a sample of the bank (today it was reviewed by a model)."
   - "Import a progress backup: today it can only be exported."

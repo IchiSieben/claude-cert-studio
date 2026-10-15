@@ -1,7 +1,7 @@
 // Minimal offline support: cache-first for the page and its data. The cache name carries VERSION, a hash
 // of the cached files stamped by tools/stamp-sw.mjs (a test fails if it is stale), so any content change
 // ships a new worker, which drops the old cache on activate.
-const VERSION = 'ccs-098a8ba75d';
+const VERSION = 'ccs-b82dd39371';
 const FILES = ['./', 'index.html', 'data/blueprints.js?v=63e84a76', 'data/questions-ccar-f.js?v=e8ae6be3', 'data/questions-ccdv-f.js?v=2b785ce7', 'manifest.webmanifest', 'icon.svg', 'icon-192.png', 'fonts/space-grotesk-latin-wght-normal.woff2', 'fonts/jetbrains-mono-latin-wght-normal.woff2'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));

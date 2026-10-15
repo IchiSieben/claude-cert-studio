@@ -83,8 +83,17 @@ try {
     const ctx = await browser.newContext({ viewport: { width: CLIP_W, height: CLIP_H }, deviceScaleFactor: 1, colorScheme: 'light' });
     const page = await ctx.newPage();
     await page.bringToFront();
+    const pageErrors: string[] = [];
+    page.on('pageerror', e => pageErrors.push(String(e)));
+    page.on('console', m => { if (m.type() === 'error') pageErrors.push(m.text()); });
     await page.goto(URL_, { waitUntil: 'networkidle' });
-    await page.waitForSelector('.certcard');
+    // the poster is the start page; force it even if a stored cert sent the visitor to the overview, and say
+    // what the page shows if the cards still do not appear (cert-media-4 timed out here without a clue)
+    await page.waitForFunction(() => typeof (window as any).render === 'function' && document.querySelector('#view')!.children.length > 0, null, { timeout: 60000 })
+      .catch(() => { throw new Error(`page never rendered; errors: ${pageErrors.join(' | ') || 'none'}`); });
+    await page.evaluate(() => { if (S.view !== 'start') go('start'); });
+    await page.waitForSelector('.certcard', { timeout: 15000 })
+      .catch(async () => { throw new Error(`no .certcard; view=${await page.evaluate(() => S.view)} h1=${await page.evaluate(() => document.querySelector('h1')?.textContent)} errors: ${pageErrors.join(' | ') || 'none'}`); });
     const sc = new Screencast(page);
     await sc.start();
     const t = Date.now();

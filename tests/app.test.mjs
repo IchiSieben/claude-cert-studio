@@ -321,6 +321,20 @@ await step("no layout shift while the bank loads (CLS 0 with the data scripts de
   } finally { srv.close(); }
 });
 
+await step("LCP: the pre-rendered start heading is kept by the first render (not re-created), so it paints before the bank", async () => {
+  const f = await browser.newPage();
+  await f.route("**/data/*.js*", async r => { await new Promise(res => setTimeout(res, 600)); await r.continue(); });
+  await f.addInitScript(() => { document.addEventListener("DOMContentLoaded", () => { const l = document.querySelector("#view .lead"); if (l) l.dataset.mark = "pre"; }); });
+  await f.goto(URL_);
+  await f.waitForSelector(".certcard");
+  assert.equal(await f.$eval("#view .lead", e => e.dataset.mark), "pre");
+  assert.equal(await f.$$eval("#view h1", els => els.length), 1);
+  await f.goto(URL_ + "?lang=es");
+  await f.waitForSelector(".certcard");
+  assert.match(await f.textContent("#view h1"), /Dos certificaciones/);
+  await f.close();
+});
+
 await step("UI rules: no dash placeholders on a fresh profile, at most one filled primary per view, header one line", async () => {
   const f = await browser.newPage({ viewport: { width: 1280, height: 900 } });
   await f.goto(URL_);

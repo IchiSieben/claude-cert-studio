@@ -42,7 +42,7 @@ cd claude-cert-studio
 
 # opcional, para los tests:
 npm ci && npx playwright install chromium
-bash tools/verify.sh        # validador del banco + 24 tests e2e (incluye axe)
+bash tools/verify.sh        # validador del banco + 25 tests e2e (incluye axe)
 ```
 
 Parámetros de URL: `?sample=1` (progreso de demostración en memoria, no toca tu `localStorage`), `?lang=es` (navegación y página de inicio en español; las preguntas siguen en inglés, como el examen), `?cert=CCDV-F`, `?view=blueprint`.
@@ -55,7 +55,7 @@ Parámetros de URL: `?sample=1` (progreso de demostración en memoria, no toca t
 | Revisión | Revisadas por un modelo contra la documentación oficial; muestra humana pendiente (`app/data/REVIEW-SAMPLE.md`). La revisión del 26-sep quitó 22 duplicados y el 15-oct se rellenaron por peso de dominio. |
 | Tipos de trampa | 10, cada opción incorrecta lleva uno |
 | Task statements cubiertos | 30 (CCAR-F) + 25 (CCDV-F), de las guías oficiales v1.0 |
-| Tests | 24 e2e con Playwright (incluye axe en las 8 vistas) (`file://` y un servidor local para el modo sin conexión y el desplazamiento de diseño) + validador del banco |
+| Tests | 25 e2e con Playwright (incluye axe en las 8 vistas) (`file://` y un servidor local para el modo sin conexión y el desplazamiento de diseño) + validador del banco |
 | Documentos de estudio | 8 dominios, 7 labs, plan de 8 semanas, checklist por objetivo (en español) |
 
 El banco llegó a 120 + 120 y la revisión del 26-sep-2026 contra la documentación de Anthropic eliminó 22 (19 duplicados) y corrigió 65 con fuente. **Lo revisó un modelo, todavía no una persona.** Si encuentras una pregunta mal, abre un issue con su id (`CCDVF-2.1-01`).
