@@ -10,3 +10,4 @@ docs/private/
 .enjambre-lane
 tools/evidence/_video-raw/
 /evidence/
+/TASK-*.md
