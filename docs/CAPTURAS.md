@@ -15,7 +15,7 @@ Todo se genera por script desde la app pública con `?sample=1` (progreso de dem
 ## Procedencia
 
 - **Primera versión (2026-10-15, 04:1x):** grabada en Windows con Chromium headless para validar el guion. Headless entrega pocos fotogramas (pantalla casi estática): el clip sale a 60 fps de salida con fotogramas sostenidos.
-- **Versión canónica:** la graba la Mac mini (Chromium con ventana, GPU real, `caffeinate -d`) con el carril `media` (`TASK-cert-media.md`, `kind: tests`). Reemplaza los siete archivos de arriba. Vigente: `mac/cert-media-3` (2026-10-15 14:24 UTC, 58,9 fps, contra el sitio ya desplegado con 120/120).
+- **Versión canónica:** la graba la Mac mini (Chromium con ventana, GPU real, `caffeinate -d`) con el carril `media` (`TASK-cert-media.md`, `kind: tests`). Reemplaza los siete archivos de arriba. Vigente: `mac/cert-media-5` (2026-10-15, 56,6 fps, contra el sitio con la interfaz rediseñada y 120/120).
 
 Reproducir en cualquier máquina con ffmpeg:
 
