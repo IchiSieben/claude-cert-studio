@@ -1,3 +1,12 @@
+---
+lesson:
+  route: certify
+  order: 10
+  level: 3
+  title_en: "Lab 02 — Tool loop and structured output"
+  summary_en: "Turn a scraped product name into valid JSON every time, calling a local catalogue tool when needed: the tool loop by hand, schemas and validation."
+---
+
 # Lab 02 — Loop de tools y salida estructurada
 
 **Proyecto**: farmacias (Radar de Precios; matcher de 3 capas).

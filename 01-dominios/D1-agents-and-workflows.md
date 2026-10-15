@@ -1,3 +1,12 @@
+---
+lesson:
+  route: certify
+  order: 1
+  level: 2
+  title_en: "D1 · Agents and Workflows — 14.7 %"
+  summary_en: "Agent architecture (when an agent, when a workflow, hierarchies), building with the Agent SDK or a hand-written loop, hooks, and the patterns: tool-use loops, subagents, memory."
+---
+
 # D1 · Agents and Workflows — 14.7 % (~8 preguntas)
 
 > Arquitectura de agentes (cuándo agente vs workflow, jerarquías), construcción con Claude (Agent SDK, loops a mano, hooks), patrones y frameworks (tool-use loops, subagentes, memoria, Strands/LangGraph/PydanticAI).

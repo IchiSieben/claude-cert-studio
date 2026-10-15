@@ -1,3 +1,12 @@
+---
+lesson:
+  route: certify
+  order: 15
+  level: 3
+  title_en: "Lab 07 — Security: injection, hooks, secrets, PII"
+  summary_en: "Attack your own agent with prompt injection, block it with hooks, keep secrets out of the context and redact personal data before it reaches the model."
+---
+
 # Lab 07 — Seguridad: inyección, hooks, secretos, PII
 
 **Proyectos**: pdf-redactor · el MCP del Lab 06 · configuración global de Claude Code · Portfolio (pre-commit) · Chasqui (logs).

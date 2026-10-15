@@ -1,3 +1,12 @@
+---
+lesson:
+  route: certify
+  order: 11
+  level: 3
+  title_en: "Lab 03 — Caching, batches and a cost model"
+  summary_en: "Summarize 90 days of reports at the lowest cost: prompt caching for the fixed system prompt, the Batches API for the backlog, and the arithmetic that compares them."
+---
+
 # Lab 03 — Caching, Batches y modelo de costo
 
 **Proyecto**: Chasqui (histórico de 90 días) o stt_whisper (post-edición nocturna de transcripciones).

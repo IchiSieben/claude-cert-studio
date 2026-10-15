@@ -1,3 +1,12 @@
+---
+lesson:
+  route: certify
+  order: 6
+  level: 2
+  title_en: "D6 · Prompt and Context Engineering — 11.0 %"
+  summary_en: "Context engineering (window, memory, drift, compaction, isolation), prompt engineering (clarity, few-shot, system vs user, constraints) and defensive output handling."
+---
+
 # D6 · Prompt and Context Engineering — 11.0 % (~6 preguntas)
 
 > Context engineering (ventana, memoria, deriva, compactación, aislamiento), prompt engineering (claridad, few-shot, system vs user, restricciones, saneamiento) y output handling (estructura, validación, parsing defensivo).

@@ -1,3 +1,12 @@
+---
+lesson:
+  route: certify
+  order: 9
+  level: 3
+  title_en: "Lab 01 — The Messages API in depth"
+  summary_en: "A five-line executive summary of a daily price report, generated in under ten seconds: system prompt, parameters, stop reasons and token accounting, measured."
+---
+
 # Lab 01 — Messages API a fondo
 
 **Proyecto**: Chasqui (bot diario Barchart + SUNAT → Excel + PPT → Gmail).

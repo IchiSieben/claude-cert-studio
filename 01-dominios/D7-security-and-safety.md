@@ -1,3 +1,12 @@
+---
+lesson:
+  route: certify
+  order: 7
+  level: 2
+  title_en: "D7 · Security and Safety — 8.1 %"
+  summary_en: "Security of AI applications (injection, jailbreaks, PII, leaks), guardrails and safe deployment, hooks as a control, identity, secrets and keys. Few questions, very predictable."
+---
+
 # D7 · Security and Safety — 8.1 % (~4 preguntas)
 
 > Seguridad de aplicaciones con IA (inyección, jailbreak, PII, fuga), guardrails y despliegue seguro, hooks como control, identidad/secretos/llaves. Pocas preguntas, muy predecibles. Tu curso de ciberseguridad te da ventaja aquí: el examen es OWASP aplicado a LLMs.

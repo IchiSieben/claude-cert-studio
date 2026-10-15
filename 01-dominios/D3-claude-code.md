@@ -1,3 +1,12 @@
+---
+lesson:
+  route: certify
+  order: 3
+  level: 2
+  title_en: "D3 · Claude Code — 3.1 %"
+  summary_en: "Its components (rules, skills, commands, agents, memory), session management, slash commands, headless and streaming modes, and the CLAUDE.md and settings.json hierarchy."
+---
+
 # D3 · Claude Code — 3.1 % (~2 preguntas)
 
 > Componentes (Rules, Skills, Commands, Agents, Agent Memory), gestión de sesión, slash commands, modos headless/streaming/auto, jerarquía de `CLAUDE.md` y `settings.json`.

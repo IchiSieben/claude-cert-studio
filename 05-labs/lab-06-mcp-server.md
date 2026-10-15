@@ -1,3 +1,12 @@
+---
+lesson:
+  route: certify
+  order: 14
+  level: 3
+  title_en: "Lab 06 — An MCP server, a skill and an audit of the kit"
+  summary_en: "One MCP server that lets several hosts list, describe and query a synthetic statistical schema read-only, plus a shared skill for the analysis."
+---
+
 # Lab 06 — Servidor MCP, Skill y auditoría del kit
 
 **Proyecto**: nuevo `Portfolio/mcp-estadistica/` con **datos sintéticos** (nunca datos reales) + `claude-kit`.

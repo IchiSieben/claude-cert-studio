@@ -1,3 +1,12 @@
+---
+lesson:
+  route: certify
+  order: 13
+  level: 3
+  title_en: "Lab 05 — An agent with the Agent SDK, hooks and subagents"
+  summary_en: "An agent that downloads, transcribes, classifies and files a batch of videos, confined to one folder by hooks and split into subagents."
+---
+
 # Lab 05 — Agente con Claude Agent SDK, hooks y subagentes
 
 **Proyecto**: archivador de videos propios (transcribir con stt_whisper, clasificar, archivar) — o `orquestador`.

@@ -1,3 +1,12 @@
+---
+lesson:
+  route: certify
+  order: 5
+  level: 2
+  title_en: "D5 · Model Selection and Optimization — 16.8 %"
+  summary_en: "LLM fundamentals, SDK, REST and streaming basics, picking the model for each task and managing cost and tokens. With D2 it is half of the exam."
+---
+
 # D5 · Model Selection and Optimization — 16.8 % (~9 preguntas)
 
 > Fundamentos de LLM, fundamentos técnicos (SDK/REST/WebSocket), elección de modelo y gestión de costo/tokens. Junto con D2 es la mitad del examen.

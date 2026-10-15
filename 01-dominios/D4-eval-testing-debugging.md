@@ -1,3 +1,12 @@
+---
+lesson:
+  route: certify
+  order: 4
+  level: 2
+  title_en: "D4 · Eval, Testing, and Debugging — 2.6 %"
+  summary_en: "Finding errors and recovery strategies, reading traces, and telling whether a problem lives in the integration layer or in the model's output."
+---
+
 # D4 · Eval, Testing, and Debugging — 2.6 % (~1 pregunta)
 
 > Identificar errores y estrategias de recuperación; análisis de trazas; aislar si el problema está en la **capa de integración** o en la **salida del modelo**.

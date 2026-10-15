@@ -1,3 +1,12 @@
+---
+lesson:
+  route: certify
+  order: 2
+  level: 2
+  title_en: "D2 · Applications and Integration — 33.1 %"
+  summary_en: "The heaviest domain: from requirements to architecture, the mechanics of the Messages API, engineering basics (REST, JSON, async, git) and configuration management."
+---
+
 # D2 · Applications and Integration — 33.1 % (~18 preguntas)
 
 > El dominio más pesado. Cubre: requerimientos → arquitectura, ciclo de vida, **mecánica de la Messages API**, fundamentos de ingeniería (REST/JSON/async/git), diseño de aplicaciones Claude y gestión de configuración.

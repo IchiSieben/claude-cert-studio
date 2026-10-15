@@ -1,3 +1,12 @@
+---
+lesson:
+  route: certify
+  order: 12
+  level: 3
+  title_en: "Lab 04 — Production grade: async, errors, logging, versioning"
+  summary_en: "Process 200 indicators in under two minutes within the rate limit, survive 429 and 529 without losing work, log every call, and switch prompt or model with evidence."
+---
+
 # Lab 04 — Grado producción: async, errores, logging, versionado
 
 **Proyecto**: signal-agent (ledger de predicciones; 163 tests, mypy strict, GitHub Actions).

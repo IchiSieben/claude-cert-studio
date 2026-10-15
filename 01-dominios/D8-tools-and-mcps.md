@@ -1,3 +1,12 @@
+---
+lesson:
+  route: certify
+  order: 8
+  level: 2
+  title_en: "D8 · Tools and MCPs — 10.6 %"
+  summary_en: "Implementing tools (schema, descriptions, errors, tool_choice, parallel calls, approval), building MCP servers (tools, resources, prompts, stdio vs HTTP) and when to use each extension point."
+---
+
 # D8 · Tools and MCPs — 10.6 % (~6 preguntas)
 
 > Implementación de tools (schema, descripciones, errores, `tool_choice`, paralelo, client vs server, aprobación), desarrollo de servidores MCP (tools/resources/prompts, stdio vs HTTP) y personalización agéntica (built-in vs custom vs Skills vs MCP).
