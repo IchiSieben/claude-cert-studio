@@ -15,8 +15,11 @@ git -C "$DEST" config user.email IchiSieben@users.noreply.github.com
 TMPD=$(mktemp -d)
 git archive HEAD | tar -x -C "$TMPD"
 for x in "${EXCLUDE[@]}"; do rm -rf "${TMPD:?}/$x"; done
-# audit gate: no third-party names, no personal paths or email in what goes out
-if grep -rnIiE -f "${CERT_AUDIT_PATTERNS:-docs/private/audit-patterns.txt}" "$TMPD"; then
+# audit gate: no third-party names, no personal paths or email in what goes out. The names live in a
+# private pattern file (one ERE per line) so the public copy of this script does not list them.
+PATS="${CERT_AUDIT_PATTERNS:-docs/private/audit-patterns.txt}"
+[ -s "$PATS" ] || { echo "export-public.sh: $PATS missing, nothing exported"; rm -rf "$TMPD"; exit 4; }
+if grep -rnIiE -f "$PATS" "$TMPD" || grep -rnIiE '[A-Z]:[\]Users[\]|/Users/[a-z]|@gmail\.com' "$TMPD"; then
   echo "export-public.sh: audit hit above, nothing exported"; rm -rf "$TMPD"; exit 3
 fi
 git -C "$DEST" ls-files -z | (cd "$DEST" && xargs -0 -r git rm -q --) || true
