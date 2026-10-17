@@ -8,7 +8,7 @@ comprueba. El diseño anterior sigue en el historial de git (el commit anterior 
 
 - **Un instrumento** (`instrument()` en `app/index.html`): barra apilada de pesos sobre una escala común de 0 a
   100 % del examen (peso = largo, nunca "el más grande = lleno"), el avance del usuario como relleno sólido y,
-  debajo, una tecla por dominio. Es la navegación de Inicio, Resumen y Blueprint y el gráfico del resultado del
+  debajo, una tecla por dominio. Es la navegación (la vista de inicio) y el gráfico del resultado del
   simulacro. Estado en la URL: `?cert=&domain=&task=` (más `view=`, `lang=`, `sample=`).
 - **El dominio abierto se dibuja en su propio eje de 0 a 100 %** de ese dominio, con la línea "= 33,1 % del
   examen". Sus task statements cuelgan debajo como hijos (guía vertical, medidores de 4 px más claros que las
@@ -44,9 +44,24 @@ movió un paso hacia el rojo ladrillo, lejos de D5**: oscuro `#d77965` → `#da6
 `#b4462f` → `#c43d2e` (4,75:1 sobre `#f5f5f6`). Un test recalcula los 8 contrastes de cada tema. Verde y rojo solo
 aparecen después de responder (acierto/fallo), siempre con texto además del color.
 
+**Cada banda lleva siempre el color de su dominio** (corrección V3c, 2026-10-16): peso = longitud, dominio = matiz,
+pista = el matiz al 35 % de alfa (`color-mix(in srgb, var(--c) 35%, transparent)`), avance = el mismo matiz sólido
+llenando desde la izquierda. Con 0 respondidas la barra ya es de colores; ningún carril (`.wbar`, `.zbar`, `.tm`,
+`.meter`) es gris. En claro se oscureció solo la luminosidad (mismo matiz) para que el relleno sólido tenga ≥ 3:1
+contra su pista al 35 % y contra el lienzo, y el color como texto ≥ 4,5:1 sobre lienzo, tarjeta y pozo; el test
+recalcula los 8 dominios × 2 temas.
+
+## Navegación
+
+El instrumento apilado (0–100 % del examen) con sus teclas de dominio es la navegación: `/` lo abre para la
+certificación por defecto (el cambio de certificación está en la cabecera). Las pestañas son solo las cuatro
+actividades (Práctica, Simulacro, Trampas, Progreso). `?view=start` y `?view=blueprint` son alias del instrumento
+(`blueprint` lo abre con todos los task statements desplegados, que ahora es el botón del propio instrumento);
+Conceptos es un enlace desde el instrumento.
+
 ## Accesibilidad y movimiento
 
-- `npm test` corre axe-core (wcag2a/aa, 21a/aa, best-practice) sobre las 8 vistas, una pregunta respondida, la
+- `npm test` corre axe-core (wcag2a/aa, 21a/aa, best-practice) sobre las 7 vistas, una pregunta respondida, la
   cabina y un resultado, en claro y oscuro, a 1280 y 390 px: 0 violaciones.
 - Foco visible (2 px, color del texto). Radar y tinta tienen equivalente de texto (lista numerada y tabla).
 - Movimiento solo como respuesta a una acción, más una coreografía de carga (la barra se dibuja de izquierda a

@@ -39,7 +39,7 @@
   --glass:rgba(7,8,10,.72);
   --ok:#3fb950; --bad:#f85149;
   --d1:#5e93dd; --d2:#31a675; --d3:#a17bf8; --d4:#e0921a; --d5:#e66894; --d6:#1fa3a3; --d7:#da6e62; --d8:#859b37;
-  --trk:24%;
+  --ta:42%;
   --sans:'Inter','Inter Fallback',system-ui,sans-serif; --mono:'Geist Mono','Geist Mono Fallback',ui-monospace,monospace;
   color-scheme:dark;
 }
@@ -49,7 +49,7 @@
   --key:inset 0 1px 0 rgba(255,255,255,.95), 0 0 0 1px rgba(0,0,0,.12), inset 0 -1px 0 rgba(0,0,0,.05);
   --key-down:inset 0 1px 0 rgba(0,0,0,.08), 0 0 0 1px rgba(0,0,0,.35), inset 0 -1px 0 rgba(255,255,255,.9);
   --glass:rgba(251,251,252,.75); --ok:#1a7f37; --bad:#cf222e;
-  --d1:#2b6eca; --d2:#257d58; --d3:#7c49f5; --d4:#996412; --d5:#d22360; --d6:#177a7a; --d7:#c43d2e; --d8:#657529; --trk:14%; color-scheme:light;
+  --d1:#2867bd; --d2:#237552; --d3:#6e36f4; --d4:#8b5b10; --d5:#b81f54; --d6:#157171; --d7:#b3382a; --d8:#5e6d26; color-scheme:light; --ta:35%;
 }}
 :root[data-theme="light"]{
   --canvas:#f5f5f6; --card:#fbfbfc; --well:#ebebed; --graphite:#e2e2e4; --line:#d6d6d8; --line-2:#cfcfd2;
@@ -57,7 +57,7 @@
   --key:inset 0 1px 0 rgba(255,255,255,.95), 0 0 0 1px rgba(0,0,0,.12), inset 0 -1px 0 rgba(0,0,0,.05);
   --key-down:inset 0 1px 0 rgba(0,0,0,.08), 0 0 0 1px rgba(0,0,0,.35), inset 0 -1px 0 rgba(255,255,255,.9);
   --glass:rgba(251,251,252,.75); --ok:#1a7f37; --bad:#cf222e;
-  --d1:#2b6eca; --d2:#257d58; --d3:#7c49f5; --d4:#996412; --d5:#d22360; --d6:#177a7a; --d7:#c43d2e; --d8:#657529; --trk:14%; color-scheme:light;
+  --d1:#2867bd; --d2:#237552; --d3:#6e36f4; --d4:#8b5b10; --d5:#b81f54; --d6:#157171; --d7:#b3382a; --d8:#5e6d26; color-scheme:light; --ta:35%;
 }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--canvas);color:var(--tx);font:16px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
@@ -111,7 +111,7 @@ p.lead{color:var(--tx-2);font-size:18px;line-height:1.4;margin:0 0 32px;max-widt
 .scale span:first-child{transform:none}.scale span:last-child{transform:translateX(-100%)}
 .wbar{display:flex;gap:2px;height:72px;border-radius:8px;overflow:hidden}
 .wbar.draw{animation:draw .6s cubic-bezier(.16,1,.3,1) both}
-.wbar .seg{position:relative;border:0;padding:0;min-width:0;background:color-mix(in srgb,var(--c) var(--trk),var(--card))}
+.wbar .seg{position:relative;border:0;padding:0;min-width:6px;background:color-mix(in srgb,var(--c) var(--ta),transparent)}
 .wbar .seg i{position:absolute;inset:0 auto 0 0;width:calc(var(--ink)*100%);background:var(--c)}
 .wbar .seg[aria-pressed=true]{box-shadow:inset 0 0 0 2px var(--tx)}
 @keyframes draw{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
@@ -127,6 +127,7 @@ p.lead{color:var(--tx-2);font-size:18px;line-height:1.4;margin:0 0 32px;max-widt
 .keys.mini{margin-top:20px;gap:6px}
 .keys.mini .k{grid-template-columns:8px 1fr auto;padding:6px 10px;min-height:36px}
 .mockm{display:none}
+.tools{margin:28px 0 0;gap:8px 12px}
 /* opened domain, drawn on its own 0-100 % axis; its task statements are children, not siblings */
 .open{margin-top:40px;padding-top:28px;border-top:1px solid var(--line)}
 .oh{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;margin-bottom:20px}
@@ -137,7 +138,7 @@ p.lead{color:var(--tx-2);font-size:18px;line-height:1.4;margin:0 0 32px;max-widt
 .zscale span{position:absolute;bottom:2px;transform:translateX(-50%)}
 .zscale span:first-child{transform:none}.zscale span:last-child{transform:translateX(-100%)}
 .zbar{display:flex;gap:2px;height:20px;border-radius:6px;overflow:hidden}
-.zbar div{position:relative;background:color-mix(in srgb,var(--c) var(--trk),var(--card))}
+.zbar div{position:relative;background:color-mix(in srgb,var(--c) var(--ta),transparent)}
 .zbar div i{position:absolute;inset:0 auto 0 0;background:var(--c);width:calc(var(--ink)*100%)}
 .zeq{font:500 13px var(--mono);color:var(--tx-2);margin:8px 0 28px}
 .tasks{margin-left:6px;padding-left:20px;border-left:1px solid var(--line)}
@@ -149,9 +150,9 @@ details.tk>summary::after{content:"+";font:500 16px var(--mono);color:var(--tx-2
 details.tk[open]>summary::after{content:"\2212"}
 .tn{display:block;font-size:15px;font-weight:500;margin-top:2px}
 .tm{display:grid;gap:5px;font:12px var(--mono);color:var(--tx-2)}
-.tm .t{height:4px;border-radius:2px;background:var(--well);position:relative}
-.tm .t b{position:absolute;inset:0 auto 0 0;border-radius:2px;background:color-mix(in srgb,var(--c) var(--trk),var(--card))}
-.tm .t b i{position:absolute;inset:0 auto 0 0;border-radius:2px;background:var(--c);width:calc(var(--ink)*100%);opacity:.8}
+.tm .t{height:6px;border-radius:3px;position:relative}
+.tm .t b{position:absolute;inset:0 auto 0 0;border-radius:3px;background:color-mix(in srgb,var(--c) var(--ta),transparent)}
+.tm .t b i{position:absolute;inset:0 auto 0 0;border-radius:3px;background:var(--c);width:calc(var(--ink)*100%)}
 .tb{padding:0 0 18px;max-width:72ch}
 .tb p{margin:0 0 10px;color:var(--tx-2);font-size:15px}
 .dsec.off{display:none}
@@ -173,13 +174,12 @@ details.tk[open]>summary::after{content:"\2212"}
 .step{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 24px;align-items:center;padding:16px 0;border-bottom:1px solid var(--line)}
 .step p{margin:0;color:var(--tx-2);font-size:14px}
 .step h3 .n{font-family:var(--mono);color:var(--tx-2);margin-right:10px;font-weight:400}
-/* start: both certifications inside one instrument-like panel, divided by a hairline */
-.certcard+.certcard{margin-top:32px;padding-top:32px;border-top:1px solid var(--line)}
-.certcard .code{font:500 12px var(--mono);color:var(--tx-2)}
-.certcard h2{font-size:28px;font-weight:400;margin:4px 0 8px}
-.certcard .study{margin-top:4px}
 .how{padding-left:22px}.how li{margin:8px 0;max-width:72ch}
 .samplebar{margin:16px 0 0;padding:8px 12px;border-radius:8px;box-shadow:inset 0 0 0 1px var(--line);font-size:13px;color:var(--tx-2)}
+.datein{font:inherit;padding:8px 10px;border:0;border-radius:8px;background:var(--well);box-shadow:inset 0 0 0 1px var(--line);color:var(--tx)}
+.paceline{margin:16px 0 0;font:13px var(--mono);color:var(--tx-2)}
+.plan{list-style:none;padding:0;margin:12px 0;max-width:520px;font-size:14px}
+.plan li{display:flex;justify-content:space-between;gap:16px;padding:6px 0;border-top:1px solid var(--line)}
 .search{width:100%;max-width:560px;font:inherit;padding:10px 12px;border:0;border-radius:8px;background:var(--well);box-shadow:inset 0 0 0 1px var(--line);color:var(--tx);margin:0 0 16px}
 /* generic lists and tables */
 .list>div{padding:16px 0;border-top:1px solid var(--line)}
@@ -251,7 +251,7 @@ body.exam main{padding-top:24px}
 .trapl li{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:8px;padding:6px 0;border-top:1px solid var(--line)}
 .trapl .i{font:12px var(--mono);color:var(--tx-2)}
 .trapl .hint2{display:block;color:var(--tx-2);font-size:13px}
-.meter{height:4px;border-radius:2px;background:var(--well);position:relative;margin:6px 0}
+.meter{height:4px;border-radius:2px;background:color-mix(in srgb,var(--c,var(--tx-2)) var(--ta),transparent);position:relative;margin:6px 0}
 .meter i{position:absolute;inset:0 auto 0 0;border-radius:2px;background:var(--c,var(--tx));width:var(--p)}
 .task-row{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:4px 24px;padding:8px 0;border-top:1px solid var(--line);align-items:center}
 footer{border-top:1px solid var(--line);color:var(--tx-2);font-size:13px;padding:16px 0}
@@ -268,7 +268,9 @@ footer p{margin:0 0 6px}
   header.top{padding-top:8px}
   .nav{flex-wrap:wrap;gap:8px;padding:6px 6px 6px 12px}
   .brand{margin-right:auto}
-  .links{order:5;flex-basis:100%;margin:0 -2px}
+  .links{position:fixed;left:0;right:0;bottom:0;z-index:6;margin:0;padding:6px 8px calc(6px + env(safe-area-inset-bottom));justify-content:space-around;background:var(--glass);backdrop-filter:blur(48px);-webkit-backdrop-filter:blur(48px);border-top:1px solid var(--line-2)}
+  body{padding-bottom:56px}
+  .nav{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--card)}
   .nav .btn{display:none}
   .mockm{display:flex;width:100%;justify-content:center;margin-top:20px;padding:12px}
   h1{font-size:36px;margin-top:40px}
@@ -285,7 +287,6 @@ footer p{margin:0 0 6px}
   details.tk>summary .tm{grid-column:1/2;grid-row:2}
   .tasks{padding-left:12px;margin-left:2px}
   .pair{grid-template-columns:minmax(0,1fr);gap:24px}
-  .certcard h2{font-size:24px}
   .cockpit{padding:16px;border-radius:16px}
   .clock{font-size:24px}
   .stem{font-size:19px;margin-bottom:20px}
@@ -318,19 +319,20 @@ footer p{margin:0 0 6px}
 </style>
 </head>
 <body>
-<header class="top"><div class="wrap"><div class="nav"><button class="brand" data-fk="brand" onclick="go('start')" aria-current="page" style="--dot:var(--tx-2)"><i aria-hidden="true"></i>Cert Studio</button><nav class="links" id="nav" aria-label="Views"><button data-fk="nav-home" onclick="go('home')">Overview</button><button data-fk="nav-blueprint" onclick="go('blueprint')">Blueprint</button><button data-fk="nav-concepts" onclick="go('concepts')">Concepts</button><button data-fk="nav-drill" onclick="go('drill')">Drill</button><button data-fk="nav-mock" onclick="go('mock')">Mock exam</button><button data-fk="nav-traps" onclick="go('traps')">Traps</button><button data-fk="nav-progress" onclick="go('progress')">Progress</button></nav><div class="sw" id="certSwitch" role="group" aria-label="Certification"><button data-fk="cert-CCAR-F" aria-pressed="true" onclick="setCert('CCAR-F')">CCAR-F</button><button data-fk="cert-CCDV-F" aria-pressed="false" onclick="setCert('CCDV-F')">CCDV-F</button></div><button class="ic" id="langBtn" data-fk="lang" lang="es" aria-label="ES, Español" onclick="setLang('es')">ES</button><button class="ic" id="themeBtn" data-fk="theme" aria-label="Switch between light and dark theme" onclick="toggleTheme()">&#9680;</button><button class="btn" id="navMock" data-fk="navmock" onclick="go('mock')">Start mock</button></div></div></header>
-<main><div class="wrap"><div id="sampleBanner" hidden></div><div id="view" data-pre="start"><!-- pre-rendered start heading: it is the LCP element and must not wait for the ~0.6 MB bank; render() keeps these nodes --><h1>Two Claude certifications, one study environment</h1><p class="lead">Practise for the Claude Certified Architect and Developer (Foundations) exams with original scenario questions, a timed mock scored like the real one, and feedback on which kind of trap caught you.</p></div></div></main>
+<header class="top"><div class="wrap"><div class="nav"><button class="brand" data-fk="brand" onclick="go('home')" aria-current="page" style="--dot:var(--d1)"><i aria-hidden="true"></i>Cert Studio</button><nav class="links" id="nav" aria-label="Views"><button data-fk="nav-drill" onclick="go('drill')">Drill</button><button data-fk="nav-mock" onclick="go('mock')">Mock exam</button><button data-fk="nav-traps" onclick="go('traps')">Traps</button><button data-fk="nav-progress" onclick="go('progress')">Progress</button></nav><div class="sw" id="certSwitch" role="group" aria-label="Certification"><button data-fk="cert-CCAR-F" aria-pressed="true" onclick="setCert('CCAR-F')">CCAR-F</button><button data-fk="cert-CCDV-F" aria-pressed="false" onclick="setCert('CCDV-F')">CCDV-F</button></div><button class="ic" id="langBtn" data-fk="lang" lang="es" aria-label="ES, Español" onclick="setLang('es')">ES</button><button class="ic" id="themeBtn" data-fk="theme" aria-label="Switch between light and dark theme" onclick="toggleTheme()">&#9680;</button><button class="btn" id="navMock" data-fk="navmock" onclick="go('mock')">Start mock</button></div></div></header>
+<main><div class="wrap"><div id="sampleBanner" hidden></div><div id="view" data-pre="home"><!-- pre-rendered heading of the instrument (default certification, English): it is the LCP element and must not wait for the ~0.6 MB bank; render() keeps these nodes --><h1>Claude Certified Architect – Foundations</h1><p class="lead">Solution architects designing Claude-powered agentic systems. 6+ months with Claude APIs, Agent SDK, Claude Code and MCP.</p></div></div></main>
 <footer><div class="wrap"><p id="disclaimer"><b>Unofficial study aid. Not affiliated with or endorsed by Anthropic. All questions are original; none reproduces a real exam item (the real items are confidential).</b></p><p id="footNote">Blueprints transcribed from the official exam guides v1.0 (July 2026). Progress is stored only in this browser.</p></div></footer>
 
 <script src="data/blueprints.js?v=63e84a76"></script>
 <script src="data/questions-ccar-f.js?v=e8ae6be3"></script>
 <script src="data/questions-ccdv-f.js?v=2b785ce7"></script>
-<script src="data/i18n.js?v=c2b96b3c"></script>
+<script src="data/i18n.js?v=acbf80b9"></script>
 <script>
 // ---------- state ----------
 const CERTS = Object.keys(window.BLUEPRINTS);
-const S = { cert: 'CCAR-F', view: 'start', domain: null, task: null, drill: null, mock: null, io: '' };
-// URL state: ?cert=&domain=&task= (the instrument), ?view=home|blueprint|concepts|drill|mock|traps|progress,
+const S = { cert: 'CCAR-F', view: 'home', expand: false, domain: null, task: null, drill: null, mock: null, io: '' };
+// URL state: ?cert=&domain=&task=&expand=1 (the instrument, which is the home view), ?view=home|concepts|drill|mock|traps|progress
+// (start and blueprint are aliases of home; blueprint also expands every task statement),
 // ?lang=es|en, ?sample=1 (demo progress in memory, localStorage never touched)
 const URLP = new URLSearchParams(location.search);
 const SAMPLE = URLP.get('sample') === '1';
@@ -382,8 +384,9 @@ const QS = () => window.QUESTIONS[S.cert] || [];
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const shuffle = a => { a = a.slice(); for(let i=a.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
 const dcol = id => `var(--d${id})`;
-const VIEWS = ['start', 'home', 'blueprint', 'concepts', 'drill', 'mock', 'traps', 'progress'];
-const NAV = VIEWS.filter(v => v !== 'start');
+const VIEWS = ['home', 'concepts', 'drill', 'mock', 'traps', 'progress'];
+// the instrument (home) is THE navigation; the tabs are only the four activities
+const NAV = ['drill', 'mock', 'traps', 'progress'];
 
 // ---------- routing and URL state ----------
 const heaviest = b => b.domains.reduce((a, d) => d.weight > a.weight ? d : a);
@@ -392,16 +395,21 @@ function urlFor(){
   const p = new URLSearchParams();
   if(SAMPLE) p.set('sample', '1');
   p.set('lang', LANG);
-  if(S.view !== 'start'){ p.set('view', S.view); p.set('cert', S.cert); }
-  if(S.domain != null && (S.view === 'home' || S.view === 'blueprint')) p.set('domain', S.domain);
-  if(S.task && S.view === 'home') p.set('task', S.task);
+  if(S.view !== 'home'){ p.set('view', S.view); p.set('cert', S.cert); }
+  else if(S.cert !== CERTS[0] || S.domain != null || S.task || S.expand){
+    p.set('view', 'home'); p.set('cert', S.cert);
+    if(S.domain != null) p.set('domain', S.domain);
+    if(S.task) p.set('task', S.task);
+    if(S.expand) p.set('expand', '1');
+  }
   const q = p.toString(); return location.pathname + (q ? '?' + q : '');
 }
 function syncUrl(push){ try{ history[push ? 'pushState' : 'replaceState'](null, '', urlFor()); }catch(e){} }
 function applyUrl(P, initial){
-  const qc = P.get('cert'); if(qc && CERTS.includes(qc)) S.cert = qc;
+  const qc = P.get('cert'); S.cert = qc && CERTS.includes(qc) ? qc : initial ? S.cert : CERTS[0];   // a bare URL is the default certification
   const qv = P.get('view'); const dom = +P.get('domain'); const tk = P.get('task');
-  S.view = qv && VIEWS.includes(qv) ? qv : (initial && (dom || tk) ? 'home' : initial ? S.view : 'start');
+  S.view = qv && VIEWS.includes(qv) ? qv : 'home';   // start, blueprint and anything unknown open the instrument
+  S.expand = P.get('expand') === '1' || qv === 'blueprint';
   const b = BP(); S.domain = null; S.task = null;
   if(dom && b.domains.some(d => d.id === dom)) S.domain = dom;
   if(tk){ const d = b.domains.find(d => d.tasks.some(x => x.id === tk)); if(d){ S.task = tk; S.domain = d.id; } }
@@ -409,22 +417,21 @@ function applyUrl(P, initial){
 function go(v){ const push = v !== S.view; S.view = v; if(v !== 'drill') S.drill = S.drill && S.drill.active ? S.drill : null; if(v !== 'home') S.task = null; syncUrl(push); render(); window.scrollTo(0,0); }
 function leaveMock(c){ return c === S.cert || !S.mock || S.mock.submitted || confirm(t('mock.switch')); }
 function setCert(c){ if(!leaveMock(c)) return; S.cert = c; S.drill = null; S.mock = null; S.domain = null; S.task = null; store.set('cert', c); syncUrl(false); render(); }
-function openCert(c){ if(!leaveMock(c)) return; if(c !== S.cert){ S.drill = null; S.mock = null; } S.cert = c; S.domain = null; S.task = null; store.set('cert', c); go('home'); }
 function openDomain(cert, id){
   if(!leaveMock(cert)) return;
   if(cert !== S.cert){ S.cert = cert; S.drill = null; S.mock = null; store.set('cert', cert); }
-  const push = S.view === 'start'; if(push) S.view = 'home';
-  S.domain = id; S.task = null; syncUrl(push); render(true);
+  S.domain = id; S.task = null; syncUrl(false); render(true);
 }
+function toggleExpand(){ S.expand = !S.expand; syncUrl(false); render(true); }
 function setLang(l){ LANG = l; store.set('lang', l); syncUrl(false); render(); }
 function toggleTheme(){ const r = document.documentElement; const light = r.dataset.theme ? r.dataset.theme === 'light' : matchMedia('(prefers-color-scheme: light)').matches; r.dataset.theme = light ? 'dark' : 'light'; store.set('theme', r.dataset.theme); }
-window.addEventListener('popstate', () => { const prev = S.cert; applyUrl(new URLSearchParams(location.search), false); if(S.cert !== prev){ S.mock = null; S.drill = null; } render(); });
+window.addEventListener('popstate', () => { const prev = S.cert; applyUrl(new URLSearchParams(location.search)); if(S.cert !== prev){ S.mock = null; S.drill = null; } render(); });
 window.addEventListener('beforeunload', e => { if(S.mock && !S.mock.submitted) e.preventDefault(); });
 
 let DRAWN = false, DRAW_NOW = false;   // the instrument draws left to right once per page load (the one load choreography)
 function navHtml(){
-  const dom = S.view === 'start' ? null : curDomain();
-  return `<div class="nav"><button class="brand" data-fk="brand" onclick="go('start')"${S.view==='start'?' aria-current="page"':''} style="--dot:${dom?dcol(dom.id):'var(--tx-2)'}"><i aria-hidden="true"></i>Cert Studio</button>`
+  const dom = curDomain();
+  return `<div class="nav"><button class="brand" data-fk="brand" onclick="go('home')"${S.view==='home'?' aria-current="page"':''} style="--dot:${dcol(dom.id)}"><i aria-hidden="true"></i>Cert Studio</button>`
    + `<nav class="links" id="nav" aria-label="${t('nav.label')}">${NAV.map(v => `<button data-fk="nav-${v}"${v===S.view?' aria-current="page"':''} onclick="go('${v}')">${t('view.'+v)}</button>`).join('')}</nav>`
    + `<div class="sw" id="certSwitch" role="group" aria-label="${t('nav.cert')}">${CERTS.map(c => `<button data-fk="cert-${c}" aria-pressed="${c===S.cert}" onclick="setCert('${c}')">${c}</button>`).join('')}</div>`
    + `<button class="ic" id="langBtn" data-fk="lang" lang="${LANG==='es'?'en':'es'}" aria-label="${t('nav.langName')}" onclick="setLang('${LANG==='es'?'en':'es'}')">${LANG==='es'?'EN':'ES'}</button>`
@@ -437,11 +444,11 @@ function render(keep){
   DRAW_NOW = !DRAWN;
   const ae = document.activeElement; const fk = ae && ae.dataset && ae.dataset.fk && (keep || ae.closest('header')) ? ae.dataset.fk : null;
   const hw = document.querySelector('header.top .wrap'); const nh = navHtml(); if(hw.innerHTML !== nh) hw.innerHTML = nh;
-  const fn = { start, home, blueprint, concepts, drill, mock, traps, progress }[S.view];
+  const fn = { home, concepts, drill, mock, traps, progress }[S.view];
   const v = document.getElementById('view'); const html = fn();
-  // first paint of the start page keeps the pre-rendered heading nodes (re-creating them restarts LCP) and appends the rest
-  const pre = v.dataset.pre === 'start' ? v.innerHTML.replace(/<!--[\s\S]*?-->/, '') : null;
-  if(pre && S.view === 'start' && html.startsWith(pre)) v.insertAdjacentHTML('beforeend', html.slice(pre.length));
+  // first paint of the instrument keeps the pre-rendered heading nodes (re-creating them restarts LCP) and appends the rest
+  const pre = v.dataset.pre === 'home' ? v.innerHTML.replace(/<!--[\s\S]*?-->/, '') : null;
+  if(pre && S.view === 'home' && html.startsWith(pre)) v.insertAdjacentHTML('beforeend', html.slice(pre.length));
   else v.innerHTML = html;
   delete v.dataset.pre; DRAWN = true;
   setMeta(); setChrome();
@@ -458,8 +465,7 @@ function setChrome(){
 // <title> and description follow the certification and the view (the page is indexed; shared links read them)
 function setMeta(){
   const b = BP(); let ti, d;
-  if(S.view === 'start'){ ti = t('meta.start.t'); d = t('meta.start.d', { n: CERTS.map(c => (window.QUESTIONS[c]||[]).length).reduce((a,x)=>a+x,0) }); }
-  else { ti = t('meta.'+S.view+'.t', { cert: b.code }) + ' — Claude Cert Studio'; d = t('meta.'+S.view+'.d', { cert: b.code, name: b.name, items: b.items, n: b.domains.length }); }
+  ti = t('meta.'+S.view+'.t', { cert: b.code }) + (S.view === 'home' ? '' : ' — Claude Cert Studio'); d = t('meta.'+S.view+'.d', { cert: b.code, name: b.name, items: b.items, n: b.domains.length });
   document.title = ti;
   const m = document.querySelector('meta[name="description"]'); if(m) m.setAttribute('content', d);
 }
@@ -523,8 +529,35 @@ function facts(b, n){
 }
 function mockm(){ return `<button class="btn mockm" onclick="go('mock')">${t('nav.startMock')}</button>`; }
 
+// ---------- exam date, daily plan ----------
+// The date is optional and per certification (progress[cert].exam, local date YYYY-MM-DD). Without it nothing changes.
+// The plan paces the work at DAILY_CAP items a day, reviews first (research top-10 item 1).
+const DAILY_CAP = 10;
+const ymd = d => { d = d instanceof Date ? d : new Date(d); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); };
+const dayNum = s => { const [y, m, d] = s.split('-').map(Number); return Math.round(Date.UTC(y, m-1, d) / 864e5); };
+const validYmd = s => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s) && ymd(new Date(+s.slice(0,4), +s.slice(5,7)-1, +s.slice(8,10))) === s;
+const examOf = cert => { const e = progOf(cert || S.cert).exam; return validYmd(e) ? e : null; };
+// whole days from today to the exam; null when there is no date or it has passed
+function daysLeft(cert){ const e = examOf(cert); if(!e) return null; const n = dayNum(e) - dayNum(ymd(new Date())); return n >= 0 ? n : null; }
+function setExam(v){
+  const p = prog(); const c = p[S.cert];
+  if(!v){ delete c.exam; delete c.fmOff; S.exMsg = ''; }
+  else if(validYmd(v) && dayNum(v) >= dayNum(ymd(new Date()))){ if(c.exam !== v) delete c.fmOff; c.exam = v; S.exMsg = ''; }
+  else S.exMsg = t('ex.bad');
+  saveProg(p); render(true);
+}
+// the plan for the current certification: items still to work (never seen, or due) at the daily cap
+function plan(){
+  const dl = daysLeft(); if(dl === null) return null;
+  const n = dueList().length; const per = Math.min(DAILY_CAP, Math.ceil(n / Math.max(1, dl)));
+  const days = []; let left = n; const t0 = new Date();
+  for(let k = 0; k <= Math.min(dl, 6) && left > 0; k++){ const c = Math.min(per, left); left -= c; days.push({ date: new Date(t0.getFullYear(), t0.getMonth(), t0.getDate() + k), n: c }); }
+  return { dl, n, per, days, work: Math.ceil(n / DAILY_CAP) };
+}
+const paceLine = () => { const pl = plan(); return pl ? t('pace.line', { cap: DAILY_CAP, w: tn('d.days', pl.work), d: tn('d.days', pl.dl) }) + (pl.work > pl.dl ? ' ' + t('pace.over') : '') : ''; };
+
 // ---------- the instrument ----------
-// One component for Start, Overview, Blueprint and the mock result. A stacked weight bar on a shared 0-100 % scale
+// One component for the home view and the mock result. A stacked weight bar on a shared 0-100 % scale
 // (weight = length, never "biggest = full"); the solid part of each band is the user's ink; below it, one key per domain.
 // opts: ink {domainId: 0..1}, open (domain id), keys 'mini', act(cert, id) -> inline handler
 function instrument(cert, o = {}){
@@ -533,12 +566,13 @@ function instrument(cert, o = {}){
   let acc = 0; const left = b.domains.map(d => { const l = acc; acc += d.weight; return l; });
   const segs = b.domains.map(d => `<button type="button" tabindex="-1" class="seg" style="--c:${dcol(d.id)};--ink:${ink[d.id]||0};flex:${d.weight} 1 0" data-w="${d.weight}" aria-pressed="${d.id===o.open}" onclick="${act(cert,d.id)}"><i></i></button>`).join('');
   const ticks = mini ? [0, 50, 100] : [0, 25, 50, 75, 100];
-  // bands under 5 % of the exam get no label under the bar: they are read on their key
-  const figs = mini ? '' : `<div class="figs" aria-hidden="true">${b.domains.map((d,i) => d.weight >= 5 ? `<span style="left:${left[i]}%">D${d.id} ${num(d.weight)}%</span>` : '').join('')}</div>`;
+  // every band is labelled; a label that would touch the previous one drops to the next free row (~1 % of the bar per character)
+  const ends = [-1, -1, -1]; let rows = 1;
+  const figs = mini ? '' : `<div class="figs" aria-hidden="true">${b.domains.map((d,i) => { const txt = `D${d.id} ${num(d.weight)}%`; let r = ends.findIndex(e => left[i] >= e); if(r < 0) r = 2; ends[r] = left[i] + txt.length + .5; rows = Math.max(rows, r + 1); return `<span style="left:${left[i]}%;top:${r * 18}px">${txt}</span>`; }).join('')}</div>`.replace('class="figs"', `class="figs" style="height:${rows * 18 + 4}px"`);
   const keys = b.domains.map(d => `<button type="button" class="k" data-fk="k${cert}-${d.id}" style="--c:${dcol(d.id)}" aria-pressed="${d.id===o.open}" onclick="${act(cert,d.id)}"><span class="dot" aria-hidden="true"></span><span class="id">D${d.id}</span>${mini?`<span class="sr">${esc(d.name)}</span>`:`<span class="nm">${esc(d.name)}</span>`}<span class="w">${num(d.weight)}%</span><span class="sr">${t('inst.ink',{ r: Math.round(100*(ink[d.id]||0)) })}</span></button>`).join('');
   return `<div class="instr"><div class="scale" aria-hidden="true">${ticks.map(v => `<span style="left:${v}%">${v}%</span>`).join('')}</div>`
     + `<div class="wbar${DRAW_NOW?' draw':''}" aria-hidden="true">${segs}</div>${figs}`
-    + `<div class="keys${mini?' mini':''}" role="group" aria-label="${t('inst.keys')}">${keys}</div></div>`;
+    + `<div class="keys${mini?' mini':''}" role="group" aria-label="${t('inst.keys')}">${keys}</div>${o.line ? `<p class="paceline" id="paceLine">${o.line}</p>` : ''}</div>`;
 }
 // the opened domain, redrawn on its own 0-100 % axis; its task statements hang under it as children
 function domainPanel(cert, d, st, o = {}){
@@ -563,7 +597,7 @@ function domainPanel(cert, d, st, o = {}){
 }
 // task statements stay open in the URL: ?task=2.1 (the domain follows from it)
 document.addEventListener('toggle', e => {
-  const el = e.target; if(!(el.matches && el.matches('details.tk')) || S.view !== 'home') return;
+  const el = e.target; if(!(el.matches && el.matches('details.tk')) || S.view !== 'home' || S.expand) return;
   if(el.open) S.task = el.dataset.task; else if(S.task === el.dataset.task) S.task = null;
   syncUrl(false);
 }, true);
@@ -580,17 +614,6 @@ function deck(o = {}){
 }
 
 // ---------- views ----------
-function start(){
-  const card = code => { const b = window.BLUEPRINTS[code]; const n = (window.QUESTIONS[code]||[]).length;
-    return `<article class="certcard" aria-labelledby="cc-${code}"><span class="code">${code}</span><h2 id="cc-${code}">${esc(b.name)}</h2><p class="muted small" style="margin:0 0 12px">${esc(b.audience)}</p>${facts(b, n)}
-    ${instrument(code, { keys: 'mini' })}${srcLine(code)}
-    <button class="btn ghost study" onclick="openCert('${code}')">${t('start.study', { cert: code })}</button></article>`; };
-  return `<h1>${t('start.h')}</h1><p class="lead">${t('start.lead')}</p>
-  <section class="inst" aria-label="${t('start.certs')}">${CERTS.map(card).join('')}</section>
-  <p class="note">${t('start.qlang')}</p>
-  <h2>${t('start.how.h')}</h2><ol class="how">${[1,2,3,4,5].map(i => `<li>${t('start.how.'+i)}</li>`).join('')}</ol>
-  ${ACADEMY_LINK ? `<p class="note" id="academyLink">${t('start.academy', { url: ACADEMY_URL[LANG] })}</p>` : ''}`;
-}
 function home(){
   const b = BP(); const st = domainStats(); const c = prog()[S.cert]; const d = curDomain();
   const seen = Object.keys(c.q).length; const right = Object.values(c.q).filter(r=>r.last==='right').length;
@@ -600,10 +623,15 @@ function home(){
   if(seen) kpis.push(`<div class="kpi"><b>${Math.round(100*right/seen)}%</b><span>${t('kpi.acc', { n: seen })}</span></div>`);
   if(lastMock) kpis.push(`<div class="kpi"><b>${lastMock.score}</b><span>${t('kpi.mock', { pass: b.pass })}</span></div>`);
   const notes = [!seen && t('kpi.noSeen'), !lastMock && t('kpi.noMock')].filter(Boolean);
-  return `<h1>${esc(b.name)}</h1><p class="lead">${esc(b.audience)}</p>${facts(b, QS().length)}${srcLine(S.cert)}
+  return `<h1>${esc(b.name)}</h1><p class="lead">${esc(b.audience)}</p>
   ${S.mock && !S.mock.submitted ? `<p class="note" style="margin:0 0 16px">${t('home.resume')} <button class="btn link sm" onclick="go('mock')">${t('home.resumeGo')}</button></p>` : ''}
-  <section class="inst" aria-label="${t('inst.label')}">${instrument(S.cert, { open: d.id })}${mockm()}${domainPanel(S.cert, d, st)}</section>
+  <p class="printonly muted">${t('bp.print', { date: new Date().toISOString().slice(0,10), items: b.items, min: b.minutes, pass: b.pass })}</p>
+  <section class="inst" aria-label="${t('inst.label')}">${instrument(S.cert, { open: d.id, line: paceLine() })}${mockm()}
+  <div class="row tools noprint"><button class="btn ghost sm" id="expandBtn" aria-pressed="${S.expand}" onclick="toggleExpand()">${S.expand ? t('home.collapse') : t('home.expand')}</button><button class="btn ghost sm" id="printBtn" onclick="window.print()">${t('bp.printBtn')}</button><button class="btn link sm" id="conceptsLink" onclick="go('concepts')">${t('home.concepts')}</button></div>
+  <p class="note noprint" style="margin-top:8px">${t('bp.printNote')}</p>
+  ${b.domains.map(x => domainPanel(S.cert, x, st, { expand: S.expand, off: x.id !== d.id })).join('')}</section>
   <p class="note">${t('inst.legend')}</p>
+  ${facts(b, QS().length)}${srcLine(S.cert)}
   <h2>${t('home.yours')}</h2>
   <div class="pair"><div>${deck({ kpi: true, act: 'startDrill({due:true})' })}</div><div><div class="kpis">${kpis.join('')}</div>${notes.length ? `<p class="kpinote" id="kpiNote">${notes.join(' ')}</p>` : ''}</div></div>
   <h2>${t('home.next')}</h2>
@@ -613,15 +641,9 @@ function home(){
     <div class="step"><div><h3><span class="n">3</span>${t('home.s3.h')}</h3><p>${t('home.s3.p', { items: b.items, min: b.minutes })}</p></div><button class="btn ghost" onclick="startMock('full')">${t('home.s3.b')}</button></div>
   </div>
   <h2>${t('home.how.h')}</h2>
-  <p class="lead">${t('home.how.p')}</p>`;
-}
-function blueprint(){
-  const b = BP(); const st = domainStats(); const d = curDomain();
-  return `<h1 class="sub">${t('bp.h', { cert: b.code })}</h1><p class="lead">${t('bp.lead')}</p>
-  <p class="printonly muted">${t('bp.print', { date: new Date().toISOString().slice(0,10), items: b.items, min: b.minutes, pass: b.pass })}</p>
-  <div class="row noprint" style="margin:0 0 20px"><button class="btn sm ghost" id="printBtn" onclick="window.print()">${t('bp.printBtn')}</button><span class="muted small">${t('bp.printNote')}</span></div>
-  <section class="inst" aria-label="${t('inst.label')}">${instrument(S.cert, { open: d.id })}${mockm()}${b.domains.map(x => domainPanel(S.cert, x, st, { expand: true, off: x.id !== d.id })).join('')}</section>
-  <p class="note">${t('bp.src')}</p>`;
+  <p class="lead">${t('home.how.p')}</p>
+  <p class="note">${t('home.qlang')}</p>
+  ${ACADEMY_LINK ? `<p class="note" id="academyLink">${t('home.academy', { url: ACADEMY_URL[LANG] })}</p>` : ''}`;
 }
 // print: open every task statement so the cheat sheet is complete, restore afterwards
 let printOpened = [];
@@ -753,7 +775,7 @@ function mock(){
     <div class="steps" style="margin-top:24px">
     <div class="step"><div><h2 class="h3">${t('mock.quick')}</h2><p>${t('mock.quickP', { n: Math.ceil(b.items/2), min: Math.ceil(b.minutes/2) })}</p></div><button class="btn" onclick="startMock('quick')">${t('mock.startQuick')}</button></div>
     <div class="step"><div><h2 class="h3">${t('mock.full')}</h2><p>${t('mock.fullP', { n: b.items, min: b.minutes })}</p></div><button class="btn ghost" onclick="startMock('full')">${t('mock.startFull')}</button></div></div>
-    <p class="note">${t('start.qlang')}</p>
+    <p class="note">${t('home.qlang')}</p>
     <p class="note" id="mockFresh">${t('mock.fresh', { n: QS().length, u: (u => QS().filter(q=>!u[q.id]).length)(mockUses()) })}</p>`; }
   if(m.submitted) return mockResult();
   const q = m.pool[m.i];
@@ -836,6 +858,7 @@ function progress(){
   <div class="kpis"><div class="kpi"><b>${seen}/${QS().length}</b><span>${t('pg.seen')}</span></div>${seen?`<div class="kpi"><b>${Math.round(100*right/seen)}%</b><span>${t('pg.acc')}</span></div>`:''}${c.mocks.length?`<div class="kpi"><b>${c.mocks.length}</b><span>${t('pg.mocks')}</span></div><div class="kpi"><b>${Math.max(...c.mocks.map(m=>m.score))}</b><span>${t('pg.best', { pass: b.pass })}</span></div>`:''}</div>
   ${!seen || !c.mocks.length ? `<p class="kpinote">${[!seen && t('kpi.noSeen'), !c.mocks.length && t('kpi.noMock')].filter(Boolean).join(' ')}</p>` : ''}
   <p class="note" id="where" style="margin-top:0">${t('pg.where')}</p>
+  ${examBlock()}
   <h2>${t('pg.mastery')}</h2>
   ${b.domains.map(d => `<details class="plain" open><summary><span class="dn" style="color:${dcol(d.id)}">D${d.id}</span>${esc(d.name)} <span class="mono muted small">${st[d.id].seen?Math.round(100*st[d.id].right/st[d.id].seen)+'%':t('pg.notStarted')}</span></summary>
    ${d.tasks.map(x => { const s = st[d.id].tasks[x.id]||{seen:0,right:0,total:0}; const pct = s.seen?Math.round(100*s.right/s.seen):null; return `<div class="task-row"><div><span class="mono muted small">${x.id}</span> ${esc(x.name)}${meter(pct||0, d.id)}</div><div class="mono muted small">${t('pg.taskSeen', { s: s.seen, n: s.total })}${pct===null?'':', '+pct+'%'}</div></div>`; }).join('')}</details>`).join('')}
@@ -844,6 +867,13 @@ function progress(){
   <h2>${t('pg.data')}</h2>
   <div class="row"><button class="btn ghost sm" onclick="exportProgress()">${t('pg.export')}</button><button class="btn ghost sm" id="importBtn" onclick="document.getElementById('importFile').click()">${t('pg.import')}</button><input type="file" id="importFile" accept="application/json,.json" hidden onchange="importProgress(this.files[0]);this.value=''"><button class="btn ghost sm" onclick="if(confirm('${t('pg.resetConfirm', { cert: S.cert })}')){const p=prog();delete p['${S.cert}'];saveProg(p);render();}">${t('pg.reset', { cert: S.cert })}</button></div>
   <p class="note" id="ioMsg" role="status">${esc(S.io || '')}</p>`;
+}
+function examBlock(){
+  const e = progOf(S.cert).exam; const dl = daysLeft(); const pl = plan();
+  return `<h2>${t('ex.h')}</h2><p class="kpinote">${t('ex.p')}</p>
+  <div class="row"><label for="examDate" class="small">${t('ex.label', { cert: S.cert })}</label><input class="datein" type="date" id="examDate" data-fk="examDate" min="${ymd(new Date())}" value="${validYmd(e) ? e : ''}" onchange="setExam(this.value)"><button class="btn ghost sm" id="examClear" onclick="setExam('')"${e ? '' : ' disabled'}>${t('ex.clear')}</button></div>
+  <p class="note" id="exMsg" role="status" style="margin-top:8px">${esc(S.exMsg || '')}${e && dl === null ? t('ex.past') : ''}</p>
+  ${pl ? `<p class="kpinote" id="examPace">${paceLine()}</p>${pl.days.length ? `<ol class="plan" id="examPlan" aria-label="${t('ex.plan')}">${pl.days.map((d, k) => `<li><span>${k === 0 ? t('ex.today') : d.date.toLocaleDateString(LANG === 'es' ? 'es-PE' : 'en-US', { weekday: 'short', day: 'numeric', month: 'short' })}</span><span class="mono">${tn('ex.items', d.n)}</span></li>`).join('')}</ol><p class="note" style="margin-top:0">${t('ex.planNote', { cap: DAILY_CAP })}</p>` : `<p class="muted">${t('ex.noWork')}</p>`}` : ''}`;
 }
 function exportProgress(){ const blob = new Blob([JSON.stringify(store.get('progress',{}),null,2)],{type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'claude-cert-progress.json'; a.click(); }
 
@@ -880,6 +910,8 @@ function normalizeProgress(raw){
     const mocks = (Array.isArray(c.mocks) ? c.mocks : []).filter(m => m && Number.isFinite(m.score) && Number.isFinite(m.pct) && Number.isFinite(m.misses) && typeof m.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(m.date) && ['quick','full'].includes(m.kind))
       .map(m => ({ ...m, byDomain: m.byDomain && typeof m.byDomain === 'object' && !Array.isArray(m.byDomain) ? m.byDomain : {}, ids: Array.isArray(m.ids) ? m.ids.filter(x => typeof x === 'string') : [] }));
     out[cert] = { q, traps, mocks };
+    if(validYmd(c.exam)){ out[cert].exam = c.exam; if(c.fmOff === true) out[cert].fmOff = true; }
+    if(Array.isArray(c.days)){ const days = [...new Set(c.days.filter(validYmd))].sort().slice(-400); if(days.length) out[cert].days = days; }
   }
   return Object.keys(out).length ? { data: out, dropped } : null;
 }
@@ -889,6 +921,8 @@ function mergeProgress(local, inc){
     const l = out[cert] || (out[cert] = { q:{}, traps:{}, mocks:[] });
     for(const [id, r] of Object.entries(c.q)){ const o = l.q[id]; if(!o || (r.when||0) > (o.when||0)) l.q[id] = r; }
     for(const [k, n] of Object.entries(c.traps)) l.traps[k] = Math.max(l.traps[k]||0, n);
+    if(c.exam && !l.exam){ l.exam = c.exam; if(c.fmOff) l.fmOff = true; }
+    if(c.days) l.days = [...new Set([...(l.days||[]), ...c.days])].sort().slice(-400);
     const key = m => [m.date, m.kind, m.score, (m.ids||[]).join()].join('|'); const have = new Set(l.mocks.map(key));
     c.mocks.forEach(m => { if(!have.has(key(m))){ l.mocks.push(m); have.add(key(m)); } });
   }
@@ -913,7 +947,7 @@ function importProgress(file){
 (function init(){
   if(SAMPLE) seedSample();
   const th = store.get('theme'); if(th) document.documentElement.dataset.theme = th;
-  const c = store.get('cert'); if(c && CERTS.includes(c)){ S.cert = c; S.view = 'home'; }
+  const c = store.get('cert'); if(c && CERTS.includes(c)) S.cert = c;
   applyUrl(URLP, true);
   syncUrl(false);
   render();

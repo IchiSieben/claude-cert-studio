@@ -1,16 +1,16 @@
 {
   "slug": "cert-studio",
   "url": "https://cert.ichisieben.dev/",
-  "deliveredFps": 56.6,
+  "deliveredFps": 60,
   "fps": 60,
-  "seconds": 6.95,
+  "seconds": 7,
   "width": 1280,
   "height": 720,
   "webmCodec": "libsvtav1",
   "webmType": "video/webm; codecs=\"av01.0.08M.08\"",
-  "webmBytes": 434731,
-  "mp4Bytes": 523274,
-  "posterBytes": 61116,
-  "loopSsim": 1,
-  "recordedAt": "2026-10-15T15:37:27.693Z"
+  "webmBytes": 314280,
+  "mp4Bytes": 296369,
+  "posterBytes": 42050,
+  "loopSsim": 0.999,
+  "recordedAt": "2026-10-17T04:27:20.494Z"
 }

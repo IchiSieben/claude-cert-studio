@@ -87,18 +87,18 @@ try {
     page.on('pageerror', e => pageErrors.push(String(e)));
     page.on('console', m => { if (m.type() === 'error') pageErrors.push(m.text()); });
     await page.goto(URL_, { waitUntil: 'networkidle' });
-    // the poster is the start page; force it even if a stored cert sent the visitor to the overview, and say
-    // what the page shows if the cards still do not appear (cert-media-4 timed out here without a clue)
+    // the poster is the instrument (home) of the default certification; force it, and say what the page shows if the bar
+    // still does not appear (cert-media-4 timed out here without a clue)
     await page.waitForFunction(() => typeof (window as any).render === 'function' && document.querySelector('#view')!.children.length > 0, null, { timeout: 60000 })
       .catch(() => { throw new Error(`page never rendered; errors: ${pageErrors.join(' | ') || 'none'}`); });
-    await page.evaluate(() => { if (S.view !== 'start') go('start'); });
-    await page.waitForSelector('.certcard', { timeout: 15000 })
-      .catch(async () => { throw new Error(`no .certcard; view=${await page.evaluate(() => S.view)} h1=${await page.evaluate(() => document.querySelector('h1')?.textContent)} errors: ${pageErrors.join(' | ') || 'none'}`); });
+    await page.evaluate(() => { setCert('CCAR-F'); go('home'); });
+    await page.waitForSelector('.wbar', { timeout: 15000 })
+      .catch(async () => { throw new Error(`no .wbar; view=${await page.evaluate(() => S.view)} h1=${await page.evaluate(() => document.querySelector('h1')?.textContent)} errors: ${pageErrors.join(' | ') || 'none'}`); });
     const sc = new Screencast(page);
     await sc.start();
     const t = Date.now();
-    await wait(page, 700);                                   // start page at rest = poster
-    await clickGlide(page, '.certcard >> nth=1 >> .study');  // pick CCDV-F
+    await wait(page, 700);                                   // instrument at rest = poster
+    await clickGlide(page, '[data-fk="cert-CCDV-F"]');      // pick CCDV-F
     await wait(page, 700);
     await openDrillQuestion(page);
     await wait(page, 600);
@@ -110,7 +110,7 @@ try {
     await wait(page, 500);
     await page.evaluate(() => window.scrollTo({ top: 260, behavior: 'smooth' }));
     await wait(page, 1300);                                  // score + by-domain bars
-    await page.evaluate(() => { S.mock = null; setCert('CCAR-F'); go('start'); });
+    await page.evaluate(() => { S.mock = null; setCert('CCAR-F'); go('home'); });
     await wait(page, 450);                                   // back to the poster state
     await sc.stop();
     const secs = (Date.now() - t) / 1000;

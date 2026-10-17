@@ -29,7 +29,7 @@ Lecciones de la ruta "Certifícate": los 8 documentos de `01-dominios/` y los 7 
 frontmatter (órdenes 1–15; nivel 2 los dominios, 3 los laboratorios). `tools/import-academia.py`
 los lee con `lesson_meta` sin cambios.
 
-Cifras de `results`: 240 preguntas originales (validador del banco, 2026-10-15); 42 pruebas de
+Cifras de `results`: 240 preguntas originales (validador del banco, 2026-10-15); 44 pruebas de
 punta a punta en verde (Playwright, Windows, 2026-10-15).
 
 ## `Landing/src/content/projects/es/cert-studio.md`
@@ -66,7 +66,7 @@ skills:
 applied:
   javascript: "Toda la app en un archivo sin framework ni build: reparto por resto mayor, puntaje ponderado, repaso espaciado SM-2 y un modo muestra con semilla fija."
   html-css: "Una sola página con vistas, tema claro y oscuro, diseño para móvil y una hoja de impresión que convierte el blueprint en PDF."
-  playwright: "42 pruebas de punta a punta: axe sin violaciones en las ocho vistas en claro y oscuro, las ocho vistas en ancho de móvil, el modo muestra sin escribir en el almacenamiento, la migración del repaso espaciado, el uso sin conexión y cero desplazamiento de diseño mientras carga el banco."
+  playwright: "44 pruebas de punta a punta: axe sin violaciones en las siete vistas en claro y oscuro, las siete vistas en ancho de móvil, el modo muestra sin escribir en el almacenamiento, la migración del repaso espaciado, el uso sin conexión y cero desplazamiento de diseño mientras carga el banco."
   hosting-estatico: "Subdominio estático en hosting compartido, subido por archivo sin borrar nada, con un .htaccess que solo responde por su propio nombre."
   bash: "El despliegue, la exportación al repo público con su auditoría por patrones y el carril de grabación de medios son scripts de Bash."
   git: "El repo público es una exportación filtrada de un solo autor; el historial de trabajo queda privado."

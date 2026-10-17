@@ -12,7 +12,7 @@ const errors = [];
 const results = [];
 async function step(name, fn) {
   try { await fn(); results.push(["PASS", name]); }
-  catch (e) { results.push(["FAIL", name + " — " + e.message.split("\n")[0]]); }
+  catch (e) { results.push(["FAIL", name + " — " + e.message.split("\n").slice(0, process.env.FULL ? 8 : 1).join(" ")]); }
 }
 function watch(page) {
   page.on("console", m => { if (m.type() === "error") errors.push(m.text()); });
@@ -169,8 +169,8 @@ await step("concepts tab: one card per distinct concept, search filters, drill l
   await page.evaluate(() => { S.drill = null; });
 });
 
-await step("blueprint print view hides chrome and shows per-task mastery bars", async () => {
-  await page.evaluate(() => go("blueprint"));
+await step("print view hides chrome and shows per-task mastery bars", async () => {
+  await page.evaluate(() => go("home"));
   await page.emulateMedia({ media: "print" });
   assert.equal(await page.isVisible("header"), false);
   assert.equal(await page.isVisible("#printBtn"), false);
@@ -178,12 +178,12 @@ await step("blueprint print view hides chrome and shows per-task mastery bars", 
   await page.emulateMedia({ media: "screen" });
 });
 
-await step("CCDV-F: switch cert, concepts and blueprint render", async () => {
+await step("CCDV-F: switch cert, concepts and the instrument render", async () => {
   await page.evaluate(() => setCert("CCDV-F"));
   await page.evaluate(() => go("concepts"));
   assert.ok((await page.$$eval("#conceptGrid .concept", e => e.length)) > 0);
-  await page.evaluate(() => go("blueprint"));
-  assert.ok(await page.isVisible("text=CCDV-F blueprint"));
+  await page.evaluate(() => go("home"));
+  assert.match(await page.textContent("#view h1"), /Claude Certified Developer/);
 });
 
 await step("mobile 390 px: no horizontal scroll on any view", async () => {
@@ -191,7 +191,7 @@ await step("mobile 390 px: no horizontal scroll on any view", async () => {
   watch(m);
   await m.goto(URL_);
   const bad = [];
-  for (const v of ["start", "home", "blueprint", "concepts", "drill", "mock", "traps", "progress"]) {
+  for (const v of ["home", "concepts", "drill", "mock", "traps", "progress"]) {
     await m.evaluate(v => go(v), v);
     const over = await m.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     if (over > 0) bad.push(`${v}:+${over}px`);
@@ -203,19 +203,51 @@ await step("mobile 390 px: no horizontal scroll on any view", async () => {
   assert.deepEqual(bad, []);
 });
 
-await step("fresh visitor lands on the start page: both certs, weights sum to 100, listed (no noindex), disclaimer", async () => {
+await step("fresh visitor lands on the instrument of the default certification: five bands summing to 100, domain keys, only four tabs, listed (no noindex), disclaimer", async () => {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const s = await ctx.newPage(); watch(s);
   await s.goto(URL_);
-  assert.equal(await s.evaluate(() => S.view), "start");
-  assert.equal(await s.$$eval(".certcard", e => e.length), 2);
-  const sums = await s.$$eval(".certcard .wbar", bars => bars.map(b => [...b.children].reduce((a, i) => a + parseFloat(i.dataset.w), 0)));
-  sums.forEach(x => assert.ok(Math.abs(x - 100) < 0.6, `weights sum ${x}`));
+  assert.equal(await s.evaluate(() => S.view + "|" + S.cert), "home|CCAR-F");
+  assert.equal(await s.$$eval(".certcard", e => e.length), 0, "no separate start page");
+  assert.equal(await s.$$eval(".wbar .seg", e => e.length), 5, "CCAR-F has five domains");
+  const sum = await s.$$eval(".wbar .seg", segs => segs.reduce((a, i) => a + parseFloat(i.dataset.w), 0));
+  assert.ok(Math.abs(sum - 100) < 0.6, "weights sum " + sum);
+  assert.equal(await s.$$eval(".keys .k", e => e.length), 5);
+  assert.deepEqual(await s.$$eval("#nav button", e => e.map(x => x.dataset.fk)), ["nav-drill", "nav-mock", "nav-traps", "nav-progress"], "the tabs are the four activities only");
+  const [bar, panel, tabs] = await s.evaluate(() => [".wbar", ".dsec:not(.off)", "#nav"].map(q => document.querySelector(q).getBoundingClientRect().top));
+  assert.ok(bar > tabs && bar < panel, "the instrument sits above the opened domain");
   assert.equal(await s.$('meta[name="robots"]'), null);
   assert.match(await s.textContent("#disclaimer"), /Unofficial study aid\. Not affiliated with or endorsed by Anthropic\./);
-  await s.click(".certcard >> nth=1 >> .study");
+  await s.click('[data-fk="cert-CCDV-F"]');
   assert.equal(await s.evaluate(() => [S.view, S.cert].join()), "home,CCDV-F");
+  await s.click("#nav [data-fk=nav-drill]"); await s.click('[data-fk="brand"]');
+  assert.equal(await s.evaluate(() => S.view), "home", "the brand returns to the instrument");
+  for (const q of ["start", "blueprint"]) { await s.goto(URL_ + "?view=" + q); assert.equal(await s.evaluate(() => S.view), "home", q + " is an alias"); }
+  await s.goto(URL_ + "?view=concepts"); assert.equal(await s.evaluate(() => S.view), "concepts");
+  await s.goto(URL_); await s.click("#conceptsLink"); assert.equal(await s.evaluate(() => S.view), "concepts", "Concepts is a link from the instrument");
+  assert.equal(await s.$(".samplebar:not([hidden])"), null, "the sample notice is only for ?sample=1");
   await ctx.close();
+});
+
+await step("every band carries its domain colour from the first visit: with nothing answered, the tracks are the hue at 42 percent alpha in dark and 35 in light, not grey, in both themes", async () => {
+  for (const scheme of ["dark", "light"]) {
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, colorScheme: scheme }); const s = await ctx.newPage(); watch(s);
+    await s.goto(URL_ + "?view=home&cert=CCDV-F&domain=2&expand=1");
+    assert.equal(await s.evaluate(() => Object.keys(prog()[S.cert].q).length), 0);
+    const px = await s.evaluate(() => {
+      const cv = document.createElement("canvas"); cv.width = cv.height = 1; const g = cv.getContext("2d", { willReadFrequently: true });
+      const rgba = c => { g.clearRect(0, 0, 1, 1); g.fillStyle = "#000"; g.fillStyle = c; g.fillRect(0, 0, 1, 1); const d = g.getImageData(0, 0, 1, 1).data; return d[3] ? [d[0] * 255 / d[3], d[1] * 255 / d[3], d[2] * 255 / d[3], d[3]] : [0, 0, 0, 0]; };
+      const of = sel => [...document.querySelectorAll(sel)].filter(e => e.offsetParent).map(e => rgba(getComputedStyle(e).backgroundColor));
+      return { seg: of(".wbar .seg"), z: of(".zbar > div"), tm: of(".tm .t b"), ink: [...document.querySelectorAll(".wbar .seg i")].every(i => i.getBoundingClientRect().width === 0) };
+    });
+    assert.ok(px.ink, "no answers, no solid ink");
+    for (const [k, list] of Object.entries({ seg: px.seg, z: px.z, tm: px.tm })) {
+      assert.ok(list.length > 0, k + " present");
+      list.forEach(c => { assert.ok(Math.abs(c[3] - (scheme === "dark" ? 107 : 89)) <= 4, scheme + " " + k + " alpha " + c[3]); assert.ok(Math.max(c[0], c[1], c[2]) - Math.min(c[0], c[1], c[2]) >= 40, scheme + " " + k + " is grey: " + c.map(Math.round)); });
+    }
+    assert.equal(new Set(px.seg.map(c => c.slice(0, 3).map(Math.round).join())).size, 8, "eight different hues in the bar");
+    await ctx.close();
+  }
 });
 
 await step("?sample=1 seeds demo progress in memory, is deterministic and never writes localStorage", async () => {
@@ -235,13 +267,13 @@ await step("?lang=es translates the chrome only; questions stay in English", asy
   const s = await browser.newPage(); watch(s);
   await s.goto(URL_ + "?lang=es&sample=1");
   assert.equal(await s.evaluate(() => document.documentElement.lang), "es");
-  assert.ok(await s.isVisible("nav >> text=Resumen"));
-  assert.ok(await s.isVisible("text=Dos certificaciones de Claude"));
+  assert.ok(await s.isVisible("nav >> text=Simulacro"));
+  assert.ok(await s.isVisible("text=Para hoy"));
   await s.close();
 });
 
 await step("print cheat sheet renders to a multi-page PDF in Chromium", async () => {
-  await page.evaluate(() => { setCert("CCAR-F"); go("blueprint"); });
+  await page.evaluate(() => { setCert("CCAR-F"); go("home"); });
   const pdf = await page.pdf({ format: "A4", printBackground: true });
   assert.equal(pdf.subarray(0, 4).toString(), "%PDF");
   const pages = (pdf.toString("latin1").match(/\/Type\s*\/Page[^s]/g) || []).length;
@@ -251,7 +283,7 @@ await step("print cheat sheet renders to a multi-page PDF in Chromium", async ()
 await step("<title> and description follow cert and view; Academy link per language", async () => {
   const s = await browser.newPage(); watch(s);
   await s.goto(URL_ + "?sample=1");
-  assert.match(await s.title(), /^Claude Cert Studio: CCAR-F and CCDV-F practice$/);
+  assert.equal(await s.title(), "Claude Cert Studio: CCAR-F practice");
   await s.evaluate(() => { setCert("CCDV-F"); go("mock"); });
   assert.equal(await s.title(), "CCDV-F mock exam — Claude Cert Studio");
   assert.match(await s.getAttribute('meta[name="description"]', "content"), /53-item mock for Claude Certified Developer/);
@@ -295,7 +327,7 @@ await step("offline: the service worker serves the page and the bank with the ne
     await s.reload(); await s.evaluate(() => navigator.serviceWorker.ready);
     await ctx.setOffline(true);
     await s.reload();
-    assert.equal(await s.$$eval(".certcard", e => e.length), 2);
+    assert.equal(await s.$$eval(".wbar .seg", e => e.length), 5);
     assert.ok(await s.evaluate(() => window.QUESTIONS["CCDV-F"].length > 100));
   } finally { await ctx.close(); srv.close(); }
 });
@@ -314,24 +346,25 @@ await step("no layout shift while the bank loads (CLS 0 with the data scripts de
     for (const width of [412, 1350]) {
       const s = await browser.newPage({ viewport: { width, height: 840 } }); watch(s);
       await s.addInitScript(() => { window.__cls = 0; new PerformanceObserver(l => l.getEntries().forEach(e => { if (!e.hadRecentInput) window.__cls += e.value; })).observe({ type: "layout-shift", buffered: true }); });
-      await s.goto(`http://127.0.0.1:${srv.address().port}/`); await s.waitForFunction(() => window.QUESTIONS && document.querySelector(".certcard")); await s.waitForTimeout(300);
+      await s.goto(`http://127.0.0.1:${srv.address().port}/`); await s.waitForFunction(() => window.QUESTIONS && document.querySelector(".wbar")); await s.waitForTimeout(300);
       const cls = await s.evaluate(() => window.__cls);
       assert.ok(cls < 0.01, `CLS ${cls.toFixed(3)} at ${width}px`); await s.close();
     }
   } finally { srv.close(); }
 });
 
-await step("LCP: the pre-rendered start heading is kept by the first render (not re-created), so it paints before the bank", async () => {
+await step("LCP: the pre-rendered heading of the instrument is kept by the first render (not re-created), so it paints before the bank", async () => {
   const f = await browser.newPage();
   await f.route("**/data/*.js*", async r => { await new Promise(res => setTimeout(res, 600)); await r.continue(); });
   await f.addInitScript(() => { document.addEventListener("DOMContentLoaded", () => { const l = document.querySelector("#view .lead"); if (l) l.dataset.mark = "pre"; }); });
   await f.goto(URL_);
-  await f.waitForSelector(".certcard");
+  await f.waitForSelector(".wbar");
   assert.equal(await f.$eval("#view .lead", e => e.dataset.mark), "pre");
   assert.equal(await f.$$eval("#view h1", els => els.length), 1);
   await f.goto(URL_ + "?lang=es");
-  await f.waitForSelector(".certcard");
-  assert.match(await f.textContent("#view h1"), /Dos certificaciones/);
+  await f.waitForSelector(".wbar");
+  assert.match(await f.textContent("#view h1"), /Claude Certified Architect/);
+  assert.match(await f.textContent("nav"), /Simulacro/);
   await f.close();
 });
 
@@ -341,7 +374,7 @@ await step("UI rules: no dash placeholders on a fresh profile, at most one fille
   await f.evaluate(() => { localStorage.clear(); setCert("CCDV-F"); go("home"); });
   assert.equal(await f.$$eval(".kpi b", els => els.filter(e => /^[–—-]$/.test(e.textContent.trim())).length), 0);
   assert.ok(await f.$("#kpiNote"), "missing data is said in a sentence");
-  for (const v of ["start", "home", "blueprint", "concepts", "drill", "mock", "traps", "progress"]) {
+  for (const v of ["home", "concepts", "drill", "mock", "traps", "progress"]) {
     await f.evaluate(x => go(x), v);
     const n = await f.$$eval("#view .btn:not(.ghost):not(.link)", els => els.filter(e => e.offsetParent).length);
     assert.ok(n <= 1, `${v}: ${n} filled buttons`);
@@ -350,7 +383,7 @@ await step("UI rules: no dash placeholders on a fresh profile, at most one fille
   await f.close();
 });
 
-await step("axe: no violations on the 8 views, an answered drill and a mock result (light/dark, 1280/390)", async () => {
+await step("axe: no violations on the 7 views, an answered drill and a mock result (light/dark, 1280/390)", async () => {
   const found = await axeAll(browser);
   assert.deepEqual(found, [], found.join(" | "));
 });
@@ -367,15 +400,16 @@ await step("i18n: every key exists in EN and ES with the same parameters and tag
   const src = fs.readFileSync(path.resolve(import.meta.dirname, "../app/index.html"), "utf8");
   const used = new Set([...src.matchAll(/\bt\('([\w.]+)'/g)].map(m => m[1]).filter(k => !k.endsWith(".")));
   [...src.matchAll(/\btn\('([\w.]+)'/g)].forEach(m => { used.add(m[1] + ".one"); used.add(m[1] + ".other"); });
-  ["home", "blueprint", "concepts", "drill", "mock", "traps", "progress"].forEach(v => { used.add("view." + v); used.add("meta." + v + ".t"); used.add("meta." + v + ".d"); });
-  [1, 2, 3, 4, 5].forEach(i => used.add("start.how." + i)); [1, 2, 3, 4].forEach(i => used.add("tr.order." + i)); used.add("kind.full"); used.add("kind.quick");
+  ["home", "concepts", "drill", "mock", "traps", "progress"].forEach(v => { used.add("meta." + v + ".t"); used.add("meta." + v + ".d"); });
+  ["drill", "mock", "traps", "progress"].forEach(v => used.add("view." + v));
+  [1, 2, 3, 4].forEach(i => used.add("tr.order." + i)); used.add("kind.full"); used.add("kind.quick");
   assert.deepEqual([...used].filter(k => !(k in d.en)), [], "keys used by the app but not defined");
   assert.deepEqual(en.filter(k => !used.has(k)), [], "keys defined but never used");
 });
 
 await step("language toggle: ES switches the whole chrome and the URL, no unresolved {placeholders} on any view in either language", async () => {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } }); const s = await ctx.newPage(); watch(s);
-  const views = ["start", "home", "blueprint", "concepts", "drill", "mock", "traps", "progress"];
+  const views = ["home", "blueprint", "concepts", "drill", "mock", "traps", "progress"];
   for (const lang of ["en", "es"]) for (const v of views.filter(x => x !== "concepts")) {
     await s.goto(URL_ + `?sample=1&lang=${lang}&view=${v}`);
     const txt = await s.evaluate(() => document.body.innerText);
@@ -392,7 +426,7 @@ await step("language toggle: ES switches the whole chrome and the URL, no unreso
   await ctx.close();
 });
 
-await step("the pre-rendered header in the HTML equals what render() builds on a fresh Start (no layout change on first paint)", async () => {
+await step("the pre-rendered header in the HTML equals what render() builds on a fresh home (no layout change on first paint)", async () => {
   const fs = await import("node:fs");
   const src = fs.readFileSync(path.resolve(import.meta.dirname, "../app/index.html"), "utf8");
   const pre = src.match(/<header class="top"><div class="wrap">([\s\S]*?)<\/div><\/header>\n<main>/)[1];
@@ -402,24 +436,33 @@ await step("the pre-rendered header in the HTML equals what render() builds on a
   assert.equal(r[0], r[1]); await ctx.close();
 });
 
-await step("instrument: state in the URL (cert, domain, task); bands under 5% carry no label; opened domain on its own 0-100% axis", async () => {
+await step("instrument: state in the URL (cert, domain, task); every band is labelled (narrow ones on a second row); opened domain on its own 0-100% axis", async () => {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } }); const s = await ctx.newPage(); watch(s);
   await s.goto(URL_ + "?sample=1&view=home&cert=CCDV-F&domain=5&task=5.2");
   assert.equal(await s.getAttribute('.keys .k[data-fk="kCCDV-F-5"]', "aria-pressed"), "true");
   assert.ok(await s.$eval("#tk-5\\.2", e => e.open), "task from the URL is open");
   const labels = await s.$$eval(".figs span", e => e.map(x => x.textContent));
-  assert.ok(labels.length === 6 && !labels.some(l => /^D[34] /.test(l)), labels.join());
+  assert.ok(labels.length === 8 && labels.some(l => /^D3 /.test(l)) && labels.some(l => /^D4 /.test(l)), labels.join());
+  const boxes = await s.$$eval(".figs span", e => e.map(x => { const r = x.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom]; }));
+  boxes.forEach((a, i) => boxes.slice(i + 1).forEach(b => assert.ok(a[2] <= b[0] || b[2] <= a[0] || a[3] <= b[1] || b[3] <= a[1], "bar labels never overlap")));
   await s.click('.keys .k[data-fk="kCCDV-F-6"]');
   assert.equal(await s.evaluate(() => location.search.includes("domain=6") && !location.search.includes("task=")), true);
-  assert.match(await s.textContent(".zeq"), /= 11 % of the exam/);
-  assert.match(await s.textContent(".zscale"), /0%.*50%.*100%/);
-  const zs = await s.$$eval(".zbar > div", d => d.reduce((a, x) => a + parseFloat(x.style.flexGrow), 0));
+  assert.match(await s.textContent(".dsec:not(.off) .zeq"), /= 11 % of the exam/);
+  assert.match(await s.textContent(".dsec:not(.off) .zscale"), /0%.*50%.*100%/);
+  const zs = await s.$$eval(".dsec:not(.off) .zbar > div", d => d.reduce((a, x) => a + parseFloat(x.style.flexGrow), 0));
   assert.ok(Math.abs(zs - 11) < 0.1, `task weights add up to the domain weight (${zs})`);
-  await s.click("details.tk >> nth=0 >> summary");
+  await s.click(".dsec:not(.off) details.tk >> nth=0 >> summary");
   await s.waitForFunction(() => location.search.includes("task=6.1"));
   assert.ok(await s.isVisible("details.tk[open] >> text=Drill CCDVF-6.1"));
   await s.goto(URL_ + "?sample=1&view=blueprint&cert=CCAR-F");
-  assert.equal(await s.$$eval("details.tk[open]", e => e.filter(x => x.offsetParent).length), 7, "blueprint shows every task of the opened domain expanded");
+  assert.equal(await s.$$eval("details.tk[open]", e => e.filter(x => x.offsetParent).length), 7, "the blueprint alias opens the instrument with every task of the opened domain expanded");
+  assert.equal(await s.getAttribute("#expandBtn", "aria-pressed"), "true");
+  assert.ok(await s.evaluate(() => location.search.includes("expand=1") && location.search.includes("view=home")), "the alias is rewritten to the canonical URL");
+  await s.click("#expandBtn");
+  assert.equal(await s.$$eval("details.tk[open]", e => e.length), 0, "collapse closes them all");
+  assert.ok(await s.evaluate(() => !location.search.includes("expand")));
+  await s.click("#expandBtn");
+  assert.equal(await s.$$eval("details.tk[open]", e => e.filter(x => x.offsetParent).length), 7);
   const m = await browser.newPage({ viewport: { width: 390, height: 844 } }); watch(m);
   await m.goto(URL_ + "?sample=1&view=home");
   const top = await m.$eval(".mockm", e => e.getBoundingClientRect().top), keysBottom = await m.$eval(".keys", e => e.getBoundingClientRect().bottom);
@@ -480,9 +523,13 @@ await step("answers show the trap, why the right one is right and a source; the 
 await step("every exam claim links its source (both certification pages and the FAQ) with the consulted date", async () => {
   const ctx = await browser.newContext(); const s = await ctx.newPage(); watch(s);
   await s.goto(URL_ + "?sample=1");
-  const hrefs = await s.$$eval(".src a", a => a.map(x => x.href));
-  ["claude-certified-developer-foundations-certification", "claude-certified-architect-foundations-certification", "page/faq-certifications"].forEach(u => assert.ok(hrefs.some(h => h.endsWith(u)), u));
-  assert.ok((await s.$$eval(".src", e => e.every(x => x.textContent.includes("2026-10-15")))));
+  const cert = { "CCAR-F": "claude-certified-architect-foundations-certification", "CCDV-F": "claude-certified-developer-foundations-certification" };
+  for (const c of Object.keys(cert)) {
+    await s.goto(URL_ + `?sample=1&view=home&cert=${c}`);
+    const hrefs = await s.$$eval(".src a", a => a.map(x => x.href));
+    [cert[c], "page/faq-certifications"].forEach(u => assert.ok(hrefs.some(h => h.endsWith(u)), c + " " + u));
+    assert.ok((await s.$$eval(".src", e => e.every(x => x.textContent.includes("2026-10-15")))));
+  }
   for (const v of ["home", "mock"]) { await s.goto(URL_ + `?sample=1&view=${v}&cert=CCDV-F`); assert.ok(await s.$(".src a"), v + " links a source"); }
   await ctx.close();
 });
@@ -517,8 +564,24 @@ await step("design rules in the source: no arrows or midpoints, one uppercase-la
   const lum = h => { const c = [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255).map(v => v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4); return .2126 * c[0] + .7152 * c[1] + .0722 * c[2]; };
   const cr = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); };
   const darkBlk = html.match(/:root\{[\s\S]*?\n\}/)[0], light = html.match(/:root\[data-theme="light"\]\{[\s\S]*?\n\}/)[0];
-  const get = (blk, n) => blk.match(new RegExp(`--d${n}:(#[0-9a-f]{6})`))[1];
-  for (let n = 1; n <= 8; n++) { assert.ok(cr(get(darkBlk, n), "#040506") >= 6, `D${n} dark ${cr(get(darkBlk, n), "#040506").toFixed(2)}`); assert.ok(cr(get(light, n), "#f5f5f6") >= 4.6, `D${n} light ${cr(get(light, n), "#f5f5f6").toFixed(2)}`); }
+  const get = (blk, n) => blk.match(new RegExp(`--d${n}:(#[0-9a-f]{6})`))[1], tok = (blk, k) => blk.match(new RegExp(`--${k}:(#[0-9a-f]{6})`))[1];
+  const rgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  const over = (c, bg, a) => c.map((v, i) => a * v + (1 - a) * bg[i]);   // c at alpha a over bg
+  const lumRgb = c => { const l = c.map(v => v / 255).map(v => v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4); return .2126 * l[0] + .7152 * l[1] + .0722 * l[2]; };
+  const crRgb = (a, b) => { const x = lumRgb(a), y = lumRgb(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); };
+  const mq = html.match(/@media \(prefers-color-scheme: light\)\{ :root:not\(\[data-theme="dark"\]\)\{[\s\S]*?\n\}\}/)[0];
+  for (let n = 1; n <= 8; n++) assert.equal(get(mq, n), get(light, n), `D${n}: the OS-light block and data-theme=light agree`);
+  // WCAG 1.4.3 / 1.4.11 for all 8 domains x 2 themes: the colour as text on every surface it sits on (>= 4.5), the solid
+  // fill against the 42 percent (dark) or 35 percent (light) track it grows inside (>= 3), and the solid fill against the canvas and the card (>= 3)
+  for (const [theme, blk] of [["dark", darkBlk], ["light", light]]) {
+    const surf = ["canvas", "card", "well"].map(k => rgb(tok(blk, k))), canvas = rgb(tok(blk, "canvas")), card = rgb(tok(blk, "card"));
+    for (let n = 1; n <= 8; n++) {
+      const c = rgb(get(blk, n));
+      surf.forEach(b => assert.ok(crRgb(c, b) >= 4.5, `D${n} ${theme} as text ${crRgb(c, b).toFixed(2)}`));
+      [canvas, card].forEach(b => { const tr = over(c, b, theme === "dark" ? .42 : .35); assert.ok(crRgb(c, tr) >= 3, `D${n} ${theme} fill vs track ${crRgb(c, tr).toFixed(2)}`); assert.ok(crRgb(c, b) >= 3, `D${n} ${theme} fill vs surface`); });
+    }
+  }
+  assert.ok(!/--trk/.test(html), "no grey track token is left: tracks are color-mix(hue var(--ta), transparent)");
   assert.notEqual(get(darkBlk, 7), "#d77965"); assert.notEqual(get(light, 7), "#b4462f");
 });
 
@@ -542,7 +605,7 @@ await step("importing a hostile or malformed progress file renders Progress with
 
 await step("popstate to another certification clears the stale drill and mock", async () => {
   const s = await browser.newPage(); const errs = []; s.on("pageerror", e => errs.push(String(e)));
-  await s.goto(URL_); await s.evaluate(() => { localStorage.clear(); setCert("CCDV-F"); go("mock"); openCert("CCAR-F"); startDrill({}); });
+  await s.goto(URL_); await s.evaluate(() => { localStorage.clear(); setCert("CCDV-F"); go("mock"); go("home"); setCert("CCAR-F"); startDrill({}); });
   assert.ok(await s.evaluate(() => !!S.drill));
   await s.evaluate(() => history.go(-2)); await s.waitForFunction(() => S.cert === "CCDV-F");
   assert.equal(await s.evaluate(() => S.drill), null);
@@ -568,10 +631,10 @@ await step("switching certification during an unsubmitted mock asks first and ca
   const s = await browser.newPage(); const msgs = []; let accept = false;
   s.on("dialog", d => { msgs.push(d.message()); accept ? d.accept() : d.dismiss(); });
   await s.goto(URL_); await s.evaluate(() => { localStorage.clear(); setCert("CCAR-F"); startMock("quick"); });
-  await s.evaluate(() => openCert("CCDV-F"));
+  await s.evaluate(() => setCert("CCDV-F"));
   assert.equal(msgs.length, 1);
   assert.equal(await s.evaluate(() => S.cert + "|" + !!S.mock), "CCAR-F|true");
-  accept = true; await s.evaluate(() => openCert("CCDV-F"));
+  accept = true; await s.evaluate(() => setCert("CCDV-F"));
   assert.equal(await s.evaluate(() => S.cert + "|" + !!S.mock), "CCDV-F|false");
   await s.close();
 });
@@ -589,6 +652,33 @@ await step("Enter on a focused option selects it in the mock; the URL keeps lang
   assert.match(await s.evaluate(() => location.search), /lang=en/);
   await s.focus(".opt[data-k='B']"); await s.keyboard.press("Enter");
   assert.deepEqual(await s.evaluate(() => [S.mock.i, S.mock.chosen.join()]), [0, "B"]);
+  await s.close();
+});
+
+// Local YYYY-MM-DD for today + n days (same machine, same timezone as the browser).
+const dayPlus = n => { const d = new Date(); d.setDate(d.getDate() + n); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+
+await step("exam date: set and clear per certification, daily plan at the cap, pace line on the instrument, past dates refused, survives export/import", async () => {
+  const s = await browser.newPage(); watch(s);
+  await s.goto(URL_); await s.evaluate(() => { localStorage.clear(); setCert("CCDV-F"); go("home"); });
+  assert.equal(await s.$("#paceLine"), null, "no date, no pace line");
+  await s.evaluate(() => go("progress"));
+  assert.equal(await s.$("#examPlan"), null, "no date, no plan");
+  await s.fill("#examDate", dayPlus(20));
+  assert.equal(await s.evaluate(() => progOf("CCDV-F").exam), dayPlus(20));
+  const bank = await s.evaluate(() => QS().length);
+  assert.match(await s.textContent("#examPlan li:first-child"), new RegExp(`Today\s*${Math.min(10, Math.ceil(bank / 20))} questions`));
+  const rows = await s.$$eval("#examPlan li", l => l.length); assert.ok(rows >= 5 && rows <= 7, "plan lists the next days, got " + rows);
+  await s.evaluate(() => go("home"));
+  assert.equal((await s.textContent("#paceLine")).trim(), `At your pace (10 a day): ${Math.ceil(bank / 10)} days of work left, 20 days to the exam.`);
+  await s.evaluate(() => setCert("CCAR-F")); assert.equal(await s.$("#paceLine"), null, "the date belongs to one certification");
+  await s.evaluate(() => { setCert("CCDV-F"); go("progress"); setExam("2020-01-01"); });
+  assert.match(await s.textContent("#exMsg"), /already passed/); assert.equal(await s.evaluate(() => progOf("CCDV-F").exam), dayPlus(20), "a past date saves nothing");
+  const n = await s.evaluate(() => normalizeProgress(JSON.parse(localStorage.getItem("ccs:progress"))).data["CCDV-F"].exam);
+  assert.equal(n, dayPlus(20), "import keeps the date");
+  assert.equal(await s.evaluate(() => normalizeProgress({ "CCDV-F": { q: {}, exam: "2026-13-45" } }).data["CCDV-F"].exam), undefined, "a malformed date is dropped");
+  await s.click("#examClear");
+  assert.equal(await s.evaluate(() => progOf("CCDV-F").exam), undefined); assert.equal(await s.$("#examPlan"), null);
   await s.close();
 });
 

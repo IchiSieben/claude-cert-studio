@@ -9,7 +9,8 @@ import fs from "node:fs";
 const root = path.resolve(import.meta.dirname, "..");
 const AXE = fs.readFileSync(createRequire(import.meta.url).resolve("axe-core/axe.min.js"), "utf8");
 const base = pathToFileURL(path.join(root, "app/index.html")).href;
-export const VIEWS = ["start", "home", "blueprint", "concepts", "drill", "mock", "traps", "progress"];
+// "blueprint" stays on purpose: it is the alias of the instrument with every task expanded (covers that state)
+export const VIEWS = ["home", "blueprint", "concepts", "drill", "mock", "traps", "progress"];
 
 const STATES = [
   ["drill-checked", () => { startDrill({ domains: [1, 2, 3, 4, 5, 6, 7, 8] }); const q = S.drill.pool[0]; S.drill.chosen = [Object.keys(q.options).find(k => !q.answer.includes(k))].concat(q.answer).slice(0, q.select); drillCheck(); }],

@@ -41,10 +41,10 @@ cd claude-cert-studio
 
 # optional, for the tests:
 npm ci && npx playwright install chromium
-bash tools/verify.sh        # bank validator + 42 e2e tests (incl. axe)
+bash tools/verify.sh        # bank validator + 44 e2e tests (incl. axe)
 ```
 
-URL switches: `?sample=1` (demo progress in memory, your `localStorage` is never touched), `?lang=es` (navigation and start page in Spanish; questions stay in English, like the exam), `?cert=CCDV-F`, `?view=blueprint`.
+URL switches: `?sample=1` (demo progress in memory, your `localStorage` is never touched), `?lang=es` (navigation and instrument in Spanish; questions stay in English, like the exam), `?cert=CCDV-F`, `?view=blueprint` (the instrument with every task statement expanded).
 
 ## What is there, with numbers (2026-10-15)
 
@@ -54,7 +54,7 @@ URL switches: `?sample=1` (demo progress in memory, your `localStorage` is never
 | Review | Model-reviewed against the official docs; human sample pending (`app/data/REVIEW-SAMPLE.md`). The Sep 26 review removed 22 duplicates; on Oct 15 the bank was refilled by domain weight. |
 | Trap types | 10, every wrong option carries one |
 | Task statements covered | 30 (CCAR-F) + 25 (CCDV-F), from the official guides v1.0 |
-| Tests | 42 Playwright e2e, including axe on all 8 views (`file://` plus a local server for offline use and layout shift) + a bank validator |
+| Tests | 44 Playwright e2e, including axe on all 7 views (`file://` plus a local server for offline use and layout shift) + a bank validator |
 | Study documents | 8 domains, 7 labs, an 8-week plan, a per-objective checklist (Spanish) |
 
 The bank reached 120 + 120; a review on 2026-09-26 against Anthropic's documentation removed 22 (19 duplicates) and corrected 65 with a source. **It was reviewed by a model, not yet by a human.** If you find a wrong question, open an issue with its id (`CCDVF-2.1-01`).
@@ -66,7 +66,7 @@ The bank reached 120 + 120; a review on 2026-09-26 against Anthropic's documenta
 - Not official material, and it knows nothing about the real items. Written from the public guides v1.0 (July 2026); a v1.1 means rewriting the blueprint.
 - The platform changed after the guide (model IDs, deprecated parameters, renamed tools). The bank teaches the guide's lesson in wording compatible with today's docs; the differences are listed in `03-practica/revision-banco-2026-09-26.md`.
 - Progress does not travel between browsers: JSON export exists, import does not yet.
-- The Spanish UI covers navigation and the start page; questions, explanations and the blueprint are in English.
+- The Spanish UI covers navigation and the instrument; questions, explanations and the blueprint are in English.
 
 ## Licenses
 

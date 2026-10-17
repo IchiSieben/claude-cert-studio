@@ -1,6 +1,7 @@
 // Shared by the three identity mockups (docs/DIRECCIONES.md). Real blueprint data comes from
 // ../../app/data/blueprints.js; the user's "ink" here is SYNTHETIC demo progress, labelled as such on screen.
 // URL: ?cert=CCDV-F|CCAR-F  ?theme=light|dark  ?open=<domain id>  (open defaults to the heaviest domain)
+//      ?ink=0  all progress at zero (the empty state; added with the fidelity gate, tests/fidelity.test.mjs)
 (function () {
   const q = new URLSearchParams(location.search);
   const theme = q.get("theme");
@@ -29,6 +30,7 @@
   }
   // demo per-task ink: deterministic wobble around the domain value
   function taskInk(cert, d, i) {
+    if (q.get("ink") === "0") return 0;
     const base = DEMO[cert][d.id];
     const v = base + (((d.id * 7 + i * 13) % 9) - 4) * 0.06;
     return Math.max(0, Math.min(1, base === 0 ? 0 : v));
@@ -42,7 +44,7 @@
     const b = window.BLUEPRINTS[cert];
     const heaviest = b.domains.reduce((a, d) => (d.weight > a.weight ? d : a));
     const open = b.domains.find(d => String(d.id) === q.get("open")) || heaviest;
-    return { cert, b, open, ink: DEMO[cert], cells: alloc(b) };
+    return { cert, b, open, ink: q.get("ink") === "0" ? Object.fromEntries(Object.keys(DEMO[cert]).map(k => [k, 0])) : DEMO[cert], cells: alloc(b) };
   }
   function nav(patch) {
     const u = new URL(location.href);
