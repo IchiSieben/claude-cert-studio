@@ -8,8 +8,8 @@ node "$(dirname "$0")/stamp-sw.mjs" --check   # never ship a stale service-worke
 : "${HSTG_UP_URL:?}" "${HSTG_AUTH:?}" "${HSTG_REST:?}"
 cd "$(dirname "$0")/../app"
 # fonts first: sw.js caches them with addAll (all or nothing), so they must exist before the new sw.js does
-FILES=(fonts/space-grotesk-latin-wght-normal.woff2 fonts/jetbrains-mono-latin-wght-normal.woff2
-       fonts/space-grotesk-OFL.txt fonts/jetbrains-mono-OFL.txt
+FILES=(fonts/inter-latin-wght-normal.woff2 fonts/geist-mono-latin-wght-normal.woff2
+       fonts/inter-OFL.txt fonts/geist-mono-OFL.txt data/i18n.js
        index.html .htaccess README.md data/blueprints.js data/questions-ccar-f.js data/questions-ccdv-f.js
        sw.js manifest.webmanifest robots.txt sitemap.xml og.png icon.svg icon-192.png icon-512.png)
 fail=0

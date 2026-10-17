@@ -1,8 +1,10 @@
 # Claude Cert Studio — study app
 
-Static, single-page, zero-build study environment for the Claude Certified **Architect – Foundations (CCAR-F)** and **Developer – Foundations (CCDV-F)** exams. English UI, because the exam is in English.
+Static, single-page, zero-build study environment for the Claude Certified **Architect – Foundations (CCAR-F)** and **Developer – Foundations (CCDV-F)** exams. UI in English and Spanish (`?lang=es` or the ES button); questions stay in English because the exam is.
 
 - `index.html` — the app (no framework, no build, no network calls).
+- `data/i18n.js` — every UI string in EN and ES; a test fails if a key exists in one language only.
+- `fonts/` — Inter and Geist Mono (OFL), self-hosted; metric-matched fallbacks measured by `tools/measure-fonts.mjs`.
 - `data/blueprints.js` — official domains, weights and task statements for both exams, plus the ten-type distractor taxonomy. **Single source of truth**; the `/cert` skill in the orquestador reads it too.
 - `data/questions-ccar-f.js` — 120 original questions (18 select-two), as of 2026-10-15.
 - `data/questions-ccdv-f.js` — 120 original questions (15 select-two), as of 2026-10-15. Both banks are model-reviewed against Anthropic's docs; human sample pending (`data/REVIEW-SAMPLE.md`). Domain counts follow the official weights.
@@ -14,9 +16,9 @@ Open `index.html` directly from disk (`file://` works: data ships as `.js`, not 
 
 ## What it does
 
-Start page (both certifications, weights, what the app does) · Overview (weights, KPIs) · Blueprint with per-task mastery · Drill by domain or task statement, unseen-first, retry-misses · Quick diagnostic (half length) and full timed mock drawn by official weight, scored 100–1000 with pass at 720 · Result page: per-domain %, weakest domain, which trap types caught you, review of misses · Concepts tab (one card per concept, searchable, with task drill links) · "Due today" spaced practice (misses and questions not seen for 3+ days) · Mocks draw never-used questions first · Print cheat sheet from the Blueprint tab (per-task mastery bars) · Traps tab (taxonomy + elimination order) · Progress with mock history and JSON export. Keyboard: A–D / 1–4 select, Enter check/next. Theme follows the system, toggle in the header. Listed publicly at https://cert.ichisieben.dev/ since 2026-10-15.
+Start page (both certifications, weights, what the app does) · Overview (weights, KPIs) · Blueprint with per-task mastery · Drill by domain or task statement, unseen-first, retry-misses · Quick diagnostic (half length) and full timed mock drawn by official weight, scored 100–1000 with pass at 720 · Result page: per-domain %, weakest domain, which trap types caught you, review of misses · Concepts tab (one card per concept, searchable, with task drill links) · "Due today" spaced practice (misses and questions not seen for 3+ days) · Mocks draw never-used questions first · Print cheat sheet from the Blueprint tab (per-task mastery bars) · Traps tab (taxonomy + elimination order) · Progress with mock history and JSON export and import (import merges; the newer answer wins). The instrument (weight bar plus domain keys) is the navigation in Start, Overview and Blueprint; the mock runs as a full-screen cockpit and ends with the instrument filled with your result, a ten-trap radar and a "study this first" ranking (weight x error rate). After `navHtml()` changes run `node tools/gen-header.mjs --write` (the pre-rendered header must match). Keyboard: A–D / 1–4 select, Enter check/next. Theme follows the system, toggle in the header. Listed publicly at https://cert.ichisieben.dev/ since 2026-10-15.
 
-URL switches: `?sample=1` seeds deterministic demo progress in memory and never touches localStorage (used for public captures); `?lang=es` translates the navigation and the start page (questions stay in English, like the exam); `?cert=CCDV-F` and `?view=blueprint` open a given cert and tab.
+URL switches: `?sample=1` seeds deterministic demo progress in memory and never touches localStorage (used for public captures); `?lang=es|en` sets the interface language (questions stay in English, like the exam); `?cert=CCDV-F&view=home&domain=5&task=5.2` opens a cert, view, domain and task statement (the instrument writes these as you click).
 
 Spaced practice is a simplified SM-2 per question (`ef`, `iv`, `reps` next to each answer): right answers come back after 1, 3, then `round(iv × ef)` days; a miss is due at once and lowers `ef`. Progress saved before SM-2 is read as-is (lazy migration, nothing rewritten).
 

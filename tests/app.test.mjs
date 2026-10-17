@@ -29,7 +29,7 @@ async function runMock(page, kind) {
   const n = await page.evaluate(() => S.mock.pool.length);
   for (let i = 0; i < n; i++) {
     await answerCurrent(page, "mock");
-    if (i < n - 1) await page.click("text=Next →");
+    if (i < n - 1) await page.click("text=Next question");
   }
   await page.click("text=Submit exam");
   await page.waitForSelector(".score");
@@ -55,7 +55,7 @@ await step("drill 5 questions records 5 answers and lowers the due count", async
     await answerCurrent(page, "drill");
     await page.click("text=Check answer");
     await page.waitForSelector(".expl");
-    await page.click(i < 4 ? "text=Next →" : "text=Next →");
+    await page.click("text=Next question");
   }
   const seen = await page.evaluate(() => Object.keys(prog()[S.cert].q).length);
   assert.equal(seen, 5);
@@ -151,7 +151,7 @@ await step("full mock: official length, no duplicates, prefers questions unused 
 });
 
 await step("progress shows all three mocks in the history table", async () => {
-  await page.click("text=Save & see progress");
+  await page.click("text=See my progress");
   const rows = await page.$$eval("table tr", r => r.length - 1);
   assert.equal(rows, 3);
 });
@@ -174,7 +174,7 @@ await step("blueprint print view hides chrome and shows per-task mastery bars", 
   await page.emulateMedia({ media: "print" });
   assert.equal(await page.isVisible("header"), false);
   assert.equal(await page.isVisible("#printBtn"), false);
-  assert.ok(await page.isVisible(".printonly .bar >> nth=0"));
+  assert.ok(await page.isVisible(".printonly .pbar >> nth=0"));
   await page.emulateMedia({ media: "screen" });
 });
 
@@ -183,7 +183,7 @@ await step("CCDV-F: switch cert, concepts and blueprint render", async () => {
   await page.evaluate(() => go("concepts"));
   assert.ok((await page.$$eval("#conceptGrid .concept", e => e.length)) > 0);
   await page.evaluate(() => go("blueprint"));
-  assert.ok(await page.isVisible("text=Blueprint · CCDV-F"));
+  assert.ok(await page.isVisible("text=CCDV-F blueprint"));
 });
 
 await step("mobile 390 px: no horizontal scroll on any view", async () => {
@@ -209,11 +209,11 @@ await step("fresh visitor lands on the start page: both certs, weights sum to 10
   await s.goto(URL_);
   assert.equal(await s.evaluate(() => S.view), "start");
   assert.equal(await s.$$eval(".certcard", e => e.length), 2);
-  const sums = await s.$$eval(".certcard .wbar", bars => bars.map(b => [...b.children].reduce((a, i) => a + parseFloat(i.style.width), 0)));
+  const sums = await s.$$eval(".certcard .wbar", bars => bars.map(b => [...b.children].reduce((a, i) => a + parseFloat(i.dataset.w), 0)));
   sums.forEach(x => assert.ok(Math.abs(x - 100) < 0.6, `weights sum ${x}`));
   assert.equal(await s.$('meta[name="robots"]'), null);
   assert.match(await s.textContent("#disclaimer"), /Unofficial study aid\. Not affiliated with or endorsed by Anthropic\./);
-  await s.click(".certcard >> nth=1 >> button");
+  await s.click(".certcard >> nth=1 >> .study");
   assert.equal(await s.evaluate(() => [S.view, S.cert].join()), "home,CCDV-F");
   await ctx.close();
 });
@@ -235,7 +235,7 @@ await step("?lang=es translates the chrome only; questions stay in English", asy
   const s = await browser.newPage(); watch(s);
   await s.goto(URL_ + "?lang=es&sample=1");
   assert.equal(await s.evaluate(() => document.documentElement.lang), "es");
-  assert.ok(await s.isVisible("nav >> text=Inicio"));
+  assert.ok(await s.isVisible("nav >> text=Resumen"));
   assert.ok(await s.isVisible("text=Dos certificaciones de Claude"));
   await s.close();
 });
@@ -251,7 +251,7 @@ await step("print cheat sheet renders to a multi-page PDF in Chromium", async ()
 await step("<title> and description follow cert and view; Academy link per language", async () => {
   const s = await browser.newPage(); watch(s);
   await s.goto(URL_ + "?sample=1");
-  assert.match(await s.title(), /^Claude Cert Studio · CCAR-F and CCDV-F practice$/);
+  assert.match(await s.title(), /^Claude Cert Studio: CCAR-F and CCDV-F practice$/);
   await s.evaluate(() => { setCert("CCDV-F"); go("mock"); });
   assert.equal(await s.title(), "CCDV-F mock exam — Claude Cert Studio");
   assert.match(await s.getAttribute('meta[name="description"]', "content"), /53-item mock for Claude Certified Developer/);
@@ -346,13 +346,260 @@ await step("UI rules: no dash placeholders on a fresh profile, at most one fille
     const n = await f.$$eval("#view .btn:not(.ghost):not(.link)", els => els.filter(e => e.offsetParent).length);
     assert.ok(n <= 1, `${v}: ${n} filled buttons`);
   }
-  assert.equal(await f.$eval(".bar1", e => e.getBoundingClientRect().height), 48);
+  assert.ok(await f.$eval(".nav", e => e.getBoundingClientRect().height) < 64, "nav is one line on desktop");
   await f.close();
 });
 
 await step("axe: no violations on the 8 views, an answered drill and a mock result (light/dark, 1280/390)", async () => {
   const found = await axeAll(browser);
   assert.deepEqual(found, [], found.join(" | "));
+});
+
+await step("i18n: every key exists in EN and ES with the same parameters and tags, and every key the app asks for is defined", async () => {
+  const fs = await import("node:fs");
+  const d = await page.evaluate(() => window.I18N);
+  const en = Object.keys(d.en), es = Object.keys(d.es);
+  assert.deepEqual(en.filter(k => !(k in d.es)), [], "keys missing in ES");
+  assert.deepEqual(es.filter(k => !(k in d.en)), [], "keys missing in EN");
+  const sig = s => [...s.matchAll(/\{(\w+)\}|<\/?(\w+)[^>]*>/g)].map(m => m[1] ? "{" + m[1] + "}" : "<" + m[2] + ">").sort().join();
+  en.forEach(k => assert.equal(sig(d.es[k]), sig(d.en[k]), `placeholders/tags differ in ${k}`));
+  en.forEach(k => assert.ok(d.es[k].trim() && d.en[k].trim(), `empty ${k}`));
+  const src = fs.readFileSync(path.resolve(import.meta.dirname, "../app/index.html"), "utf8");
+  const used = new Set([...src.matchAll(/\bt\('([\w.]+)'/g)].map(m => m[1]).filter(k => !k.endsWith(".")));
+  [...src.matchAll(/\btn\('([\w.]+)'/g)].forEach(m => { used.add(m[1] + ".one"); used.add(m[1] + ".other"); });
+  ["home", "blueprint", "concepts", "drill", "mock", "traps", "progress"].forEach(v => { used.add("view." + v); used.add("meta." + v + ".t"); used.add("meta." + v + ".d"); });
+  [1, 2, 3, 4, 5].forEach(i => used.add("start.how." + i)); [1, 2, 3, 4].forEach(i => used.add("tr.order." + i)); used.add("kind.full"); used.add("kind.quick");
+  assert.deepEqual([...used].filter(k => !(k in d.en)), [], "keys used by the app but not defined");
+  assert.deepEqual(en.filter(k => !used.has(k)), [], "keys defined but never used");
+});
+
+await step("language toggle: ES switches the whole chrome and the URL, no unresolved {placeholders} on any view in either language", async () => {
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } }); const s = await ctx.newPage(); watch(s);
+  const views = ["start", "home", "blueprint", "concepts", "drill", "mock", "traps", "progress"];
+  for (const lang of ["en", "es"]) for (const v of views.filter(x => x !== "concepts")) {
+    await s.goto(URL_ + `?sample=1&lang=${lang}&view=${v}`);
+    const txt = await s.evaluate(() => document.body.innerText);
+    assert.ok(!/\{\w+\}/.test(txt), `${lang}/${v}: unresolved placeholder`);
+    assert.equal(await s.evaluate(() => document.documentElement.lang), lang);
+  }
+  await s.goto(URL_ + "?sample=1&view=home&cert=CCDV-F");
+  await s.click("#langBtn");
+  assert.match(await s.evaluate(() => location.search), /lang=es/);
+  assert.ok(await s.isVisible("nav >> text=Simulacro"));
+  assert.ok(await s.isVisible("text=Para hoy"));
+  await s.goto(URL_ + "?sample=1&lang=es");
+  assert.match(await s.textContent("main"), /Las preguntas, las explicaciones y los task statements están en inglés/);
+  await ctx.close();
+});
+
+await step("the pre-rendered header in the HTML equals what render() builds on a fresh Start (no layout change on first paint)", async () => {
+  const fs = await import("node:fs");
+  const src = fs.readFileSync(path.resolve(import.meta.dirname, "../app/index.html"), "utf8");
+  const pre = src.match(/<header class="top"><div class="wrap">([\s\S]*?)<\/div><\/header>\n<main>/)[1];
+  const ctx = await browser.newContext(); const s = await ctx.newPage(); watch(s);
+  await s.goto(URL_);
+  const r = await s.evaluate(pre => { const d = document.createElement("div"); d.innerHTML = pre; return [d.innerHTML, document.querySelector("header.top .wrap").innerHTML]; }, pre);
+  assert.equal(r[0], r[1]); await ctx.close();
+});
+
+await step("instrument: state in the URL (cert, domain, task); bands under 5% carry no label; opened domain on its own 0-100% axis", async () => {
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } }); const s = await ctx.newPage(); watch(s);
+  await s.goto(URL_ + "?sample=1&view=home&cert=CCDV-F&domain=5&task=5.2");
+  assert.equal(await s.getAttribute('.keys .k[data-fk="kCCDV-F-5"]', "aria-pressed"), "true");
+  assert.ok(await s.$eval("#tk-5\\.2", e => e.open), "task from the URL is open");
+  const labels = await s.$$eval(".figs span", e => e.map(x => x.textContent));
+  assert.ok(labels.length === 6 && !labels.some(l => /^D[34] /.test(l)), labels.join());
+  await s.click('.keys .k[data-fk="kCCDV-F-6"]');
+  assert.equal(await s.evaluate(() => location.search.includes("domain=6") && !location.search.includes("task=")), true);
+  assert.match(await s.textContent(".zeq"), /= 11 % of the exam/);
+  assert.match(await s.textContent(".zscale"), /0%.*50%.*100%/);
+  const zs = await s.$$eval(".zbar > div", d => d.reduce((a, x) => a + parseFloat(x.style.flexGrow), 0));
+  assert.ok(Math.abs(zs - 11) < 0.1, `task weights add up to the domain weight (${zs})`);
+  await s.click("details.tk >> nth=0 >> summary");
+  await s.waitForFunction(() => location.search.includes("task=6.1"));
+  assert.ok(await s.isVisible("details.tk[open] >> text=Drill CCDVF-6.1"));
+  await s.goto(URL_ + "?sample=1&view=blueprint&cert=CCAR-F");
+  assert.equal(await s.$$eval("details.tk[open]", e => e.filter(x => x.offsetParent).length), 7, "blueprint shows every task of the opened domain expanded");
+  const m = await browser.newPage({ viewport: { width: 390, height: 844 } }); watch(m);
+  await m.goto(URL_ + "?sample=1&view=home");
+  const top = await m.$eval(".mockm", e => e.getBoundingClientRect().top), keysBottom = await m.$eval(".keys", e => e.getBoundingClientRect().bottom);
+  assert.ok(await m.isVisible(".mockm") && top >= keysBottom - 1, "mobile: Start mock sits under the instrument");
+  assert.equal(await m.isVisible("#navMock"), false, "and leaves the nav");
+  await m.close(); await ctx.close();
+});
+
+await step("exam cockpit: nav hidden, keys sink in place on A-D, cells coloured only when answered, flag, big mono clock", async () => {
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } }); const s = await ctx.newPage(); watch(s);
+  await s.goto(URL_ + "?sample=1&view=home&cert=CCDV-F");
+  await s.evaluate(() => startMock("quick"));
+  assert.equal(await s.isVisible("header.top"), false); assert.equal(await s.isVisible("footer"), false);
+  assert.ok((await s.$eval("#clock", e => parseFloat(getComputedStyle(e).fontSize))) >= 28);
+  assert.match(await s.$eval("#clock", e => getComputedStyle(e).fontFamily), /Geist Mono/);
+  const node = await s.$("#opts .opt[data-k=B]");
+  await s.keyboard.press("b");
+  assert.equal(await node.getAttribute("aria-pressed"), "true", "same node pressed: updated in place");
+  assert.equal(await s.$$eval(".cell.a", e => e.length), 1);
+  const bg = await s.$eval(".cell.a", e => getComputedStyle(e).backgroundColor), plain = await s.$eval(".cell:not(.a):not(.cur)", e => getComputedStyle(e).backgroundColor);
+  assert.notEqual(bg, plain);
+  assert.equal(await s.$eval("#opts .opt[data-k=B]", e => getComputedStyle(e).transitionDuration.split(",").map(x => x.trim()).includes("0.15s")), true, "150 ms sink");
+  await s.keyboard.press("f"); assert.equal(await s.$$eval(".cell.fl", e => e.length), 1);
+  await s.keyboard.press("Enter"); assert.match(await s.textContent("#qcount"), /Question 2 of/);
+  assert.equal((await s.textContent("main")).match(/Enter/g).length, 1, "shortcuts are listed once");
+  await s.click("text=Leave mock"); assert.ok(await s.isVisible("header.top"));
+  await ctx.close();
+});
+
+await step("result: instrument filled with the real ink, radar of the ten traps with a text equivalent, study-first = weight x error rate", async () => {
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } }); const s = await ctx.newPage(); watch(s);
+  await s.goto(URL_ + "?sample=1&view=home&cert=CCDV-F");
+  const exp = await s.evaluate(() => { startMock("quick"); S.mock.pool.forEach((q, i) => S.mock.answers[i] = i % 3 ? q.answer.slice() : ["A"]); submitMock();
+    const r = S.mock.result, b = BP(); return b.domains.filter(d => r.by[d.id].total && r.by[d.id].right < r.by[d.id].total).map(d => [d.id, d.weight * (1 - r.by[d.id].right / r.by[d.id].total)]).sort((a, c) => c[1] - a[1]).slice(0, 3).map(x => x[0]); });
+  assert.equal(await s.$$eval(".trapl li", e => e.length), 10);
+  assert.ok(await s.$("svg.radar[role=img] title"), "radar has a title and a desc");
+  assert.ok(await s.$("svg.radar desc"));
+  const shown = await s.$$eval(".first li .dn", e => e.map(x => +x.textContent.slice(1)));
+  assert.deepEqual(shown, exp);
+  assert.ok((await s.$$eval(".wbar .seg i", e => e.filter(x => parseFloat(getComputedStyle(x).width) > 0).length)) > 0);
+  assert.ok(await s.isVisible("table >> text=Result by domain"));
+  await ctx.close();
+});
+
+await step("answers show the trap, why the right one is right and a source; the questions without a ref say 'no source yet'", async () => {
+  const r = await page.evaluate(() => { let linked = 0, none = 0, bad = 0, total = 0;
+    for (const c of Object.keys(window.QUESTIONS)) window.QUESTIONS[c].forEach(q => { total++; const d = document.createElement("div"); S.cert = c; d.innerHTML = question(q, { chosen: q.answer.slice(), checked: true });
+      const a = d.querySelector(".docref a"), n = d.querySelector(".nosrc .tag");
+      if (q.ref) { if (a && !n) linked++; else bad++; } else { if (n && /no source yet/.test(n.textContent) && !a) none++; else bad++; }
+      if (!/Why the right one is right/.test(d.textContent) || !d.querySelector(".tag.trap, .tag.ok")) bad++; });
+    S.cert = "CCDV-F"; return { linked, none, bad, total }; });
+  assert.equal(r.bad, 0); assert.equal(r.linked + r.none, r.total); assert.ok(r.none > 0 && r.linked > 90, JSON.stringify(r));
+  const es = await browser.newPage(); watch(es); await es.goto(URL_ + "?lang=es&sample=1");
+  assert.equal(await es.evaluate(() => { const q = QUESTIONS["CCDV-F"].find(x => !x.ref); const d = document.createElement("div"); d.innerHTML = question(q, { chosen: q.answer.slice(), checked: true }); return d.querySelector(".nosrc .tag").textContent; }), "sin fuente aún");
+  await es.close();
+});
+
+await step("every exam claim links its source (both certification pages and the FAQ) with the consulted date", async () => {
+  const ctx = await browser.newContext(); const s = await ctx.newPage(); watch(s);
+  await s.goto(URL_ + "?sample=1");
+  const hrefs = await s.$$eval(".src a", a => a.map(x => x.href));
+  ["claude-certified-developer-foundations-certification", "claude-certified-architect-foundations-certification", "page/faq-certifications"].forEach(u => assert.ok(hrefs.some(h => h.endsWith(u)), u));
+  assert.ok((await s.$$eval(".src", e => e.every(x => x.textContent.includes("2026-10-15")))));
+  for (const v of ["home", "mock"]) { await s.goto(URL_ + `?sample=1&view=${v}&cert=CCDV-F`); assert.ok(await s.$(".src a"), v + " links a source"); }
+  await ctx.close();
+});
+
+await step("progress import: export then import round-trips exactly; a bad file changes nothing; the page says where progress lives", async () => {
+  const fs = await import("node:fs"); const os = await import("node:os");
+  const ctx = await browser.newContext({ acceptDownloads: true }); const s = await ctx.newPage(); watch(s);
+  await s.goto(URL_);
+  await s.evaluate(() => { setCert("CCDV-F"); const a = QS()[0], b = QS()[1]; record(a, true, a.answer); record(b, false, ["A", "B", "C", "D"].filter(k => !b.answer.includes(k)).slice(0, b.select)); go("progress"); });
+  assert.match(await s.textContent("#where"), /only in this browser/);
+  const before = await s.evaluate(() => localStorage.getItem("ccs:progress"));
+  const [dl] = await Promise.all([s.waitForEvent("download"), s.click("text=Export progress (JSON)")]);
+  const file = await dl.path(); assert.deepEqual(JSON.parse(fs.readFileSync(file, "utf8")), JSON.parse(before));
+  await s.evaluate(() => { localStorage.removeItem("ccs:progress"); render(); });
+  assert.equal(await s.evaluate(() => Object.keys(prog()[S.cert].q).length), 0);
+  await s.setInputFiles("#importFile", file);
+  await s.waitForFunction(() => /Imported/.test(document.getElementById("ioMsg").textContent));
+  assert.deepEqual(JSON.parse(await s.evaluate(() => localStorage.getItem("ccs:progress"))), JSON.parse(before), "round trip is exact");
+  const bad = path.join(os.tmpdir(), "ccs-bad.json"); fs.writeFileSync(bad, '{"hello":1}');
+  await s.setInputFiles("#importFile", bad);
+  await s.waitForFunction(() => /not a Cert Studio/.test(document.getElementById("ioMsg").textContent));
+  assert.equal(await s.evaluate(() => localStorage.getItem("ccs:progress")), before, "bad file leaves progress untouched");
+  fs.unlinkSync(bad); await ctx.close();
+});
+
+await step("design rules in the source: no arrows or midpoints, one uppercase-label rule, no outer shadows, every domain colour keeps AA contrast, D7 moved off the salmon", async () => {
+  const fs = await import("node:fs"); const app = path.resolve(import.meta.dirname, "../app");
+  const html = fs.readFileSync(path.join(app, "index.html"), "utf8"), i18n = fs.readFileSync(path.join(app, "data/i18n.js"), "utf8");
+  for (const [n, s] of [["index.html", html], ["i18n.js", i18n]]) { assert.ok(!s.includes("→"), n + " has an arrow"); assert.ok(!s.includes("·"), n + " has a midpoint"); }
+  assert.equal((html.match(/text-transform:uppercase/g) || []).length, 1, "only the task-statement code eyebrow is uppercase");
+  assert.ok(!/box-shadow:[^;}]*\b\d+px \d+px \d+px/.test(html.replace(/inset [^,;}]*/g, "")), "no outer drop shadows");
+  const lum = h => { const c = [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255).map(v => v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4); return .2126 * c[0] + .7152 * c[1] + .0722 * c[2]; };
+  const cr = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); };
+  const darkBlk = html.match(/:root\{[\s\S]*?\n\}/)[0], light = html.match(/:root\[data-theme="light"\]\{[\s\S]*?\n\}/)[0];
+  const get = (blk, n) => blk.match(new RegExp(`--d${n}:(#[0-9a-f]{6})`))[1];
+  for (let n = 1; n <= 8; n++) { assert.ok(cr(get(darkBlk, n), "#040506") >= 6, `D${n} dark ${cr(get(darkBlk, n), "#040506").toFixed(2)}`); assert.ok(cr(get(light, n), "#f5f5f6") >= 4.6, `D${n} light ${cr(get(light, n), "#f5f5f6").toFixed(2)}`); }
+  assert.notEqual(get(darkBlk, 7), "#d77965"); assert.notEqual(get(light, 7), "#b4462f");
+});
+
+await step("importing a hostile or malformed progress file renders Progress with no injected element and no error", async () => {
+  const s = await browser.newPage(); const errs = []; s.on("pageerror", e => errs.push(String(e))); s.on("console", m => { if (m.type() === "error") errs.push(m.text()); });
+  await s.goto(URL_ + "?view=progress&cert=CCAR-F");
+  const evil = "<img src=x onerror=window.__x=1>";
+  const good = { date: "2026-10-01", kind: "full", score: 700, pct: 60, misses: 3, byDomain: { [evil]: 50 }, ids: ["a"] };
+  const raw = { "CCAR-F": { q: {}, traps: {}, mocks: [
+    { ...good, date: evil }, { ...good, kind: evil }, { ...good, pct: "x" }, { ...good, misses: null }, { ...good, byDomain: "no", ids: "no" }, good ] } };
+  await s.setInputFiles("#importFile", { name: "p.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(raw)) });
+  await s.waitForFunction(() => document.getElementById("ioMsg").textContent.length > 0);
+  assert.equal(await s.locator("img[src='x']").count(), 0);
+  assert.equal(await s.evaluate(() => window.__x), undefined);
+  assert.equal(await s.locator("table tr").count(), 3, "header + the two valid entries");
+  await s.setInputFiles("#importFile", { name: "q.json", mimeType: "application/json", buffer: Buffer.from('{"CCAR-F":{"q":{},"mocks":[null,1]}}') });
+  await s.waitForTimeout(200);
+  assert.deepEqual(errs, []);
+  await s.close();
+});
+
+await step("popstate to another certification clears the stale drill and mock", async () => {
+  const s = await browser.newPage(); const errs = []; s.on("pageerror", e => errs.push(String(e)));
+  await s.goto(URL_); await s.evaluate(() => { localStorage.clear(); setCert("CCDV-F"); go("mock"); openCert("CCAR-F"); startDrill({}); });
+  assert.ok(await s.evaluate(() => !!S.drill));
+  await s.evaluate(() => history.go(-2)); await s.waitForFunction(() => S.cert === "CCDV-F");
+  assert.equal(await s.evaluate(() => S.drill), null);
+  await s.evaluate(() => history.go(2)); await s.waitForFunction(() => S.cert === "CCAR-F");
+  assert.equal(await s.evaluate(() => S.drill === null && S.mock === null), true);
+  assert.deepEqual(errs, []);
+  await s.close();
+});
+
+await step("a mock that times out records answered items only, not blanks", async () => {
+  const s = await browser.newPage(); watch(s);
+  await s.goto(URL_); await s.evaluate(() => { localStorage.clear(); setCert("CCAR-F"); startMock("quick"); });
+  await answerCurrent(s, "mock");
+  await s.evaluate(() => { S.mock.end = Date.now() - 1; });
+  await s.waitForSelector(".score");
+  const n = await s.evaluate(() => Object.keys(prog()["CCAR-F"].q).length);
+  assert.equal(n, 1);
+  assert.ok(await s.evaluate(() => S.mock.result.misses.length) > 1, "blanks still count as misses");
+  await s.close();
+});
+
+await step("switching certification during an unsubmitted mock asks first and can be declined", async () => {
+  const s = await browser.newPage(); const msgs = []; let accept = false;
+  s.on("dialog", d => { msgs.push(d.message()); accept ? d.accept() : d.dismiss(); });
+  await s.goto(URL_); await s.evaluate(() => { localStorage.clear(); setCert("CCAR-F"); startMock("quick"); });
+  await s.evaluate(() => openCert("CCDV-F"));
+  assert.equal(msgs.length, 1);
+  assert.equal(await s.evaluate(() => S.cert + "|" + !!S.mock), "CCAR-F|true");
+  accept = true; await s.evaluate(() => openCert("CCDV-F"));
+  assert.equal(await s.evaluate(() => S.cert + "|" + !!S.mock), "CCDV-F|false");
+  await s.close();
+});
+
+await step("i18n strings used inside inline JS contain no apostrophe", async () => {
+  const s = await browser.newPage(); await s.goto(URL_);
+  const bad = await s.evaluate(() => ["en", "es"].flatMap(l => ["mock.confirm", "pg.resetConfirm", "mock.switch"].filter(k => /['’]/.test(window.I18N[l][k])).map(k => l + ":" + k)));
+  assert.deepEqual(bad, []);
+  await s.close();
+});
+
+await step("Enter on a focused option selects it in the mock; the URL keeps lang=en", async () => {
+  const s = await browser.newPage(); watch(s);
+  await s.goto(URL_); await s.evaluate(() => { localStorage.clear(); setCert("CCAR-F"); startMock("quick"); });
+  assert.match(await s.evaluate(() => location.search), /lang=en/);
+  await s.focus(".opt[data-k='B']"); await s.keyboard.press("Enter");
+  assert.deepEqual(await s.evaluate(() => [S.mock.i, S.mock.chosen.join()]), [0, "B"]);
+  await s.close();
+});
+
+await step("docs state the e2e test count and it matches this file", async () => {
+  const fs = await import("node:fs"); const root = path.resolve(import.meta.dirname, "..");
+  const n = (fs.readFileSync(import.meta.filename, "utf8").match(/^await step\(/gm) || []).length;
+  for (const f of ["README.md", "README.en.md", "docs/FICHA-LANDING.md", "docs/arquitectura.html"]) {
+    const txt = fs.readFileSync(path.join(root, f), "utf8");
+    const found = [...txt.matchAll(/\b(\d+)\s+(?:tests e2e|e2e tests|e2e con Playwright|Playwright e2e|pruebas de punta a punta|pruebas|casos)\b/g)].map(m => +m[1]);
+    assert.ok(found.length > 0, f + " states a count"); found.forEach(x => assert.equal(x, n, `${f} says ${x}, the suite has ${n}`));
+  }
 });
 
 await step("zero console errors", async () => { assert.deepEqual(errors, [], errors.join(" | ")); });

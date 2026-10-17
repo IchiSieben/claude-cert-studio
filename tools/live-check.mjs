@@ -31,7 +31,7 @@ await browser.close();
 const fails = [];
 if (r.bank["CCAR-F"] !== 120 || r.bank["CCDV-F"] !== 120) fails.push("bank " + JSON.stringify(r.bank));
 if (!r.caches.includes(want)) fails.push(`cache ${r.caches} != ${want}`);
-if (!r.fonts.includes("Space Grotesk") || !r.fonts.includes("JetBrains Mono")) fails.push("fonts " + r.fonts);
+if (!r.fonts.includes("Inter") || !r.fonts.includes("Geist Mono")) fails.push("fonts " + r.fonts);
 if (off !== "120/120") fails.push("offline " + off);
 if (r.cls > 0.01) fails.push("CLS " + r.cls.toFixed(3));
 if (errors.length) fails.push("console " + errors.join(" | "));

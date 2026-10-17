@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cert Studio, mockup C: Retícula</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+<style>
+/* Direction C, "Retícula": the exam drawn as its questions. One cell = one expected question, coloured by
+   domain; a filled cell is one you would answer right today. The same grid becomes the mock-exam map. §C */
+@font-face{font-family:'JetBrains Mono';src:url(../../app/fonts/jetbrains-mono-latin-wght-normal.woff2) format('woff2');font-weight:100 800;font-display:swap}
+:root{
+  --ground:#ffffff; --ink:#14213d; --soft:#4a5872; --hair:#d5dbe5;
+  --mark:#ffd400; --mark-ink:#14213d;
+  --d1:#2f6fd0; --d2:#1f8a5b; --d3:#7a4fe0; --d4:#a85c00; --d5:#c93a6e; --d6:#0f8296; --d7:#7d5a3a; --d8:#5d7222; --tint:14%;
+  --sans:'Archivo',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --ground:#152140; --ink:#eef2f8; --soft:#aab6cc; --hair:#2f3f63; --mark:#ffd84d; --mark-ink:#152140;
+  --d1:#7aa9f5; --d2:#55c993; --d3:#b199f7; --d4:#f0a04b; --d5:#f37fa5; --d6:#47c6da; --d7:#cfa477; --d8:#acc45f; --tint:18%; color-scheme:dark}}
+:root[data-theme=dark]{
+  --ground:#152140; --ink:#eef2f8; --soft:#aab6cc; --hair:#2f3f63; --mark:#ffd84d; --mark-ink:#152140;
+  --d1:#7aa9f5; --d2:#55c993; --d3:#b199f7; --d4:#f0a04b; --d5:#f37fa5; --d6:#47c6da; --d7:#cfa477; --d8:#acc45f; --tint:18%; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--ground);color:var(--ink);font:16px/1.5 var(--sans)}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.wrap{max-width:1312px;margin:0 auto;padding:0 16px}
+header{display:flex;align-items:center;gap:20px;padding:18px 0}
+.brand{font-weight:800;font-stretch:125%;font-size:18px;margin-right:auto}
+.certs{display:flex}
+.certs button{border:2px solid var(--ink);background:none;padding:4px 12px;font:600 13px var(--mono)}
+.certs button+button{border-left:0}
+.certs button[aria-pressed=true]{background:var(--ink);color:var(--ground)}
+.th{border:2px solid var(--ink);background:none;width:34px;height:31px}
+nav{display:flex;gap:28px;font-weight:500;padding-bottom:12px;border-bottom:2px solid var(--ink)}
+nav b{box-shadow:inset 0 -.45em 0 var(--mark);font-weight:700}
+.head{display:grid;grid-template-columns:auto minmax(0,1fr);gap:0 32px;align-items:end;margin:40px 0 28px}
+.n{font:800 200px/.78 var(--sans);font-stretch:62%;letter-spacing:-.02em}
+.head h1{font-size:34px;line-height:1.1;font-weight:700;font-stretch:112%;margin:0 0 8px}
+.head p{margin:0;color:var(--soft);max-width:60ch}
+/* the grid: column-major, so each domain is one contiguous block, left to right in exam order */
+.grid{display:grid;grid-template-rows:repeat(4,64px);grid-auto-flow:column;grid-auto-columns:64px;gap:6px}
+.cell{position:relative;border:2px solid var(--c);background:color-mix(in srgb,var(--c) var(--tint),var(--ground));padding:0;transition:opacity .2s}
+.cell.on{background:var(--c);animation:pop .5s both;animation-delay:calc(var(--i)*12ms)}
+.cell span{position:absolute;left:5px;top:3px;font:500 11px var(--mono);color:var(--soft)}
+.cell.on span{color:var(--ground)}
+.grid.focus .cell:not(.o){opacity:.5}
+.grid.focus .cell.o{box-shadow:0 6px 0 -2px var(--mark)}
+@keyframes pop{from{transform:scale(.6);opacity:0}}
+.keys{display:flex;flex-wrap:wrap;gap:6px 22px;margin:16px 0 0;padding:0;list-style:none}
+.keys button{border:0;background:none;padding:6px 0;display:flex;gap:8px;align-items:center;font-size:15px}
+.keys i{width:14px;height:14px;background:var(--c)}
+.keys .w{font-family:var(--mono);color:var(--soft)}
+.keys button[aria-expanded=true] .t{box-shadow:inset 0 -.45em 0 var(--mark);font-weight:700}
+.dom{margin-top:44px;border-top:2px solid var(--ink);padding-top:20px;display:grid;grid-template-columns:300px minmax(0,1fr);gap:32px}
+.dom .code{font:800 120px/.8 var(--sans);font-stretch:62%;color:var(--c)}
+.dom h2{font-size:28px;line-height:1.1;font-weight:700;font-stretch:112%;margin:12px 0 6px}
+.dom p{margin:0;color:var(--soft)}
+.task{display:grid;grid-template-columns:56px minmax(0,1fr) 210px;gap:16px;padding:14px 0;border-bottom:1px solid var(--hair);align-items:start}
+.task .k{font:600 18px var(--mono)}
+.task h3{margin:0;font-size:18px;font-weight:600}
+.task p{font-size:15px}
+.q{display:flex;flex-wrap:wrap;gap:3px;align-items:center}
+.q i{width:16px;height:16px;border:2px solid var(--c)}
+.q i.on{background:var(--c)}
+.q i.part{width:calc(16px*var(--f));border-right-style:dashed}
+.q small{font:13px var(--mono);color:var(--soft);margin-left:8px;flex-basis:100%}
+.go{background:var(--mark);color:var(--mark-ink);border:2px solid var(--mark-ink);padding:10px 18px;font-weight:700}
+.dark-go{border-color:var(--mark)}
+.row{display:flex;gap:16px;align-items:center;margin-top:20px}
+.note{font-size:13px;color:var(--soft);margin:40px 0 64px}
+@media (max-width:640px){
+  nav{gap:18px;overflow-x:auto;white-space:nowrap;font-size:15px}
+  .head{grid-template-columns:1fr;margin:24px 0 20px}
+  .n{font-size:120px}.head h1{font-size:24px;margin-top:8px}
+  .grid{grid-template-rows:repeat(8,40px);grid-auto-columns:40px;gap:5px}
+  .cell span{font-size:9px;left:3px;top:1px}
+  .dom{grid-template-columns:1fr;gap:12px}.dom .code{font-size:80px}.dom h2{font-size:22px}
+  .task{grid-template-columns:40px minmax(0,1fr)}.task .q{grid-column:2}
+  .keys{display:block;margin-top:12px}.keys button{display:grid;grid-template-columns:14px minmax(0,1fr) auto;width:100%;text-align:left;min-height:44px;border-top:1px solid var(--hair)}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><span class="brand">Cert Studio</span><div class="certs" id="certs"></div><button class="th" aria-label="Theme" onclick="toggleTheme()">◐</button></header>
+  <nav aria-label="Sections"><b>Overview</b><span>Drill</span><span>Mock exam</span><span>Traps</span><span>Progress</span></nav>
+  <main id="view"></main>
+</div>
+<script src="../../app/data/blueprints.js"></script>
+<script src="common.js"></script>
+<script>
+const M = window.MOCK, { fmt, esc } = M;
+function toggleTheme(){ const r = document.documentElement; const dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; r.dataset.theme = dark ? 'light' : 'dark'; M.nav({ theme: r.dataset.theme }); }
+M.render = function(){
+  const { cert, b, open, ink, cells } = M.state();
+  document.getElementById('certs').innerHTML = ['CCAR-F','CCDV-F'].map(c => `<button aria-pressed="${c===cert}" onclick="MOCK.nav({cert:'${c}'})">${c}</button>`).join('');
+  let k = 0; const grid = b.domains.map((d,di) => Array.from({length: cells[di]}, (_, j) => { k++;
+    const on = j < Math.round(cells[di]*ink[d.id]);
+    return `<button class="cell ${on?'on':''} ${d===open?'o':''}" style="--c:var(--d${d.id});--i:${k}" aria-label="Question ${k}: domain ${d.id}${on?', inked':''}" onclick="MOCK.nav({open:${d.id}})"><span>${k}</span></button>`; }).join('')).join('');
+  const keys = b.domains.map((d,di) => `<li><button style="--c:var(--d${d.id})" aria-expanded="${d===open}" onclick="MOCK.nav({open:${d.id}})"><i></i><span class="t">D${d.id} ${esc(d.name)}</span><span class="w">${fmt(d.weight)} %, ${cells[di]} q</span></button></li>`).join('');
+  const tw = open.tasks.map(t => M.taskWeight(open, t));
+  const tasks = open.tasks.map((t,i) => { const exp = b.items*tw[i].w/100, v = M.taskInk(cert,open,i);
+    const whole = Math.floor(exp), f = exp - whole, onN = Math.round(exp*v);
+    const sq = Array.from({length: whole}, (_, j) => `<i class="${j<onN?'on':''}"></i>`).join('') + (f > .05 ? `<i class="part" style="--f:${f.toFixed(2)}"></i>` : '');
+    return `<div class="task"><span class="k">${t.id}</span><div><h3>${esc(t.name)}</h3><p>${esc(t.text.replace(/\s*\(\d+(\.\d+)?%\)\s*$/,''))}</p></div>
+    <div class="q" role="img" aria-label="about ${fmt(exp)} questions, ${Math.round(100*v)}% inked">${sq}<small>≈ ${fmt(exp)} questions${tw[i].official?'':'*'}</small></div></div>`; }).join('');
+  document.getElementById('view').innerHTML = `
+  <div class="head"><span class="n">${b.items}</span><div><h1>${esc(b.name)}</h1>
+    <p>Each square is one of the ${b.items} questions, split by the official weight of its domain. Solid means you answer that kind right today. ${b.minutes} minutes, pass at ${b.pass}/1000.</p></div></div>
+  <div class="grid focus" role="group" aria-label="The exam as ${b.items} questions by domain">${grid}</div>
+  <ul class="keys">${keys}</ul>
+  <section class="dom" style="--c:var(--d${open.id})" aria-labelledby="dt">
+    <div><span class="code">D${open.id}</span><h2 id="dt">${esc(open.name)}</h2>
+      <p>${fmt(open.weight)} % of the exam: ${cells[b.domains.indexOf(open)]} of the ${b.items} squares. ${Math.round(100*ink[open.id])} % solid.</p>
+      <div class="row"><button class="go">Drill D${open.id}</button></div></div>
+    <div>${tasks}</div>
+  </section>
+  <p class="note">Solid squares are demo data. Squares are the expected split (largest remainder), not a promise about your form. ${cert==='CCAR-F'?'* Per-task shares are the domain split evenly: the CCAR-F guide weighs domains only. ':''}Weights: official exam guide v1.0, July 2026.</p>`;
+};
+M.render();
+</script>
+</body>
+</html>

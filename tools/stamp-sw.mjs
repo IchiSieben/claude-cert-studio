@@ -5,7 +5,7 @@
 // `node tools/stamp-sw.mjs` writes both; `--check` exits 1 if either is stale (run by the e2e suite and the deploy).
 import fs from 'node:fs'; import path from 'node:path'; import crypto from 'node:crypto';
 const app = path.resolve(import.meta.dirname, '../app');
-const DATA = ['data/blueprints.js', 'data/questions-ccar-f.js', 'data/questions-ccdv-f.js'];
+const DATA = ['data/blueprints.js', 'data/questions-ccar-f.js', 'data/questions-ccdv-f.js', 'data/i18n.js'];
 const sha = (buf, n) => crypto.createHash('sha256').update(buf).digest('hex').slice(0, n);
 const read = f => fs.readFileSync(path.join(app, f), 'utf8');
 const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

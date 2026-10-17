@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cert Studio, mockup B: Columna</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Direction B, "Columna": the exam as one vertical gauge that IS the navigation. Ink rises inside each
+   segment like a level. Condensed type because domain names are long and the column is narrow. §B */
+:root{
+  --ground:#f3f4f6; --panel:#ffffff; --ink:#16181d; --soft:#50565f; --hair:#cdd1d7;
+  --act:#3d2bff; --act-ink:#ffffff;
+  --d1:#2f6fd0; --d2:#1f8a5b; --d3:#7a4fe0; --d4:#b86e00; --d5:#c93a6e; --d6:#0f8296; --d7:#7d5a3a; --d8:#5d7222; --tint:20%;
+  --sans:'IBM Plex Sans Condensed','Arial Narrow',sans-serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --ground:#23272d; --panel:#2b3037; --ink:#eceef1; --soft:#a7aeb8; --hair:#414852; --act:#9d93ff; --act-ink:#16181d;
+  --d1:#6ea2f2; --d2:#4cc48c; --d3:#a98bf5; --d4:#e9a23b; --d5:#f0789f; --d6:#3fc2d6; --d7:#c49a6c; --d8:#a3bb57; --tint:28%; color-scheme:dark}}
+:root[data-theme=dark]{
+  --ground:#23272d; --panel:#2b3037; --ink:#eceef1; --soft:#a7aeb8; --hair:#414852; --act:#9d93ff; --act-ink:#16181d;
+  --d1:#6ea2f2; --d2:#4cc48c; --d3:#a98bf5; --d4:#e9a23b; --d5:#f0789f; --d6:#3fc2d6; --d7:#c49a6c; --d8:#a3bb57; --tint:28%; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--ground);color:var(--ink);font:17px/1.45 var(--sans)}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--act);outline-offset:2px}
+.app{display:grid;grid-template-columns:300px minmax(0,1fr);min-height:100vh;max-width:1440px;margin:0 auto}
+aside{position:sticky;top:0;height:100vh;padding:24px 0 24px 24px;display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;gap:16px}
+.brand{font-weight:700;font-size:20px}
+.certs{display:flex;gap:4px}
+.certs button{border:1px solid var(--hair);background:none;padding:4px 10px;font:500 13px var(--mono);color:var(--soft);border-radius:2px}
+.certs button[aria-pressed=true]{border-color:var(--ink);color:var(--ink);box-shadow:inset 0 -3px 0 var(--ink)}
+.gauge{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 72px;column-gap:14px;min-height:0}
+.labels{position:relative}
+.labels button{position:absolute;right:0;transform:translateY(-50%);border:0;background:none;padding:2px 0;text-align:right;display:flex;gap:8px;align-items:baseline;white-space:nowrap}
+.labels b{font:500 13px var(--mono);color:var(--soft)}
+.labels span{font-weight:600;font-size:22px;font-variant-numeric:tabular-nums}
+.labels button[aria-current=true] span{color:var(--act)}
+.lead{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;color:var(--hair)}
+.col{display:flex;flex-direction:column;gap:2px;border:1px solid var(--ink);padding:2px;background:var(--panel)}
+.col button{position:relative;border:0;padding:0;min-height:0;background:color-mix(in srgb,var(--c) var(--tint),var(--panel));overflow:hidden}
+.col button i{position:absolute;left:0;right:0;bottom:0;background:var(--c);height:calc(var(--lv)*100%);animation:rise 1s cubic-bezier(.2,.7,.2,1) both}
+.col button[aria-current=true]{outline:3px solid var(--act);outline-offset:3px;z-index:1}
+@keyframes rise{from{height:0}}
+.axis{font:12px var(--mono);color:var(--soft);display:flex;justify-content:space-between}
+nav{display:flex;flex-direction:column;gap:2px;font-size:15px;color:var(--soft)}
+main{padding:24px 48px 64px}
+.top{display:flex;gap:24px;align-items:center;justify-content:space-between;border-bottom:1px solid var(--hair);padding-bottom:16px}
+.top nav{flex-direction:row;gap:20px}
+.top nav b{color:var(--ink)}
+.th{border:1px solid var(--hair);background:none;width:34px;height:30px;color:var(--soft)}
+.facts{color:var(--soft);margin:12px 0 0}
+.facts b{font-family:var(--mono);font-weight:500;color:var(--ink)}
+.hero{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 32px;align-items:end;margin:40px 0 32px;border-left:6px solid var(--c);padding-left:24px}
+.hero .w{font:600 168px/.8 var(--sans);letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.hero .w small{font-size:32px;letter-spacing:0;font-weight:500;color:var(--soft)}
+.hero h1{font-size:40px;line-height:1.05;margin:0 0 6px;font-weight:700}
+.hero p{margin:0;color:var(--soft)}
+.tasks{border-top:1px solid var(--ink)}
+.task{display:grid;grid-template-columns:120px minmax(0,1fr) 180px;gap:24px;align-items:center;padding:16px 0;border-bottom:1px solid var(--hair)}
+.task .k{font:500 44px/1 var(--mono);letter-spacing:-.03em;color:var(--c)}
+.task h2{font-size:20px;margin:0;font-weight:600}
+.task p{margin:2px 0 0;color:var(--soft);font-size:16px}
+.lvl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 10px;align-items:center;font:14px var(--mono)}
+.lvl .m{grid-column:1/-1;height:10px;background:color-mix(in srgb,var(--c) var(--tint),var(--panel));position:relative}
+.lvl .m i{position:absolute;inset:0 auto 0 0;background:var(--c)}
+.lvl a{color:var(--act);font-family:var(--sans);font-weight:600;font-size:15px;justify-self:end}
+.cta{margin-top:24px;display:flex;gap:16px;align-items:center}
+.go{background:var(--act);color:var(--act-ink);border:0;padding:12px 20px;font-weight:700;font-size:16px;border-radius:2px}
+.note{font-size:14px;color:var(--soft);margin-top:40px}
+@media (max-width:760px){
+  .app{grid-template-columns:76px minmax(0,1fr)}
+  aside{padding:12px 0 12px 12px;grid-template-rows:minmax(0,1fr) auto;gap:8px;height:100vh}
+  .brand,.certs,aside nav,.labels,.lead{display:none}
+  .gauge{grid-template-columns:52px}
+  .col button{min-height:14px}
+  .col button::after{content:attr(data-k);position:absolute;inset:auto 0 2px 0;text-align:center;font:600 11px var(--mono);color:var(--panel)}
+  .axis{font-size:11px}.axis span+span{display:none}
+  main{padding:12px 16px 48px 14px}
+  .top{flex-wrap:wrap;gap:10px}
+  .top nav{order:3;width:100%;overflow-x:auto;white-space:nowrap;font-size:14px;gap:14px}
+  .mcert{display:flex!important}
+  .hero{grid-template-columns:1fr;margin:24px 0;padding-left:14px;border-left-width:4px}
+  .hero .w{font-size:96px}.hero h1{font-size:26px}
+  .task{grid-template-columns:52px minmax(0,1fr);gap:4px 12px}
+  .task .k{font-size:22px}.task .lvl{grid-column:2}
+}
+.mcert{display:none;gap:4px}
+.mcert button{border:1px solid var(--hair);background:none;padding:3px 8px;font:500 12px var(--mono);color:var(--soft)}
+.mcert button[aria-pressed=true]{border-color:var(--ink);color:var(--ink)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside aria-label="Exam blueprint">
+    <span class="brand">Cert Studio</span>
+    <div class="certs" id="certs"></div>
+    <div class="gauge" id="gauge"></div>
+    <div class="axis" aria-hidden="true"><span>0 %</span><span>100 % of the exam, top to bottom</span></div>
+  </aside>
+  <main id="view"></main>
+</div>
+<script src="../../app/data/blueprints.js"></script>
+<script src="common.js"></script>
+<script>
+const M = window.MOCK, { fmt, esc } = M;
+function toggleTheme(){ const r = document.documentElement; const dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; r.dataset.theme = dark ? 'light' : 'dark'; M.nav({ theme: r.dataset.theme }); }
+M.render = function(){
+  const { cert, b, open, ink } = M.state();
+  const certBtns = ['CCAR-F','CCDV-F'].map(c => `<button aria-pressed="${c===cert}" onclick="MOCK.nav({cert:'${c}'})">${c}</button>`).join('');
+  document.getElementById('certs').innerHTML = certBtns;
+  // label positions: centre of each segment, then pushed apart so no two are closer than 30 px
+  const g = document.getElementById('gauge');
+  g.innerHTML = `<div class="labels" id="labels"></div><div class="col" id="col">${b.domains.map(d => `<button data-k="${d.id}" style="--c:var(--d${d.id});--lv:${ink[d.id]};flex:${d.weight} 1 0" aria-current="${d===open}" aria-label="Domain ${d.id}, ${esc(d.name)}: ${d.weight}% of the exam, ${Math.round(100*ink[d.id])}% inked" onclick="MOCK.nav({open:${d.id}})"><i></i></button>`).join('')}</div>`;
+  const col = document.getElementById('col'), lab = document.getElementById('labels');
+  if (getComputedStyle(lab).display !== 'none') {
+    const H = col.clientHeight, top0 = col.offsetTop;
+    const centers = [...col.children].map(el => el.offsetTop + el.offsetHeight/2);
+    const ys = []; centers.forEach((c,i) => ys.push(Math.max(c, i ? ys[i-1] + 30 : 0)));
+    for (let i = ys.length-1; i >= 0; i--) if (ys[i] > H - 12) ys[i] = H - 12; else if (i < ys.length-1 && ys[i] > ys[i+1]-30) ys[i] = ys[i+1]-30;
+    lab.innerHTML = b.domains.map((d,i) => `<button style="top:${ys[i]}px" aria-current="${d===open}" tabindex="-1" aria-hidden="true" onclick="MOCK.nav({open:${d.id}})"><b>D${d.id}</b><span>${fmt(d.weight)}</span></button>`).join('')
+      + `<svg class="lead" aria-hidden="true">${centers.map((c,i) => Math.abs(c-ys[i]) > 2 ? `<path d="M${lab.clientWidth+2} ${ys[i]} L${lab.clientWidth+12} ${c}" stroke="currentColor" fill="none"/>` : '').join('')}</svg>`;
+  }
+  const tw = open.tasks.map(t => M.taskWeight(open, t));
+  document.getElementById('view').innerHTML = `
+  <div class="top"><nav aria-label="Sections"><b>Overview</b><span>Drill</span><span>Mock exam</span><span>Traps</span><span>Progress</span></nav>
+    <div class="mcert">${certBtns}</div><button class="th" aria-label="Theme" onclick="toggleTheme()">◐</button></div>
+  <p class="facts">${esc(b.name)}: <b>${b.items}</b> questions in <b>${b.minutes}</b> minutes, pass at <b>${b.pass}</b>/1000.</p>
+  <section class="hero" style="--c:var(--d${open.id})">
+    <span class="w">${fmt(open.weight)}<small>%</small></span>
+    <div><h1>${esc(open.name)}</h1><p>Domain ${open.id} of ${b.domains.length}. About ${fmt(b.items*open.weight/100)} of the ${b.items} questions. You answer ${Math.round(100*ink[open.id])}% of it right.</p></div>
+  </section>
+  <div class="tasks" style="--c:var(--d${open.id})">${open.tasks.map((t,i) => { const v = M.taskInk(cert,open,i); return `<div class="task"><span class="k">${t.id}</span>
+    <div><h2>${esc(t.name)}</h2><p>${esc(t.text.replace(/\s*\(\d+(\.\d+)?%\)\s*$/,''))}</p></div>
+    <div class="lvl"><span>${fmt(tw[i].w)}%${tw[i].official?'':'*'} of exam</span><a href="#">Drill</a><div class="m" role="img" aria-label="${Math.round(100*v)}% inked"><i style="width:${100*v}%"></i></div></div></div>`; }).join('')}</div>
+  <div class="cta"><button class="go">Drill all of D${open.id}</button><span class="note" style="margin:0">Mock exam hides everything except the question, the clock and the 1–${b.items} map.</span></div>
+  <p class="note">Levels shown are demo data. ${cert==='CCAR-F' ? '* Per-task shares are the domain split evenly: the CCAR-F guide weighs domains only. ' : ''}Weights: official exam guide v1.0, July 2026.</p>`;
+};
+M.render();
+addEventListener('resize', () => M.render());
+</script>
+</body>
+</html>

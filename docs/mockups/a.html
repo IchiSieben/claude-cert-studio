@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cert Studio, mockup A: Regla</title>
+<style>
+/* Direction A, "Regla": the exam as a measuring rule. Colour lives only in the data (domains);
+   the chrome is graphite on cool paper, and the action colour is ink itself. docs/DIRECCIONES.md §A */
+@font-face{font-family:'Space Grotesk';src:url(../../app/fonts/space-grotesk-latin-wght-normal.woff2) format('woff2');font-weight:300 700;font-display:swap}
+@font-face{font-family:'JetBrains Mono';src:url(../../app/fonts/jetbrains-mono-latin-wght-normal.woff2) format('woff2');font-weight:100 800;font-display:swap}
+:root{
+  --paper:#eef1f4; --ink:#14171a; --soft:#4c5560; --hair:#c3cad2; --well:#e1e6eb;
+  --act:#14171a; --act-ink:#eef1f4;
+  --d1:#2f6fd0; --d2:#1f8a5b; --d3:#7a4fe0; --d4:#b86e00; --d5:#c93a6e; --d6:#0f8296; --d7:#7d5a3a; --d8:#5d7222;
+  --tint:24%;
+  --sans:'Space Grotesk',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --paper:#1c2229; --ink:#e9edf1; --soft:#a3adb8; --hair:#3a434d; --well:#252c34; --act:#e9edf1; --act-ink:#1c2229;
+  --d1:#6ea2f2; --d2:#4cc48c; --d3:#a98bf5; --d4:#e9a23b; --d5:#f0789f; --d6:#3fc2d6; --d7:#c49a6c; --d8:#a3bb57; --tint:30%; color-scheme:dark}}
+:root[data-theme=dark]{
+  --paper:#1c2229; --ink:#e9edf1; --soft:#a3adb8; --hair:#3a434d; --well:#252c34; --act:#e9edf1; --act-ink:#1c2229;
+  --d1:#6ea2f2; --d2:#4cc48c; --d3:#a98bf5; --d4:#e9a23b; --d5:#f0789f; --d6:#3fc2d6; --d7:#c49a6c; --d8:#a3bb57; --tint:30%; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 var(--sans)}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.wrap{max-width:1312px;margin:0 auto;padding:0 16px}
+header{display:flex;align-items:center;gap:16px;height:56px;border-bottom:1px solid var(--hair)}
+.brand{font-weight:600;margin-right:auto}
+.seg{display:flex;gap:2px;background:var(--hair);padding:2px;border-radius:4px}
+.seg button{border:0;background:var(--paper);padding:5px 12px;font:500 13px var(--mono);color:var(--soft);border-radius:3px}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+.th{border:1px solid var(--hair);background:none;width:34px;height:30px;border-radius:4px;color:var(--soft)}
+nav{display:flex;gap:24px;font-size:14px;color:var(--soft);height:44px;align-items:center}
+nav b{color:var(--ink);font-weight:600}
+h1{font-size:40px;line-height:1.05;letter-spacing:-.02em;font-weight:600;margin:40px 0 8px;max-width:22ch}
+.facts{color:var(--soft);margin:0 0 40px;font-size:15px}
+.facts b{font-family:var(--mono);font-weight:500;color:var(--ink)}
+/* the rule */
+.rule{position:relative;margin:0 0 8px}
+.ticks{position:relative;height:22px;font:12px var(--mono);color:var(--soft)}
+.ticks span{position:absolute;bottom:0;transform:translateX(-50%)}
+.ticks span::after{content:"";position:absolute;left:50%;top:100%;width:1px;height:6px;background:var(--soft)}
+.ticks span:first-child{transform:none}.ticks span:first-child::after{left:0}
+.ticks span:last-child{transform:translateX(-100%)}.ticks span:last-child::after{left:auto;right:0}
+.big{position:relative;height:84px}
+.big b{position:absolute;bottom:4px;font:500 64px/1 var(--mono);letter-spacing:-.04em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.big b small{font-size:22px;letter-spacing:0;margin-left:2px;color:var(--soft)}
+.big b.m{font-size:36px}.big b.s{font-size:20px;font-weight:600}.big b.s.up{bottom:30px}
+.bar{display:flex;gap:2px;height:56px;margin-top:6px}
+.bar button{position:relative;border:0;padding:0;height:100%;background:color-mix(in srgb,var(--c) var(--tint),var(--paper));border-radius:0;overflow:hidden;min-width:0}
+.bar button i{position:absolute;left:0;top:0;bottom:0;background:var(--c);width:calc(var(--ink-w)*100%);animation:fill .9s cubic-bezier(.2,.7,.2,1) both}
+.bar button span{position:absolute;left:8px;bottom:6px;font:600 13px var(--mono);color:var(--paper);mix-blend-mode:normal}
+.bar button[aria-expanded=true]{outline:2px solid var(--ink);outline-offset:2px;z-index:1}
+@keyframes fill{from{width:0}}
+/* zoom: the open segment re-drawn on its own ruler, joined by two lines */
+.join{height:40px;width:100%;display:block}
+.zoom{border-top:1px solid var(--ink);padding-top:18px}
+.zh{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 24px;margin-bottom:16px}
+.zh .code{font:500 56px/1 var(--mono);letter-spacing:-.04em}
+.zh h2{font-size:26px;line-height:1.15;font-weight:600;margin:0}
+.zh p{margin:0;color:var(--soft);flex-basis:100%}
+.zbar{display:flex;gap:2px;height:28px;margin:0 0 4px}
+.zbar div{position:relative;background:color-mix(in srgb,var(--c) var(--tint),var(--paper));overflow:hidden}
+.zbar div i{position:absolute;inset:0 auto 0 0;background:var(--c);width:calc(var(--ink-w)*100%)}
+.zscale{display:flex;justify-content:space-between;font:12px var(--mono);color:var(--soft);margin-bottom:24px}
+.task{display:grid;grid-template-columns:64px minmax(0,1fr) 92px 120px auto;gap:16px;align-items:center;padding:14px 0;border-top:1px solid var(--hair)}
+.task .k{font:500 20px var(--mono)}
+.task .n{font-weight:600}.task .t{color:var(--soft);font-size:14px}
+.task .w{font:15px var(--mono);text-align:right;font-variant-numeric:tabular-nums}
+.meter{height:8px;background:var(--well);position:relative}
+.meter i{position:absolute;inset:0 auto 0 0;background:var(--c)}
+.go{border:1px solid var(--act);background:var(--act);color:var(--act-ink);padding:8px 16px;border-radius:4px;font-weight:600;font-size:14px}
+.go.q{background:none;color:var(--ink);border-color:var(--hair)}
+.note{font-size:13px;color:var(--soft);margin:32px 0 64px}
+.list{display:none}
+@media (max-width:640px){
+  h1{font-size:30px;margin-top:28px}
+  nav{gap:16px;overflow-x:auto;white-space:nowrap}
+  .big{display:none}
+  .bar{height:40px}
+  .bar button span{display:none}
+  .list{display:block;margin:12px 0 8px}
+  .list button{display:grid;grid-template-columns:14px 34px minmax(0,1fr) auto;gap:8px;align-items:center;width:100%;min-height:44px;border:0;border-top:1px solid var(--hair);background:none;text-align:left;padding:6px 0}
+  .list button[aria-expanded=true]{font-weight:600}
+  .list .sw{width:14px;height:14px;background:var(--c)}
+  .list .w{font:14px var(--mono)}
+  .zh .code{font-size:40px}.zh h2{font-size:21px}
+  .task{grid-template-columns:44px minmax(0,1fr) auto;row-gap:6px}
+  .task .k{font-size:16px}.task .meter{grid-column:2/4}.task .w{grid-row:1;grid-column:3}
+  .task .go{grid-column:2/4;justify-self:start}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><span class="brand">Cert Studio</span>
+    <div class="seg" id="cert"></div><button class="th" aria-label="Theme" onclick="toggleTheme()">◐</button></header>
+  <nav aria-label="Sections"><b>Overview</b><span>Drill</span><span>Mock exam</span><span>Traps</span><span>Progress</span></nav>
+  <main id="view"></main>
+</div>
+<script src="../../app/data/blueprints.js"></script>
+<script src="common.js"></script>
+<script>
+const M = window.MOCK, { fmt, esc } = M;
+function toggleTheme(){ const r = document.documentElement; const dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; M.nav({ theme: dark ? 'light' : 'dark' }); r.dataset.theme = dark ? 'light' : 'dark'; }
+M.render = function(){
+  const { cert, b, open, ink, cells } = M.state();
+  document.getElementById('cert').innerHTML = ['CCAR-F','CCDV-F'].map(c => `<button aria-pressed="${c===cert}" onclick="MOCK.nav({cert:'${c}'})">${c}</button>`).join('');
+  // left edge of every segment in % of the exam (gaps are ignored: 2 px out of 1300)
+  let acc = 0; const left = b.domains.map(d => { const l = acc; acc += d.weight; return l; });
+  // figure size follows the room the segment has: >=12% big, 6-12% medium, <6% small and staggered
+  let small = 0;
+  const big = b.domains.map((d,i) => { const cls = d.weight >= 12 ? '' : d.weight >= 6 ? 'm' : 's' + (small++ % 2 ? ' up' : '');
+    return `<b class="${cls}" style="left:${left[i]}%">${fmt(d.weight)}${d.weight >= 6 ? '<small>%</small>' : ''}</b>`; }).join('');
+  const bar = b.domains.map(d => `<button style="--c:var(--d${d.id});--ink-w:${ink[d.id]};flex:${d.weight} 1 0" aria-expanded="${d===open}" aria-label="Domain ${d.id}, ${esc(d.name)}: ${d.weight}% of the exam, ${Math.round(100*ink[d.id])}% inked" onclick="MOCK.nav({open:${d.id}})"><i></i>${d.weight >= 6 ? `<span>D${d.id}</span>` : ''}</button>`).join('');
+  const list = b.domains.map(d => `<button style="--c:var(--d${d.id})" aria-expanded="${d===open}" onclick="MOCK.nav({open:${d.id}})"><span class="sw"></span><span class="w">D${d.id}</span><span>${esc(d.name)}</span><span class="w">${fmt(d.weight)} %</span></button>`).join('');
+  const oi = b.domains.indexOf(open); const a = left[oi], z = a + open.weight;
+  const tw = open.tasks.map(t => M.taskWeight(open, t));
+  const tasks = open.tasks.map((t,i) => `<div class="task" style="--c:var(--d${open.id})"><span class="k">${t.id}</span>
+    <div><div class="n">${esc(t.name)}</div><div class="t">${esc(t.text.replace(/\s*\(\d+(\.\d+)?%\)\s*$/,''))}</div></div>
+    <span class="w">${fmt(tw[i].w)} %${tw[i].official ? '' : '*'}</span>
+    <div class="meter" role="img" aria-label="${Math.round(100*M.taskInk(cert,open,i))}% inked"><i style="width:${100*M.taskInk(cert,open,i)}%"></i></div>
+    <button class="go ${i ? 'q' : ''}">Drill ${t.id}</button></div>`).join('');
+  document.getElementById('view').innerHTML = `
+  <h1>${esc(b.name)}</h1>
+  <p class="facts"><b>${b.items}</b> questions, <b>${b.minutes}</b> minutes, pass at <b>${b.pass}</b>/1000. Length is what a domain weighs; the dark fill is what you already answer right.</p>
+  <div class="rule">
+    <div class="big" aria-hidden="true">${big}</div>
+    <div class="ticks" aria-hidden="true">${[0,10,20,30,40,50,60,70,80,90,100].map(v => `<span style="left:${v}%">${v}</span>`).join('')}</div>
+    <div class="bar" role="group" aria-label="Exam blueprint, 0 to 100% of the exam">${bar}</div>
+  </div>
+  <div class="list">${list}</div>
+  <svg class="join" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true"><path d="M${a} 0 L0 10 M${z} 0 L100 10" stroke="currentColor" stroke-width="1" vector-effect="non-scaling-stroke" fill="none"/></svg>
+  <section class="zoom" style="--c:var(--d${open.id})" aria-labelledby="zt">
+    <div class="zh"><span class="code">D${open.id}</span><h2 id="zt">${esc(open.name)}</h2>
+      <p>${fmt(open.weight)} % of the exam, about ${fmt(b.items*open.weight/100)} questions. Drawn ${fmt(100/open.weight)}× larger than the rule above.</p></div>
+    <div class="zbar" aria-hidden="true">${open.tasks.map((t,i) => `<div style="flex:${tw[i].w} 1 0;--ink-w:${M.taskInk(cert,open,i)}"><i></i></div>`).join('')}</div>
+    <div class="zscale" aria-hidden="true"><span>${fmt(a)} %</span><span>${fmt(z)} % of the exam</span></div>
+    ${tasks}
+  </section>
+  <p class="note">Ink shown here is demo data. ${cert === 'CCAR-F' ? '* The CCAR-F guide gives weights per domain only; task shares are the domain split evenly. ' : ''}Weights: official exam guide v1.0, July 2026.</p>`;
+};
+M.render();
+</script>
+</body>
+</html>

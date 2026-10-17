@@ -12,3 +12,6 @@ tools/evidence/_video-raw/
 /evidence/*
 !/evidence/ui/
 /TASK-*.md
+
+# Refero style sheets: unknown licence, reference only (V3c)
+/docs/refero/

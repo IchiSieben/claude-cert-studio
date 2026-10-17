@@ -98,7 +98,7 @@ try {
     await sc.start();
     const t = Date.now();
     await wait(page, 700);                                   // start page at rest = poster
-    await clickGlide(page, '.certcard >> nth=1 >> button');  // pick CCDV-F
+    await clickGlide(page, '.certcard >> nth=1 >> .study');  // pick CCDV-F
     await wait(page, 700);
     await openDrillQuestion(page);
     await wait(page, 600);

@@ -13,6 +13,7 @@ export const VIEWS = ["start", "home", "blueprint", "concepts", "drill", "mock",
 
 const STATES = [
   ["drill-checked", () => { startDrill({ domains: [1, 2, 3, 4, 5, 6, 7, 8] }); const q = S.drill.pool[0]; S.drill.chosen = [Object.keys(q.options).find(k => !q.answer.includes(k))].concat(q.answer).slice(0, q.select); drillCheck(); }],
+  ["cockpit", () => { startMock("quick"); S.mock.answers[0] = ["A"]; S.mock.flags[1] = true; render(); }],
   ["mock-result", () => { startMock("quick"); S.mock.pool.forEach((q, i) => S.mock.answers[i] = i % 2 ? q.answer.slice() : ["A"]); submitMock(); }],
 ];
 

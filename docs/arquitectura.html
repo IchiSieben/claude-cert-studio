@@ -320,7 +320,7 @@ td .m{font-family:var(--font-mono);font-size:12px}
             <div class="k"><span>exportación filtrada y auditada al repo público</span><span class="m">export-public.sh</span></div>
             <div class="k"><span>subida por TUS de 6 archivos, nunca borra</span><span class="m">deploy-cert.sh</span></div>
             <div class="k"><span>solo responde por su subdominio; el resto, 404</span><span class="m">.htaccess</span></div>
-            <div class="k"><span>validador del banco + 21 pruebas de punta a punta</span><span class="m">verify.sh</span></div>
+            <div class="k"><span>validador del banco + 42 pruebas de punta a punta</span><span class="m">verify.sh</span></div>
             <div class="k"><span>clip de 7 s y tres capturas desde la URL pública</span><span class="m">Mac · carril media</span></div>
           </div>
           <p style="font-size:12.5px;color:var(--ink2)">Requisitos para estudiar: un navegador. Para las pruebas: Node 22 y el Chromium de Playwright. Para los videos: ffmpeg.</p>
@@ -706,7 +706,7 @@ const N = {
   val:  {x:960,y:40,w:220,h:100,kind:"herramienta · Node",ttl:"validate-bank.mjs",tech:"esquema · tareas · etiquetas",color:"blue",
          resp:"Carga blueprints y bancos y falla ante un id repetido, una tarea inexistente, una clave que no coincide con select o una opción incorrecta sin etiqueta válida.",
          kv:{"Sale con":"1 ante cualquier error"}},
-  e2e:  {x:960,y:180,w:220,h:100,kind:"pruebas · Playwright",ttl:"app.test.mjs",tech:"Chromium · file:// · 25 casos",color:"blue",
+  e2e:  {x:960,y:180,w:220,h:100,kind:"pruebas · Playwright",ttl:"app.test.mjs",tech:"Chromium · file:// · 42 casos",color:"blue",
          resp:"Recorre la app como una persona: práctica, simulacros sin repetidos, resultado, modo muestra sin almacenamiento, PDF de la hoja de repaso, 390 px y cero errores de consola.",
          kv:{"Corre con":"bash tools/verify.sh"}},
   ls:   {x:300,y:360,w:170,h:100,kind:"almacén · navegador",ttl:"localStorage",tech:"ccs:progress · ccs:cert · ccs:theme",color:"blue",
