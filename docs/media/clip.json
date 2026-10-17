@@ -3,14 +3,14 @@
   "url": "https://cert.ichisieben.dev/",
   "deliveredFps": 60,
   "fps": 60,
-  "seconds": 7,
+  "seconds": 7.1,
   "width": 1280,
   "height": 720,
   "webmCodec": "libsvtav1",
   "webmType": "video/webm; codecs=\"av01.0.08M.08\"",
-  "webmBytes": 314280,
-  "mp4Bytes": 296369,
-  "posterBytes": 42050,
-  "loopSsim": 0.999,
-  "recordedAt": "2026-10-17T04:27:20.494Z"
+  "webmBytes": 339539,
+  "mp4Bytes": 322959,
+  "posterBytes": 36944,
+  "loopSsim": 1,
+  "recordedAt": "2026-10-17T05:27:59.368Z"
 }
